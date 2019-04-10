@@ -1,0 +1,86 @@
+<template>
+   <div class="home content">
+      <h2>
+         <img class="bt-banner" src="../assets/banner.png"/>
+         <span class="admin">
+            <router-link to="/admin">
+               <button class="pure-button pure-button-primary">Admin Access</button>
+            </router-link>
+         </span>
+      </h2>
+      <div class="info">
+         <h3>Find unique copies of 19th- and early 20th-century books on library shelves</h3>
+         <p><button class="submit pure-button pure-button-primary">SUBMIT A BOOK</button></p>
+         <p>
+            Thousands of <b>old library books</b> bear fascinating traces of the past. 
+            <b>Readers wrote in their books, and left pictures, letters, flowers, locks of hair, and other 
+            things between their pages.</b> We need your help identifying them in the stacks of academic 
+            libraries.  Together we can find out more about what books were and how they were used by 
+            their original owners, while also proving the value of maintaining rich print collections in our 
+            libraries.
+         </p>
+         <p>
+            CURRENTLY COLLECTING IMAGES and CITATIONS of MARKED COPIES OF <b>LIBRARY  
+            BOOKS PUBLISHED BEFORE 1923.</b>  We are focusing on CIRCULATING AND RESEARCH COLLECTIONS 
+            (<b>not</b> rare books or special collections).  <b>Join the search!</b>
+         </p>
+         <p>
+            Great coverage from our recent 2018 event at Nebraska:<br/>
+            <a href="https://unlincoln.exposure.co/treasure-hunt" target="_blank">
+               https://unlincoln.exposure.co/treasure-hunt
+            </a>
+         </p>
+         <p>
+            Explore our CLIR-funded project at the University of Virginia:<br/>
+            <a href="http://booktraces.library.virginia.edu" target="_blank">
+               http://booktraces.library.virginia.edu
+            </a>
+         <p>
+            Search the Book Traces database of over 12,000 University of Virginia books:<br/>
+            <a href="https://booktraces.lib.virginia.edu/" target="_blank">
+               https://booktraces.lib.virginia.edu/
+            </a>
+         </p>
+      </div>
+   </div>
+</template>
+
+<script>
+export default {
+   name: "home",
+   methods: {
+   }
+};
+</script>
+
+<style scoped>
+.pure-button.submit {
+   background: #24890d;
+   font-weight: bold;
+}
+span.admin {
+   font-size: 12px;
+   position: absolute;
+   right: 0;
+}
+
+div.home {
+   position: relative;
+   min-width: 1000px;
+   padding: 20px 30px;
+   background: white;
+   width: 75%;
+   margin: 0 auto;
+   border-right: 1px solid #ccc;
+   border-left: 1px solid #ccc;
+   border-bottom: 1px solid #ccc;
+   font-weight: 400;
+   color: #333;
+}
+div.info {
+   margin-bottom: 30px;
+}
+div.info a {
+   margin-left: 20px;
+}
+</style>
