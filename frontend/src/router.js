@@ -4,7 +4,6 @@ import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Press from './views/Press.vue'
 import Events from './views/Events.vue'
-import Contact from './views/Contact.vue'
 import FAQ from './views/FAQ.vue'
 import Submit from './views/Submit.vue'
 import Admin from './views/Admin.vue'
@@ -35,11 +34,6 @@ export default new Router({
       path: '/events',
       name: 'events',
       component: Events
-    },
-    {
-      path: '/contact',
-      name: 'contact',
-      component: Contact
     },
     {
       path: '/faq',

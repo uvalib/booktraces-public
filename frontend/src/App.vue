@@ -52,7 +52,7 @@ body {
    position: relative;
 }
 #app a {
-   color: cornflowerblue;
+   color: #24890d;
    font-weight: 500;
    text-decoration: none;
 }
@@ -65,12 +65,12 @@ div.bkg {
 #app div.content {
   position: relative;
   min-width: 800px;
-  padding: 20px 30px 250px 30px;
+  padding: 30px 60px 250px 60px;
   min-height: 600px;
   background: white;
   font-weight: 400;
   color: #444;
-  width:85%;
+  width:80%;
   border-right: 1px solid #666;
 }
 #app .content h2 {

@@ -1,13 +1,13 @@
 <template>
    <div class="home content">
-      <h2>
+      <div class="bt-banner">
          <img class="bt-banner" src="../assets/banner.png"/>
          <span class="admin">
             <router-link to="/admin">
                <button class="pure-button pure-button-primary">Admin Access</button>
             </router-link>
          </span>
-      </h2>
+      </div>
       <div class="info">
          <h3>Find unique copies of 19th- and early 20th-century books on library shelves</h3>
          <p><button class="submit pure-button pure-button-primary">SUBMIT A BOOK</button></p>
@@ -57,6 +57,9 @@ export default {
 .pure-button.submit {
    background: #24890d;
    font-weight: bold;
+}
+.bt-banner {
+   position: relative;
 }
 span.admin {
    font-size: 12px;
