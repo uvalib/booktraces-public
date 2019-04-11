@@ -104,7 +104,7 @@ const actions = {
   },
   removeUploadedFile( ctx, filename ) {
     ctx.commit("removeUploadedFile",filename)
-    axios.delete("/api/upload/"+filename+"?key="+ctx.getters.identifier)
+    axios.delete("/api/upload/"+filename+"?key="+ctx.getters.uploadID)
   }
 }
 

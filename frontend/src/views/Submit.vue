@@ -2,25 +2,71 @@
   <div class="content submit">
     <h2>Submit a Book</h2>
     <div class="info">
-      We are currently  collecting pre-1923 copies of library books.  Share your finds with us!
+      <p>We are currently  collecting pre-1923 copies of library books.  Share your finds with us!</p>
+      <p>Submit images and information about your library book here:</p>
     </div>
     <form class="pure-form pure-form-stacked">
       <fieldset>
-        <div class="pure-g">
-          <SubmitterInfo/>
-          <GeneralInfo/>
+        <div class="pure-u-1-1 gap">
+          <label for="title">Title of Book<span class="required">*</span></label>
+          <input id="title" class="pure-u-1-1" type="text" required>
         </div>
-        <input type="hidden" id="submitted-files" name="submitted-files" :value="uploadedFiles">
-        <vue-dropzone :useCustomSlot=true id="customdropzone" 
-          :options="dropzoneOptions" 
-          v-on:vdropzone-sending="sendingEvent"
-          v-on:vdropzone-success="fileAddedEvent"
-          v-on:vdropzone-removed-file="fileRemovedEvent">
-          <div class="dropzone-custom">
-            <div class="upload title">Drag and drop to upload content</div>
-            <div class="upload subtitle">or click to select a file from your computer</div>
-          </div>
-        </vue-dropzone>
+        <div class="pure-u-1-1 gap">
+          <label for="author">Author (Last name, first name)<span class="required">*</span></label>
+          <input id="author" class="pure-u-1-1" type="text" required>
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="author">Publication place/date (e.g., London, 1888)</label>
+          <input id="author" class="pure-u-1-1" type="text">
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="library">Library where found<span class="required">*</span></label>
+          <input id="library" class="pure-u-1-1" type="text">
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="call-number">Call Number</label>
+          <input id="call-number" class="pure-u-1-1" type="text">
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="description">Description</label>
+          <textarea rows="4" id="description" class="pure-u-1-1"></textarea>
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label>Images of unique features (e.g., marginalia, inserts)<span class="required">*</span></label>
+          <input type="hidden" id="submitted-files" name="submitted-files" :value="uploadedFiles">
+          <vue-dropzone :useCustomSlot=true id="customdropzone" 
+            :options="dropzoneOptions" 
+            v-on:vdropzone-sending="sendingEvent"
+            v-on:vdropzone-success="fileAddedEvent"
+            v-on:vdropzone-removed-file="fileRemovedEvent">
+            <div class="dropzone-custom">
+              <div class="upload title">Drag and drop to upload content</div>
+              <div class="upload subtitle">or click to select a file from your computer</div>
+            </div>
+          </vue-dropzone>
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="submitter">Submitted By<span class="required">*</span></label>
+          <input id="submitter" class="pure-u-1-1" type="text">
+          <p class="note">The name you provide will appear on the Booktraces site along with your submission.</p>
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="email">Email Address<span class="required">*</span></label>
+          <input id="email" class="pure-u-1-1" type="text">
+          <p class="note">We will keep your email address private and will only use if if we need to contact you about your submission.</p>
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="tags">Post Tags</label>
+          <div class="choices">
+            <span v-for="tag in tags" :key="tag.id">
+               <label class="pure-checkbox inline">
+                  <input type="checkbox" name="tag" :value="tag.id">
+                  {{ tag.name }}
+               </label>
+            </span>
+         </div>
+        </div>
+        <button class="submit pure-button pure-button-primary">SUBMIT</button>
       </fieldset>
     </form>
   </div>
@@ -39,21 +85,24 @@ export default {
     return {
       dropzoneOptions: {
         url: '/api/upload',
-        createImageThumbnails: false,
+        createImageThumbnails: true,
         maxFilesize: null,
         chunking: true,
-        chunkSize: 10000000, // bytes = 10Mb,
-        previewTemplate: this.template()
+        chunkSize: 1000000, // bytes = 1Mb,
+        addRemoveLinks: true  
       }
     }
   },
   computed: {
     uploadedFiles: function() {
       return this.$store.getters.uploadedFiles
+    },
+    tags: function() {
+      return this.$store.getters.tags
     }
   },
   created: function () {
-    this.$store.dispatch('getGenres')
+    this.$store.dispatch('getTags')
     this.$store.dispatch('getUploadID')
   },
   methods: {
@@ -67,41 +116,41 @@ export default {
     },
     sendingEvent (file, xhr, formData) {
       formData.append('identifier', this.$store.getters.uploadID);
-    },
-    template: function () {
-        return `<div class="dz-preview dz-file-preview" style="width:100px; margin:  5px;">
-          <style type="text/css">
-          .custom-remove { z-index:1000;position:absolute;right:5px;top:5px;opacity:0.8;}
-          .custom-remove:hover { opacity:1;cursor:pointer; }
-          .dz-progress.custom { margin-top:0 !important; top: auto !important; bottom:10px !important; border-radius:0 !important;background:white !important;}
-          .dz-upload.custom { background: darkslateblue !important}
-          .truncated {display:block;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
-          p.failure {text-align:center; padding: 1px 4px 0 4px; background: white; color: #a00;
-                      border-left: 4px solid rgba(33,150,243,.8);
-                      border-right: 4px solid rgba(33,150,243,.8);padding: 2px 0 0 0;}
-          </style>
-                <img class="custom-remove" src="remove.png" data-dz-remove/>
-                <div class="dz-image">
-                    <div data-dz-thumbnail-bg></div>
-                </div>
-                <div class="dz-details" style="text-align: center;padding: 30px 10px;">
-                    <div class="dz-name" style="font-size:12px"><span class="truncated" data-dz-name></span></div>
-                    <div class="dz-size" style="font-size:12px"><span data-dz-size></span></div>
-                </div>
-                <div class="dz-progress custom"><span class="dz-upload custom" data-dz-uploadprogress></span></div>
-                <div class="dz-error-message"><span data-dz-errormessage></span></div>
-                <div class="dz-success-mark"><i class="fa fa-check"></i></div>
-                <div class="dz-error-mark" style="top:60%"><p class="failure">FAILED<p></i></div>
-            </div>
-        `;
-      },
+    }
   }
 }
 </script>
 
 <style scoped>
+/* NOTE: Styles for DropZone must go in an un-scoped style section. App.vue has them */   
+.pure-button.submit {
+   background: #24890d;
+   font-weight: bold;
+}
+label.pure-checkbox.inline {
+  display: inline-block;
+  margin: 5px 10px;
+}
+p.note {
+  font-style: italic;
+  color: #999;
+  font-size: 0.8em;
+  margin:0;
+}
+.gap {
+  margin-bottom: 10px;
+}
+.required {
+  font-weight: bold;
+  padding-left: 5px;
+  color: firebrick;
+}
 div.dropzone-custom {
   color: #666;
+}
+#customdropzone  {
+  padding: 5px;
+  height: 180px;
 }
 div.upload.title {
   font-weight: bold;

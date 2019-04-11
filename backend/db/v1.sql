@@ -65,9 +65,9 @@ insert into events(event_date,description) values
 ("March 25, 2015", 'talk in the Advanced Research Collaborative, CUNY Graduate Center, reviewed by Timothy Griffiths <a href="http://arc.commons.gc.cuny.edu/2015/03/27/the-haptic-lives-and-loves-of-library-books-reflections-on-andrew-stauffers-traces-in-the-stacks-the-troubled-archive-of-nineteenth-century-print/">here</a>'),
 ("February 4 2015", "talk in the Victorian Seminar, CUNY Graduate Center"),
 ("February 3, 2015", 'talk in the <a href="http://cencl.uga.edu">18th-and19th Century Colloquium at the University of Georgia</a>'),
-("November 21, 2014", 'talk in the T<a href="http://depts.washington.edu/text/">Textual Studies Program, University of Washington</a>'),
+("November 21, 2014", 'talk in the <a href="http://depts.washington.edu/text/">Textual Studies Program, University of Washington</a>'),
 ("October 28, 2014", '<a href="http://library.columbia.edu/locations/rbml/exhibitions/2014-2015.html">talk in the Book History Colloquium at Columbia University</a>, reviewed by Roger Schonfeld <strong><a href="http://www.sr.ithaka.org/blog-individual/notes-columbias-book-history-colloquium">here</a></strong>'),
-("October 27, 2014 ", '<a href="http://www1.lehigh.edu/news/searching-hidden-history-linderman-stacks">talk and event at Lehigh University</a>, reviewed by Annie Johnson <strong><a href="http://anniekjohnson.com/2014/11/03/book-traces-lehigh/">here</a></strong>'),
+("October 27, 2014", '<a href="http://www1.lehigh.edu/news/searching-hidden-history-linderman-stacks">talk and event at Lehigh University</a>, reviewed by Annie Johnson <strong><a href="http://anniekjohnson.com/2014/11/03/book-traces-lehigh/">here</a></strong>'),
 ("October 8, 2014", '<a href="https://blogs.cul.columbia.edu/rbml/2014/08/29/book-traces-comes-to-the-butler-stacks-on-october-8th/"> event at Butler Library, Columbia University</a>, reviewed by Tara Kron<strong> <a href="http://dh.prattsils.org/blog/resources/event-reviews/book-traces-comes-butler-stacks-prof-andrew-stauffer-butler-library-columbia-university-10092014/">here</a></strong><');
 
 --

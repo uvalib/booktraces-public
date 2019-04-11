@@ -26,6 +26,10 @@ export default {
 </script>
 
 <style scoped>
+#app .menubar .pure-menu-item .router-link-active {
+   color: #ff9500;
+   border-bottom: 2px solid #ff9500;
+}
 div.bt-header {
    background-color: #20406e;
    color: white;
