@@ -9,6 +9,7 @@
          <ul class="pure-menu-list">
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
+            <li class="pure-menu-item"><router-link to="/events">Events</router-link></li>
             <li class="pure-menu-item"><router-link to="/faq">FAQ</router-link></li>
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>

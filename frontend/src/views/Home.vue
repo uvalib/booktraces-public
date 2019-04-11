@@ -25,12 +25,6 @@
             (<b>not</b> rare books or special collections).  <b>Join the search!</b>
          </p>
          <p>
-            Great coverage from our recent 2018 event at Nebraska:<br/>
-            <a href="https://unlincoln.exposure.co/treasure-hunt" target="_blank">
-               https://unlincoln.exposure.co/treasure-hunt
-            </a>
-         </p>
-         <p>
             Explore our CLIR-funded project at the University of Virginia:<br/>
             <a href="http://booktraces.library.virginia.edu" target="_blank">
                http://booktraces.library.virginia.edu

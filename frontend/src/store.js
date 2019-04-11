@@ -7,6 +7,7 @@ Vue.use(Vuex)
 // root state object. Holds all of the state for the system
 const state = {
   tags: [],
+  events: [],
   uploadID: null,
   error: null,
   uploadedFiles: [],
@@ -22,6 +23,9 @@ const getters = {
   },
   tags: state => {
     return state.tags
+  },
+  events: state => {
+    return state.events
   },
   error: state => {
     return state.error
@@ -40,8 +44,11 @@ const getters = {
 // Synchronous updates to the state. Can be called directly in components like this:
 // this.$store.commit('mutation_name') or called from asynchronous actions
 const mutations = {
-  setTags (state, genres) {
-    state.tags = genres
+  setTags (state, tags) {
+    state.tags = tags
+  },
+  setEvents (state, events) {
+    state.events = events
   },
   setUser (state, user) {
     state.user = user
@@ -77,6 +84,14 @@ const actions = {
     }).catch((error) => {
       ctx.commit('setTags', []) 
       ctx.commit('setError', "Unable to get tags: "+error.response) 
+    })
+  },
+  getEvents( ctx ) {
+    axios.get("/api/events").then((response)  =>  {
+      ctx.commit('setEvents', response.data )
+    }).catch((error) => {
+      ctx.commit('setEvents', []) 
+      ctx.commit('setError', "Unable to get events: "+error.response) 
     })
   },
   getUploadID( ctx ) {

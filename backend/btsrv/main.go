@@ -34,6 +34,7 @@ func main() {
 	{
 		api.GET("/identifier", svc.GetSubmissionIdentifier)
 		api.GET("/tags", svc.GetTags)
+		api.GET("/events", svc.GetEvents)
 		api.POST("/upload", svc.UploadFile)
 		api.DELETE("/upload/:file", svc.DeleteUploadedFile)
 	}
