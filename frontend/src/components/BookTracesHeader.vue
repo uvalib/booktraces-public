@@ -1,9 +1,22 @@
 <template>
-   <div class="header">
-      <router-link :to="{ name: 'home'}">
-         <span class="site-name">Book Traces</span>
-      </router-link>
-      <a target="_blank" href="https://library.virginia.edu"><img class="uva-library" src="../assets/uvalogo.png"/></a>
+   <div class="bt-header">
+      <div class="site-name">
+         <router-link to="/">
+            <span class="site-name">Book Traces</span>
+         </router-link>
+      </div>
+      <div class="pure-menu pure-menu-horizontal menubar">
+         <ul class="pure-menu-list">
+            <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
+            <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
+            <li class="pure-menu-item"><router-link to="/contact">Contact</router-link></li>
+            <li class="pure-menu-item"><router-link to="/faq">FAQ</router-link></li>
+            <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
+         </ul>
+      </div>
+      <div class="uva-icon">
+         <a target="_blank" href="https://library.virginia.edu"><img class="uva-library" src="../assets/uvalogo.png"/></a>
+      </div>
    </div>
 </template>
 
@@ -13,26 +26,39 @@ export default {
 </script>
 
 <style scoped>
-div.header {
-   background-color: black;
+div.bt-header {
+   background-color: #20406e;
    color: white;
    padding:15px;
-   text-align: left;
+   position: relative;
 }
-#app div.header a {
+#app div.bt-header a {
   color: white;
   text-decoration: none;
 }
-div.header span.site-name {
+div.bt-header span.site-name {
    margin: 0;
-   font-size: 1.4em;
+   font-size: 24px;
    position: relative;
-   font-weight: bold;
 }
 img.uva-library {
   position: absolute;
   top: 10px;
   right: 10px;
-  max-height: 40px;
+  max-height: 43px;
+}
+.pure-menu-horizontal.menubar {
+   position: absolute;
+   bottom: 7px;
+   right: 110px;
+   white-space: inherit;
+   width: auto;
+   display: inline-block;
+}
+li.pure-menu-item {
+   padding: 0 10px;
+}
+.pure-menu-item a:hover {
+   border-bottom: 2px solid white;
 }
 </style>

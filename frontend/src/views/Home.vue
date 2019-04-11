@@ -63,20 +63,6 @@ span.admin {
    position: absolute;
    right: 0;
 }
-
-div.home {
-   position: relative;
-   min-width: 1000px;
-   padding: 20px 30px;
-   background: white;
-   width: 75%;
-   margin: 0 auto;
-   border-right: 1px solid #ccc;
-   border-left: 1px solid #ccc;
-   border-bottom: 1px solid #ccc;
-   font-weight: 400;
-   color: #333;
-}
 div.info {
    margin-bottom: 30px;
 }

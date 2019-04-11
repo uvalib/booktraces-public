@@ -1,10 +1,8 @@
 <template>
-  <div class="submit">
-    <h2>University Archives Records Transfer Form</h2>
-    <div class="contact-small">
-      <p>University Archives</p>
-      <p>Albert & Shirley Small Special Collections Library, P.O. Box 400110, Charlottesville, VA, 22904-4110</p>
-      <p>Contact: Bethany Anderson, University Archivist, Phone: (434) 982-2980, Email: <a href="mailto:bga3d@virginia.edu">bga3d@virginia.edu</a></p>
+  <div class="content submit">
+    <h2>Submit a Book</h2>
+    <div class="info">
+      We are currently  collecting pre-1923 copies of library books.  Share your finds with us!
     </div>
     <form class="pure-form pure-form-stacked">
       <fieldset>
@@ -31,14 +29,10 @@
 <script>
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
-import SubmitterInfo from '@/components/SubmitterInfo'
-import GeneralInfo from '@/components/GeneralInfo'
 
 export default {
   name: 'submit',
   components: {
-    SubmitterInfo: SubmitterInfo,
-    GeneralInfo: GeneralInfo,
     vueDropzone: vue2Dropzone
   },
   data: function () {
@@ -46,8 +40,6 @@ export default {
       dropzoneOptions: {
         url: '/api/upload',
         createImageThumbnails: false,
-        // timeout: null,    no tmimeouts
-        // addRemoveLinks: true,
         maxFilesize: null,
         chunking: true,
         chunkSize: 10000000, // bytes = 10Mb,
@@ -61,9 +53,6 @@ export default {
     }
   },
   created: function () {
-    let u = this.$cookies.get("archives_xfer_user")
-    this.$store.commit("setUser",u)
-    this.$cookies.remove("archives_xfer_user")
     this.$store.dispatch('getGenres')
     this.$store.dispatch('getUploadID')
   },
@@ -111,37 +100,6 @@ export default {
 </script>
 
 <style scoped>
-a {
-   color: cornflowerblue;
-   font-weight: 500;
-   text-decoration: none;
-}
-a:hover {
- text-decoration: underline;  
-}
-div.contact-small {
-  font-size: 0.9em;
-  color: #666;
-  border-bottom: 1px dashed #EB5F0C;
-  padding-bottom: 5px;
-  margin-bottom: 15px;
-}
-div.contact-small p {
-  margin: 0;
-}
-div.submit {
-  padding: 30px 50px 250px 50px;
-  height: 100%;
-  background: white;
-  min-width: 1000px;
-  width: 75%;
-  margin: 0 auto;
-  border-right: 1px solid #dfdacc;
-  border-left: 1px solid #dfdacc;
-  font-weight: 400;
-  font-size: 0.9em;
-  color: #666;
-}
 div.dropzone-custom {
   color: #666;
 }
