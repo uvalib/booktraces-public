@@ -28,7 +28,7 @@ func (cfg *ServiceConfig) Load() {
 
 	flag.StringVar(&cfg.DevAuthUser, "devuser", "", "Authorized computing id for dev")
 	flag.IntVar(&cfg.Port, "port", 8080, "Service port (default 8080)")
-	flag.StringVar(&cfg.UploadDir, "upload", "./uploads", "Upload directory")
+	flag.StringVar(&cfg.UploadDir, "upload", "./submissions", "Upload directory")
 
 	flag.Parse()
 	log.Printf("%#v", cfg)

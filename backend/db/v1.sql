@@ -83,3 +83,49 @@ CREATE TABLE users (
    updated_at datetime NOT NULL,
    UNIQUE KEY (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Create table for submissions
+--
+DROP TABLE IF EXISTS submissions;
+CREATE TABLE submissions (
+   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   upload_id varchar(25) DEFAULT NULL,
+   submitter_name varchar(255) NOT NULL,
+   submitter_email varchar(255) NOT NULL,
+   title varchar(255) NOT NULL,
+   author varchar(255) NOT NULL,
+   publication_info varchar(255) DEFAULT NULL,
+   library varchar(255) NOT NULL,
+   call_number varchar(20) DEFAULT NULL,
+   description text DEFAULT NULL,
+   submitted_at datetime default CURRENT_TIMESTAMP,
+   approved boolean default false,
+   approved_at datetime default NULL,
+   approved_by_id int(11) default NULL,
+   UNIQUE KEY (upload_id),
+   FOREIGN KEY (approved_by_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Create table for submission_files
+--
+DROP TABLE IF EXISTS submission_files;
+CREATE TABLE submission_files (
+   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   submission_id int(11) NOT NULL,
+   filename varchar(255) NOT NULL,
+   FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Create table for submission_tags
+--
+DROP TABLE IF EXISTS submission_tags;
+CREATE TABLE submission_tags (
+   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   submission_id int(11) NOT NULL,
+   tag_id  int(11) NOT NULL,
+   FOREIGN KEY (tag_id) REFERENCES tags(id),
+   FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

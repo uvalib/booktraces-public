@@ -35,6 +35,7 @@ div.bt-header {
    color: white;
    padding:15px;
    position: relative;
+   border-bottom:1px solid #40608e;
 }
 #app div.bt-header a {
   color: white;

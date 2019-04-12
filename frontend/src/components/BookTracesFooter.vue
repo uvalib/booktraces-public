@@ -41,6 +41,8 @@ footer {
    bottom: 0;
    height: 210px;
    font-weight: 500;
+   border-top:1px solid #40608e;
+   border-bottom:1px solid #40608e;
 }
 footer .external_links {
    float:right;

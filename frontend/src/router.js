@@ -6,8 +6,10 @@ import Press from './views/Press.vue'
 import Events from './views/Events.vue'
 import FAQ from './views/FAQ.vue'
 import Submit from './views/Submit.vue'
+import Thanks from './views/Thanks.vue'
 import Admin from './views/Admin.vue'
 import Forbidden from './views/Forbidden.vue'
+import store from './store'
 
 Vue.use(Router)
 
@@ -43,7 +45,17 @@ export default new Router({
     {
       path: '/submit',
       name: 'submit',
-      component: Submit
+      component: Submit,
+      beforeEnter: (_to, _from, next) => {
+        console.log("Get new upload ID")
+        store.dispatch('getUploadID')
+        next()
+      }
+    },
+    {
+      path: '/thanks',
+      name: 'thanks',
+      component: Thanks
     },
     {
       path: '/admin',

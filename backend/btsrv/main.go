@@ -32,9 +32,10 @@ func main() {
 	router.GET("/authenticate", svc.Authenticate)
 	api := router.Group("/api")
 	{
-		api.GET("/identifier", svc.GetSubmissionIdentifier)
+		api.GET("/identifier", svc.GetUploadID)
 		api.GET("/tags", svc.GetTags)
 		api.GET("/events", svc.GetEvents)
+		api.POST("/submit", svc.SubmitForm)
 		api.POST("/upload", svc.UploadFile)
 		api.DELETE("/upload/:file", svc.DeleteUploadedFile)
 	}

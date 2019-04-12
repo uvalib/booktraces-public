@@ -83,7 +83,7 @@ const actions = {
       ctx.commit('setTags', response.data )
     }).catch((error) => {
       ctx.commit('setTags', []) 
-      ctx.commit('setError', "Unable to get tags: "+error.response) 
+      ctx.commit('setError', "Unable to get tags: "+error.response.data) 
     })
   },
   getEvents( ctx ) {
@@ -91,7 +91,7 @@ const actions = {
       ctx.commit('setEvents', response.data )
     }).catch((error) => {
       ctx.commit('setEvents', []) 
-      ctx.commit('setError', "Unable to get events: "+error.response) 
+      ctx.commit('setError', "Unable to get events: "+error.response.data) 
     })
   },
   getUploadID( ctx ) {
@@ -99,7 +99,7 @@ const actions = {
       ctx.commit('setUploadID', response.data )
     }).catch((error) => {
       ctx.commit('setUploadID', []) 
-      ctx.commit('setError', "Unable to get uploadID: "+error.response) 
+      ctx.commit('setError', "Unable to get uploadID: "+error.response.data) 
     })
   },
   removeUploadedFile( ctx, filename ) {
@@ -113,7 +113,7 @@ const errorPlugin = store => {
   store.subscribe((mutation) => {
     if (mutation.type === "setError") {
       if ( mutation.payload != null ) {
-        setTimeout( ()=>{ store.commit('setError', null)}, 6000)
+        setTimeout( ()=>{ store.commit('setError', null)}, 10000)
       }
     }
   })

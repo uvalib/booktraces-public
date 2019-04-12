@@ -16,8 +16,8 @@
           <input id="author" class="pure-u-1-1" type="text" required>
         </div>
         <div class="pure-u-1-1 gap">
-          <label for="author">Publication place/date (e.g., London, 1888)</label>
-          <input id="author" class="pure-u-1-1" type="text">
+          <label for="publication">Publication place/date (e.g., London, 1888)</label>
+          <input id="publication" class="pure-u-1-1" type="text">
         </div>
         <div class="pure-u-1-1 gap">
           <label for="library">Library where found<span class="required">*</span></label>
@@ -33,7 +33,6 @@
         </div>
         <div class="pure-u-1-1 gap">
           <label>Images of unique features (e.g., marginalia, inserts)<span class="required">*</span></label>
-          <input type="hidden" id="submitted-files" name="submitted-files" :value="uploadedFiles">
           <vue-dropzone :useCustomSlot=true id="customdropzone" 
             :options="dropzoneOptions" 
             v-on:vdropzone-sending="sendingEvent"
@@ -60,21 +59,23 @@
           <div class="choices">
             <span v-for="tag in tags" :key="tag.id">
                <label class="pure-checkbox inline">
-                  <input type="checkbox" name="tag" :value="tag.id">
+                  <input type="checkbox" name="tag" :value="tag.id" v-model="selectedTags">
                   {{ tag.name }}
                </label>
             </span>
          </div>
         </div>
-        <button class="submit pure-button pure-button-primary">SUBMIT</button>
       </fieldset>
     </form>
+    <div class="error">{{error}}</div>
+    <span @click="submitClicked" class="submit pure-button pure-button-primary">SUBMIT</span>
   </div>
 </template>
 
 <script>
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+import axios from 'axios'
 
 export default {
   name: 'submit',
@@ -83,6 +84,8 @@ export default {
   },
   data: function () {
     return {
+      submitted: false,
+      selectedTags: [],
       dropzoneOptions: {
         url: '/api/upload',
         createImageThumbnails: true,
@@ -94,8 +97,14 @@ export default {
     }
   },
   computed: {
+    error: function() {
+      return this.$store.getters.error
+    },
     uploadedFiles: function() {
       return this.$store.getters.uploadedFiles
+    },
+    uploadID: function() {
+      return this.$store.getters.uploadID
     },
     tags: function() {
       return this.$store.getters.tags
@@ -103,19 +112,39 @@ export default {
   },
   created: function () {
     this.$store.dispatch('getTags')
-    this.$store.dispatch('getUploadID')
   },
   methods: {
     fileAddedEvent (file) {
-      // just adds filename to store list 
       this.$store.commit("addUploadedFile",file.name)
     },
     fileRemovedEvent (file) {
-      // makes an ajax call to the service to remove the file
-      this.$store.dispatch("removeUploadedFile",file.name)
+      if ( this.submitted === false) {
+        this.$store.dispatch("removeUploadedFile",file.name)
+      }
     },
     sendingEvent (file, xhr, formData) {
-      formData.append('identifier', this.$store.getters.uploadID);
+      formData.append('uploadID', this.$store.getters.uploadID);
+    },
+    submitClicked(/*event*/) {
+      let form = {
+        uploadID: this.$store.getters.uploadID,
+        title: document.getElementById("title").value,
+        author: document.getElementById("author").value,
+        publication: document.getElementById("publication").value,
+        library: document.getElementById("library").value,
+        callNumber: document.getElementById("call-number").value,
+        description: document.getElementById("description").value,
+        files: this.$store.getters.uploadedFiles,
+        submitter: document.getElementById("submitter").value,
+        email: document.getElementById("email").value,
+        tags: this.selectedTags
+      }
+      axios.post("/api/submit", form).then((response)  =>  {
+        this.submitted = true
+        this.$router.push("thanks")
+      }).catch((error) => {
+        this.$store.commit("setError",error.response.data) 
+      })
     }
   }
 }
@@ -126,6 +155,11 @@ export default {
 .pure-button.submit {
    background: #24890d;
    font-weight: bold;
+}
+.error {
+  margin: 5px 0 10px 0;
+  color: firebrick;
+  font-style: italic;
 }
 label.pure-checkbox.inline {
   display: inline-block;
