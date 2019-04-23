@@ -3,11 +3,15 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
@@ -141,13 +145,23 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 	log.Printf("Received submission: %+v", submission)
 	pendingDir := fmt.Sprintf("%s/%s", svc.UploadDir, "pending")
 	uploadDir := fmt.Sprintf("%s/%s", pendingDir, submission.UploadID)
-	submittedDir := fmt.Sprintf("%s/%s", svc.UploadDir, "submitted")
+
+	// Submitted dir gets broken up by YYYY/MM before the submissionID
+	currTime := time.Now()
+	submittedDir := fmt.Sprintf("%s/%s/%s", svc.UploadDir, "submitted", currTime.Format("2006/01"))
 	os.MkdirAll(submittedDir, 0777)
 	tgtDir := fmt.Sprintf("%s/%s", submittedDir, submission.UploadID)
 	log.Printf("Moving pending upload files from %s to %s", uploadDir, tgtDir)
 	err = os.Rename(uploadDir, tgtDir)
 	if err != nil {
 		log.Printf("ERROR: Unable to move pending files to submitted: %s", err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = generateThumbnails(tgtDir)
+	if err != nil {
+		log.Printf("ERROR: Unable to generate thumbnails %s", err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -184,4 +198,32 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, submission)
+}
+
+// Generate 150x150x thumbnails for all images (.png and .jpg) in the srcDir
+func generateThumbnails(srcDir string) error {
+	log.Printf("Generate 150x150 thumbnail for all images in %s", srcDir)
+	files, err := ioutil.ReadDir(srcDir)
+	if err != nil {
+		return err
+	}
+
+	for _, imgFile := range files {
+		if imgFile.IsDir() {
+			continue
+		}
+		origFn := fmt.Sprintf("%s/%s", srcDir, imgFile.Name())
+		ext := filepath.Ext(origFn)
+		thumbFn := fmt.Sprintf("%s-150x150%s", strings.TrimSuffix(origFn, ext), ext)
+		log.Printf("Generate thumbnail file %s...", thumbFn)
+		args := []string{"-quiet", "-resize", "150x150^", "-extent", "150x150", "-gravity", "center", origFn, thumbFn}
+		log.Printf("convert args: %+v", args)
+		cmd := exec.Command("convert", args...)
+		err := cmd.Run()
+		if err != nil {
+			return err
+		}
+		log.Printf("Thunbnail %s generated", thumbFn)
+	}
+	return nil
 }

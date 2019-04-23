@@ -14,6 +14,11 @@ module.exports = {
         target: process.env.SUBMIT_API, // or 'http://localhost:8095',
         changeOrigin: true,
         logLevel: 'debug'
+      },
+      '/uploads': {
+        target: process.env.SUBMIT_API, // or 'http://localhost:8095',
+        changeOrigin: true,
+        logLevel: 'debug'
       }
     }
   },

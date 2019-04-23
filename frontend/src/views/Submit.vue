@@ -92,7 +92,8 @@ export default {
         maxFilesize: null,
         chunking: true,
         chunkSize: 1000000, // bytes = 1Mb,
-        addRemoveLinks: true  
+        addRemoveLinks: true,
+        acceptedFiles: "image/jpeg,image/png"
       }
     }
   },

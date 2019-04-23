@@ -44,6 +44,10 @@ func main() {
 	// by yarn and it proxies all requests to the API to the routes above
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 
+	imgDir := fmt.Sprintf("%s/%s", cfg.UploadDir, "submitted")
+	log.Printf("Mount %s as /uploads", imgDir)
+	router.Use(static.Serve("/uploads", static.LocalFile(imgDir, true)))
+
 	// add a catchall route that renders the index page.
 	// based on no-history config setup info here:
 	//    https://router.vuejs.org/guide/essentials/history-mode.html#example-server-configurations
