@@ -36,13 +36,24 @@
             </a>
          </p>
       </div>
+      <div class="recents">
+         <h3>Recently Submitted Books</h3>
+         <p>Total Submission: {{total}}</p>
+      </div>
    </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
    name: "home",
+   computed: mapState({
+      total: state => state.totalSubmissions,
+   }),
    methods: {
+   },
+   created() {
+      this.$store.dispatch("getSubmissions")
    }
 };
 </script>

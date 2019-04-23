@@ -15,7 +15,7 @@ export default {
    name: "events",
    computed: {
       events() {
-         return this.$store.getters.events
+         return this.$store.state.events
       }
    },
    created: function () {

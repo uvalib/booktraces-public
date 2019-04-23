@@ -11,6 +11,8 @@ const state = {
   uploadID: null,
   error: null,
   uploadedFiles: [],
+  totalSubmissions: 0,
+  submissions: [],
   user: null
 }
 
@@ -18,27 +20,6 @@ const state = {
 // and the getters themselves as the second param. Getter params are passed 
 // as a function. Access as a property like: this.$store.getters.NAME
 const getters = {
-  uploadID: state => {
-    return state.uploadID
-  },
-  tags: state => {
-    return state.tags
-  },
-  events: state => {
-    return state.events
-  },
-  error: state => {
-    return state.error
-  },
-  hasError: state => {
-    return state.error != null && state.error != ""
-  },
-  uploadedFiles: state => {
-    return state.uploadedFiles
-  },
-  user: state => {
-    return state.user
-  },
 }
 
 // Synchronous updates to the state. Can be called directly in components like this:
@@ -62,6 +43,14 @@ const mutations = {
   setUploadID (state, uploadID) {
     state.uploadID = uploadID
   },
+  addSubmissions(state, submissionInfo) {
+    state.totalSubmissions += submissionInfo.total
+    state.submissions.push(submissionInfo.thumbs)
+  },
+  clearSubmissions(state) {
+    state.totalSubmissions = 0
+    state.submissions = []
+  },
   addUploadedFile (state, filename) {
     state.uploadedFiles.push(filename)
   },
@@ -78,6 +67,14 @@ const mutations = {
 // Vuex instance. It has access to all getters, setters and commit. They are 
 // called from components like: this.$store.dispatch('action_name', data_object)
 const actions = {
+  getSubmissions( ctx ) {
+    ctx.commit('clearSubmissions' )
+    axios.get("/api/submissions").then((response)  =>  {
+      ctx.commit('addSubmissions', response.data )
+    }).catch((error) => {
+      ctx.commit('setError', "Unable to get submissions: "+error.response.data) 
+    })
+  },
   getTags( ctx ) {
     axios.get("/api/tags").then((response)  =>  {
       ctx.commit('setTags', response.data )

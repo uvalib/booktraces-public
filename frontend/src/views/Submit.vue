@@ -99,16 +99,16 @@ export default {
   },
   computed: {
     error: function() {
-      return this.$store.getters.error
+      return this.$store.state.error
     },
     uploadedFiles: function() {
-      return this.$store.getters.uploadedFiles
+      return this.$store.state.uploadedFiles
     },
     uploadID: function() {
-      return this.$store.getters.uploadID
+      return this.$store.state.uploadID
     },
     tags: function() {
-      return this.$store.getters.tags
+      return this.$store.state.tags
     }
   },
   created: function () {
@@ -140,7 +140,7 @@ export default {
         email: document.getElementById("email").value,
         tags: this.selectedTags
       }
-      axios.post("/api/submit", form).then((response)  =>  {
+      axios.post("/api/submit", form).then((/*response*/)  =>  {
         this.submitted = true
         this.$router.push("thanks")
       }).catch((error) => {
