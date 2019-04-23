@@ -11,17 +11,19 @@ export default {
 
 <style scoped>
 div.sidebar {
-   padding: 15px;
-   background-color: #0e2b56;
-   color: white;
+   padding: 0 15px 15px 15px;
+   background-color: black;
+   color: #ccc;
    font-size: 0.9em;
 }
 #app div.sidebar a {
-  color: white;
+  color: #ccc;
   text-decoration: none;
 }
 .subtitle {
    margin:0;
    padding:0;
+   font-family: 'Special Elite', cursive;
+   font-weight: 500;
 }
 </style>

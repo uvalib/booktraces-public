@@ -38,7 +38,7 @@ body {
    height: 100%;
    margin: 0;
    padding: 0;
-   background-color: #0e2b56;
+   background-image: url(./assets/main-bkg.jpg);
 }
 #app {
    font-family: "Avenir", Helvetica, Arial, sans-serif;
@@ -46,6 +46,9 @@ body {
    -moz-osx-font-smoothing: grayscale;
    min-height: 100%;
    position: relative;
+   width: 90%;
+   background-color: black;
+   border-right: 1px solid black;
 }
 #app h2 {
    margin: 0;
@@ -60,7 +63,7 @@ body {
    text-decoration: underline;
 }
 div.bkg {
-   background-image: url(./assets/main-bkg.jpg);
+   background-image: url(./assets/books-bkg.jpg);
 }
 #app div.content {
    position: relative;
@@ -70,14 +73,14 @@ div.bkg {
    background: white;
    font-weight: 400;
    color: #444;
-   width: 80%;
-   border-right: 1px solid #666;
+   border: 1px solid black;
+   margin: 25px;
 }
 #app .content h2 {
    font-size: 1.5em;
-   font-weight: 500;
-   color: #eb5f0c;
-   border-bottom: 1px dashed #eb5f0c;
+   font-weight: bold;
+   border-bottom: 1px dashed #666;
+   font-family: 'Special Elite', cursive;
    padding-bottom: 5px;
    margin-bottom: 15px;
 }

@@ -27,15 +27,15 @@ export default {
 
 <style scoped>
 #app .menubar .pure-menu-item .router-link-active {
-   color: #ff9500;
-   border-bottom: 2px solid #ff9500;
+   color: #55d737;
+   border-bottom: 2px solid green;
 }
 div.bt-header {
-   background-color: #20406e;
+   background-color: black;
    color: white;
    padding:15px;
    position: relative;
-   border-bottom:1px solid #40608e;
+   font-family: 'Special Elite', cursive;
 }
 #app div.bt-header a {
   color: white;
@@ -48,9 +48,9 @@ div.bt-header span.site-name {
 }
 img.uva-library {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  max-height: 43px;
+  top: 6px;
+  right: 6px;
+  max-height: 40px;
 }
 .pure-menu-horizontal.menubar {
    position: absolute;

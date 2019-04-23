@@ -30,8 +30,8 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 footer {
-   background-color: #20406e;
-   color: #d2e5f7;
+   background-color: black;
+   color: #ccc;
    padding:20px;
    font-size: 0.9em;
    width: 100%;
@@ -41,8 +41,6 @@ footer {
    bottom: 0;
    height: 210px;
    font-weight: 500;
-   border-top:1px solid #40608e;
-   border-bottom:1px solid #40608e;
 }
 footer .external_links {
    float:right;
@@ -52,7 +50,7 @@ footer p.copy {
    margin-top:20px;
 }
 #app footer a {
-   color: #d2e5f7;
+   color: #ccc;
 }
 #app footer a:hover {
    color: white;

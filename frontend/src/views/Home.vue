@@ -1,7 +1,7 @@
 <template>
    <div class="home content">
       <div class="bt-banner">
-         <img class="bt-banner" src="../assets/banner.png"/>
+         <h1>Book Traces</h1>
          <span class="admin">
             <router-link to="/admin">
                <button class="pure-button pure-button-primary">Admin Access</button>
@@ -48,6 +48,14 @@ export default {
 </script>
 
 <style scoped>
+h3, h1 {
+   font-family: 'Special Elite', cursive;
+   margin-bottom: 5px;
+}
+h3 {
+  margin-bottom: 20px;
+  font-weight: 500;
+}
 .pure-button.submit {
    background: #24890d;
    font-weight: bold;
@@ -56,9 +64,10 @@ export default {
    position: relative;
 }
 span.admin {
-   font-size: 12px;
+   font-size: 11px;
    position: absolute;
    right: 0;
+   top:0;
 }
 div.info {
    margin-bottom: 30px;

@@ -111,7 +111,7 @@ func (svc *ServiceContext) UploadFile(c *gin.Context) {
 func (svc *ServiceContext) DeleteUploadedFile(c *gin.Context) {
 	tgtFile := c.Param("file")
 	uploadID := c.Query("key")
-	tgt := fmt.Sprintf("%s/%s/%s", svc.UploadDir, uploadID, tgtFile)
+	tgt := fmt.Sprintf("%s/%s/%s/%s", svc.UploadDir, "pending", uploadID, tgtFile)
 	log.Printf("Request to delete %s", tgt)
 	if _, err := os.Stat(tgt); err == nil {
 		delErr := os.Remove(tgt)
