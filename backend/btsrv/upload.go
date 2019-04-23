@@ -158,6 +158,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	os.Chmod(tgtDir, 0777)
 
 	err = generateThumbnails(tgtDir)
 	if err != nil {
@@ -223,6 +224,7 @@ func generateThumbnails(srcDir string) error {
 		if err != nil {
 			return err
 		}
+		os.Chmod(thumbFn, 0777)
 		log.Printf("Thunbnail %s generated", thumbFn)
 	}
 	return nil
