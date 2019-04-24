@@ -44,8 +44,10 @@ const mutations = {
     state.uploadID = uploadID
   },
   addSubmissions(state, submissionInfo) {
-    state.totalSubmissions += submissionInfo.total
-    state.submissions.push(submissionInfo.thumbs)
+    state.totalSubmissions = submissionInfo.total
+    submissionInfo.thumbs.forEach( function(thumb) {
+      state.submissions.push(thumb)
+    })
   },
   clearSubmissions(state) {
     state.totalSubmissions = 0

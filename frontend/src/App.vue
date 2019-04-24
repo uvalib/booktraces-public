@@ -46,7 +46,7 @@ body {
    -moz-osx-font-smoothing: grayscale;
    min-height: 100%;
    position: relative;
-   width: 90%;
+   max-width: 1260px;
    background-color: black;
    border-right: 1px solid black;
 }
@@ -67,14 +67,14 @@ div.bkg {
 }
 #app div.content {
    position: relative;
-   min-width: 800px;
-   padding: 30px 60px 250px 60px;
+   padding: 30px 60px 30px 60px;
    min-height: 600px;
    background: white;
    font-weight: 400;
    color: #444;
    border: 1px solid black;
-   margin: 25px;
+   width: 80%;
+   margin: 25px auto;
 }
 #app .content h2 {
    font-size: 1.5em;

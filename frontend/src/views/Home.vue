@@ -39,6 +39,11 @@
       <div class="recents">
          <h3>Recently Submitted Books</h3>
          <p>Total Submission: {{total}}</p>
+         <div class="pure-g thumbs">
+            <div class="pure-u-1-5" v-for="thumb in submissions" :key="thumb.submissionID">
+               <img class="pure-img thumb" :src="thumb.url"/>
+            </div>
+         </div>
       </div>
    </div>
 </template>
@@ -49,6 +54,7 @@ export default {
    name: "home",
    computed: mapState({
       total: state => state.totalSubmissions,
+      submissions: state => state.submissions,
    }),
    methods: {
    },
@@ -66,6 +72,9 @@ h3, h1 {
 h3 {
   margin-bottom: 20px;
   font-weight: 500;
+}
+.pure-g.thumbs > [class *=pure-u]{
+   margin:3px;
 }
 .pure-button.submit {
    background: #24890d;
