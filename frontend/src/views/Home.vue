@@ -41,7 +41,7 @@
          <p>Total Submission: {{total}}</p>
          <div class="pure-g thumbs">
             <div class="pure-u-1-5" v-for="thumb in submissions" :key="thumb.submissionID">
-               <img class="pure-img thumb" :src="thumb.url"/>
+               <router-link :to="thumbURL(thumb.submissionID)"><img class="pure-img thumb" :src="thumb.url"/></router-link>
             </div>
          </div>
       </div>
@@ -52,11 +52,16 @@
 import { mapState } from 'vuex'
 export default {
    name: "home",
-   computed: mapState({
-      total: state => state.totalSubmissions,
-      submissions: state => state.submissions,
-   }),
+   computed: {
+      ...mapState({
+         total: state => state.totalSubmissions,
+         submissions: state => state.submissions,
+      }),
+   },
    methods: {
+       thumbURL(id) {
+         return "/submission/"+id
+      }
    },
    created() {
       this.$store.dispatch("getSubmissions")

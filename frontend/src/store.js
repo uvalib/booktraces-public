@@ -13,7 +13,9 @@ const state = {
   uploadedFiles: [],
   totalSubmissions: 0,
   submissions: [],
-  user: null
+  user: null,
+  details: null,
+  loading: true
 }
 
 // state getter functions. All are functions that take state as the first param 
@@ -64,6 +66,15 @@ const mutations = {
     if (index !== -1) {
       state.uploadedFiles.splice(index, 1)
     }
+  },
+  clearSubmissionDetail (state) {
+    state.details = null
+  },
+  setSubmissionDetail (state, details) {
+    state.details = details
+  },
+  setloading (state, isLoading) {
+    state.loading = isLoading
   }
 }
 
@@ -78,6 +89,17 @@ const actions = {
       ctx.commit('addSubmissions', response.data )
     }).catch((error) => {
       ctx.commit('setError', "Unable to get submissions: "+error.response.data) 
+    })
+  },
+  getSubmissionDetail( ctx, id ) {
+    ctx.commit("setloading", true)
+    ctx.commit('clearSubmissionDetail' )
+    axios.get("/api/submissions/"+id).then((response)  =>  {
+      ctx.commit('setSubmissionDetail', response.data )
+      ctx.commit("setloading", false)
+    }).catch((error) => {
+      ctx.commit('setError', "Unable to get submission detail: "+error.response.data) 
+      ctx.commit("setloading", false)
     })
   },
   getTags( ctx ) {

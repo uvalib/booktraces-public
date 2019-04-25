@@ -6,6 +6,7 @@ import Press from './views/Press.vue'
 import Events from './views/Events.vue'
 import FAQ from './views/FAQ.vue'
 import Submit from './views/Submit.vue'
+import Submission from './views/Submission.vue'
 import Thanks from './views/Thanks.vue'
 import Admin from './views/Admin.vue'
 import Forbidden from './views/Forbidden.vue'
@@ -51,6 +52,11 @@ export default new Router({
         store.dispatch('getUploadID')
         next()
       }
+    },
+    {
+      path: '/submission/:id',
+      name: 'submission',
+      component: Submission
     },
     {
       path: '/thanks',
