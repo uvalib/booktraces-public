@@ -53,6 +53,9 @@ const mutations = {
     state.totalSubmissions = 0
     state.submissions = []
   },
+  clearUploadedFiles(state) {
+    state.uploadedFiles = []
+  },
   addUploadedFile (state, filename) {
     state.uploadedFiles.push(filename)
   },

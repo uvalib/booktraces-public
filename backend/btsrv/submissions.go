@@ -18,18 +18,86 @@ import (
 
 // Submission contains the data necessary for a user to make a book traces submission
 type Submission struct {
-	ID          int      `json:"id"`
-	UploadID    string   `json:"uploadId" binding:"required" db:"upload_id"`
-	Title       string   `json:"title" binding:"required"`
-	Author      string   `json:"author" binding:"required"`
-	Publication string   `json:"publication" db:"publication_info"`
-	Library     string   `json:"library" binding:"required"`
-	CallNumber  string   `json:"callNumber" db:"call_number"`
-	Description string   `json:"description"`
-	Files       []string `json:"files" binding:"required"`
-	Submitter   string   `json:"submitter" binding:"required" db:"submitter_name"`
-	Email       string   `json:"email" binding:"required" db:"submitter_email"`
-	Tags        []string `json:"tags"`
+	ID          int       `json:"id"`
+	UploadID    string    `json:"uploadId" binding:"required" db:"upload_id"`
+	Title       string    `json:"title" binding:"required"`
+	Author      string    `json:"author" binding:"required"`
+	Publication string    `json:"publication" db:"publication_info"`
+	Library     string    `json:"library" binding:"required"`
+	CallNumber  string    `json:"callNumber" db:"call_number"`
+	Description string    `json:"description"`
+	Files       []string  `json:"files" binding:"required" db:"-"`
+	Submitter   string    `json:"submitter" binding:"required" db:"submitter_name"`
+	Email       string    `json:"email" binding:"required" db:"submitter_email"`
+	Tags        []string  `json:"tags" db:"-"`
+	SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
+}
+
+// TableName sets the name of the table in the DB that this struct binds to
+func (sub *Submission) TableName() string {
+	return "submissions"
+}
+
+// WriteFiles commits submission files to DB
+func (sub *Submission) WriteFiles(db *dbx.DB) {
+	log.Printf("Attach files to submission")
+	for _, fn := range sub.Files {
+		_, err := db.Insert("submission_files", dbx.Params{
+			"submission_id": sub.ID,
+			"filename":      fn,
+		}).Execute()
+		if err != nil {
+			log.Printf("WARN: Unable to attach %s to submission %d", fn, sub.ID)
+		}
+	}
+}
+
+// WriteTags commits submission tags to DB
+func (sub *Submission) WriteTags(db *dbx.DB) {
+	log.Printf("Attach tags to submission")
+	for _, tagIDStr := range sub.Tags {
+		tagID, _ := strconv.Atoi(tagIDStr)
+		_, err := db.Insert("submission_tags", dbx.Params{
+			"submission_id": sub.ID,
+			"tag_id":        tagID,
+		}).Execute()
+		if err != nil {
+			log.Printf("WARN: Unable to attach tag %d to submission %d", tagID, sub.ID)
+		}
+	}
+}
+
+// GetTags retrieves the list of tags associated with this submission
+func (sub *Submission) GetTags(db *dbx.DB) {
+	q := db.NewQuery("select t.name as name from tags t inner join submission_tags st on st.tag_id = t.id where submission_id={:id}")
+	q.Bind((dbx.Params{"id": sub.ID}))
+	rows, err := q.Rows()
+	if err != nil {
+		log.Printf("WARNING: Unable to retrieve tags for submission[%d]: %s", sub.ID, err.Error())
+		return
+	}
+	for rows.Next() {
+		var t struct{ Name string }
+		rows.ScanStruct(&t)
+		sub.Tags = append(sub.Tags, t.Name)
+	}
+}
+
+// GetFileURLs retrieves the list of URLS for files associated with this submission
+func (sub *Submission) GetFileURLs(db *dbx.DB) {
+	q := db.NewQuery("select filename from submission_files where submission_id={:id}")
+	q.Bind((dbx.Params{"id": sub.ID}))
+	rows, err := q.Rows()
+	if err != nil {
+		log.Printf("WARNING: Unable to retrieve files for submission[%d]: %s", sub.ID, err.Error())
+		return
+	}
+	baseURL := fmt.Sprintf("/uploads/%s/%s", sub.SubmittedAt.Format("2006/01"), sub.UploadID)
+	for rows.Next() {
+		var f struct{ Filename string }
+		rows.ScanStruct(&f)
+		sub.Files = append(sub.Files, fmt.Sprintf("%s/%s", baseURL, f.Filename))
+	}
 }
 
 // SubmissionThumb contains the ID and URL for a submission thumbnail
@@ -46,9 +114,16 @@ type RecentSubmissions struct {
 	Thumbs   []SubmissionThumb `json:"thumbs"`
 }
 
-// TableName sets the name of the table in the DB that this struct binds to
-func (c *Submission) TableName() string {
-	return "submissions"
+// GetSubmissionDetail gets full details of a submission
+func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
+	tgtID := c.Param("id")
+	q := svc.DB.NewQuery("select * from submissions where id={:id}")
+	q.Bind((dbx.Params{"id": tgtID}))
+	var sub Submission
+	q.One(&sub)
+	sub.GetTags(svc.DB)
+	sub.GetFileURLs(svc.DB)
+	c.JSON(http.StatusOK, sub)
 }
 
 // GetSubmissions gets one page of recent submissions and returns it along with some context
@@ -137,28 +212,8 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Attach files to submission")
-	for _, fn := range submission.Files {
-		_, err := svc.DB.Insert("submission_files", dbx.Params{
-			"submission_id": submission.ID,
-			"filename":      fn,
-		}).Execute()
-		if err != nil {
-			log.Printf("WARN: Unable to attach %s to submission %d", fn, submission.ID)
-		}
-	}
-
-	log.Printf("Attach tags to submission")
-	for _, tagIDStr := range submission.Tags {
-		tagID, _ := strconv.Atoi(tagIDStr)
-		_, err := svc.DB.Insert("submission_tags", dbx.Params{
-			"submission_id": submission.ID,
-			"tag_id":        tagID,
-		}).Execute()
-		if err != nil {
-			log.Printf("WARN: Unable to attach tag %d to submission %d", tagID, submission.ID)
-		}
-	}
+	submission.WriteFiles(svc.DB)
+	submission.WriteTags(svc.DB)
 
 	c.JSON(http.StatusOK, submission)
 }

@@ -124,23 +124,24 @@ export default {
       }
     },
     sendingEvent (file, xhr, formData) {
-      formData.append('uploadID', this.$store.getters.uploadID);
+      formData.append('uploadID', this.$store.state.uploadID);
     },
     submitClicked(/*event*/) {
       let form = {
-        uploadID: this.$store.getters.uploadID,
+        uploadID: this.$store.state.uploadID,
         title: document.getElementById("title").value,
         author: document.getElementById("author").value,
         publication: document.getElementById("publication").value,
         library: document.getElementById("library").value,
         callNumber: document.getElementById("call-number").value,
         description: document.getElementById("description").value,
-        files: this.$store.getters.uploadedFiles,
+        files: this.$store.state.uploadedFiles,
         submitter: document.getElementById("submitter").value,
         email: document.getElementById("email").value,
         tags: this.selectedTags
       }
       axios.post("/api/submit", form).then((/*response*/)  =>  {
+        this.$store.commit("clearUploadedFiles")
         this.submitted = true
         this.$router.push("thanks")
       }).catch((error) => {
