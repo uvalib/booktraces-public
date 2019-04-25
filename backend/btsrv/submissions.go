@@ -18,19 +18,19 @@ import (
 
 // Submission contains the data necessary for a user to make a book traces submission
 type Submission struct {
-	ID          int       `json:"id"`
-	UploadID    string    `json:"uploadId" binding:"required" db:"upload_id"`
-	Title       string    `json:"title" binding:"required"`
-	Author      string    `json:"author" binding:"required"`
-	Publication string    `json:"publication" db:"publication_info"`
-	Library     string    `json:"library" binding:"required"`
-	CallNumber  string    `json:"callNumber" db:"call_number"`
-	Description string    `json:"description"`
-	Files       []string  `json:"files" binding:"required" db:"-"`
-	Submitter   string    `json:"submitter" binding:"required" db:"submitter_name"`
-	Email       string    `json:"email" binding:"required" db:"submitter_email"`
-	Tags        []string  `json:"tags" db:"-"`
-	SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
+	ID          int      `json:"id"`
+	UploadID    string   `json:"uploadId" binding:"required" db:"upload_id"`
+	Title       string   `json:"title" binding:"required"`
+	Author      string   `json:"author" binding:"required"`
+	Publication string   `json:"publication" db:"publication_info"`
+	Library     string   `json:"library" binding:"required"`
+	CallNumber  string   `json:"callNumber" db:"call_number"`
+	Description string   `json:"description"`
+	Files       []string `json:"files" binding:"required" db:"-"`
+	Submitter   string   `json:"submitter" binding:"required" db:"submitter_name"`
+	Email       string   `json:"email" binding:"required" db:"submitter_email"`
+	Tags        []string `json:"tags" db:"-"`
+	SubmittedAt string   `json:"submittedAt" db:"submitted_at"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to
@@ -92,7 +92,10 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 		log.Printf("WARNING: Unable to retrieve files for submission[%d]: %s", sub.ID, err.Error())
 		return
 	}
-	baseURL := fmt.Sprintf("/uploads/%s/%s", sub.SubmittedAt.Format("2006/01"), sub.UploadID)
+	//sub.SubmittedAt.Format("2006/01")
+	log.Printf("DATE: %s", sub.SubmittedAt)
+	dateDirs := strings.Join(strings.Split(sub.SubmittedAt, "-")[:2], "/")
+	baseURL := fmt.Sprintf("/uploads/%s/%s", dateDirs, sub.UploadID)
 	for rows.Next() {
 		var f struct{ Filename string }
 		rows.ScanStruct(&f)
