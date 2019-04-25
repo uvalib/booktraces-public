@@ -85,6 +85,7 @@ func (sub *Submission) GetTags(db *dbx.DB) {
 
 // GetFileURLs retrieves the list of URLS for files associated with this submission
 func (sub *Submission) GetFileURLs(db *dbx.DB) {
+	log.Printf("Getting file URLS for submission %d", sub.ID)
 	q := db.NewQuery("select filename from submission_files where submission_id={:id}")
 	q.Bind((dbx.Params{"id": sub.ID}))
 	rows, err := q.Rows()
@@ -93,7 +94,7 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 		return
 	}
 	//sub.SubmittedAt.Format("2006/01")
-	log.Printf("DATE: %s", sub.SubmittedAt)
+	log.Printf("Submission DATE: %s", sub.SubmittedAt)
 	dateDirs := strings.Join(strings.Split(sub.SubmittedAt, "-")[:2], "/")
 	baseURL := fmt.Sprintf("/uploads/%s/%s", dateDirs, sub.UploadID)
 	for rows.Next() {
