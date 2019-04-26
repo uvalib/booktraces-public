@@ -2,20 +2,16 @@ package main
 
 import (
 	"fmt"
-	"time"
-
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
 // User maps the users table into a structure
 type User struct {
-	ID        string    `json:"id"`
-	FirstName string    `json:"firstName" db:"first_name" form:"fname"`
-	LastName  string    `json:"lastName" db:"last_name" form:"lname"`
-	Email     string    `json:"email" form:"email"`
-	Admin     bool      `json:"-"`
-	CreatedAt time.Time `db:"created_at" json:"-"`
-	UpdatedAt time.Time `db:"updated_at" json:"-"`
+	ID        string `json:"id"`
+	FirstName string `json:"firstName" db:"first_name" form:"fname"`
+	LastName  string `json:"lastName" db:"last_name" form:"lname"`
+	Email     string `json:"email" form:"email"`
+	Token     string `json:"token" db:"token"`
 }
 
 // IsValid makes sure all fields are set and look right
@@ -38,7 +34,7 @@ func (user *User) TableName() string {
 
 // FindByEmail finds a user by email
 func (user *User) FindByEmail(db *dbx.DB, email string) error {
-	q := db.NewQuery("select id,last_name,first_name,email,title,university_affiliation,phone from users where email={:email} limit 1")
+	q := db.NewQuery("select * from users where email={:email} limit 1")
 	q.Bind(dbx.Params{"email": email})
 	return q.One(user)
 }

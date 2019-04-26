@@ -79,10 +79,10 @@ CREATE TABLE users (
    last_name varchar(255) DEFAULT NULL,
    first_name varchar(255) DEFAULT NULL,
    email varchar(255) NOT NULL,
-   created_at datetime NOT NULL,
-   updated_at datetime NOT NULL,
+   token varchar(25) NOT NULL DEFAULT "",
    UNIQUE KEY (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+insert into users (last_name,first_name,email) values ("Foster", "Lou", "lf6f@virginia.edu");
 
 --
 -- Create table for submissions

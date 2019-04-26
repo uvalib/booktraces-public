@@ -35,11 +35,15 @@ func main() {
 		api.GET("/identifier", svc.GetUploadID)
 		api.GET("/tags", svc.GetTags)
 		api.GET("/events", svc.GetEvents)
-		api.GET("/submissions", svc.GetSubmissions)
+		api.GET("/recents", svc.GetRecentThumbs)
 		api.GET("/submissions/:id", svc.GetSubmissionDetail)
 		api.POST("/submit", svc.SubmitForm)
 		api.POST("/upload", svc.UploadFile)
 		api.DELETE("/upload/:file", svc.DeleteUploadedFile)
+		admin := api.Group("/admin")
+		{
+			admin.GET("/submissions", svc.AuthMiddleware, svc.GetSubmissions)
+		}
 	}
 
 	// Note: in dev mode, this is never actually used. The front end is served

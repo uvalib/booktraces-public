@@ -130,8 +130,8 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, sub)
 }
 
-// GetSubmissions gets one page of recent submissions and returns it along with some context
-func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
+// GetRecentThumbs gets one page of recent submissions and returns it along with some context
+func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 	pageStr := c.Query("page")
 	const pageSize = 50
 	page := 1

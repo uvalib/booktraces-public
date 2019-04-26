@@ -3,9 +3,7 @@
       <div class="bt-banner">
          <h1>Book Traces</h1>
          <span class="admin">
-            <router-link to="/admin">
-               <button class="pure-button pure-button-primary">Admin Access</button>
-            </router-link>
+            <button @click="adminClicked" class="pure-button pure-button-primary">Admin Access</button>
          </span>
       </div>
       <div class="info">
@@ -59,12 +57,15 @@ export default {
       }),
    },
    methods: {
-       thumbURL(id) {
+      thumbURL(id) {
          return "/submission/"+id
+      },
+      adminClicked() {
+         window.location.href = "/authenticate"
       }
    },
    created() {
-      this.$store.dispatch("getSubmissions")
+      this.$store.dispatch("getRecentThumbs")
    }
 };
 </script>

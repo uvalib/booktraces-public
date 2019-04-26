@@ -85,10 +85,18 @@ const mutations = {
 const actions = {
   getSubmissions( ctx ) {
     ctx.commit('clearSubmissions' )
-    axios.get("/api/submissions").then((response)  =>  {
+    axios.get("/api/admin/submissions",{ withCredentials: true }).then((response)  =>  {
       ctx.commit('addSubmissions', response.data )
     }).catch((error) => {
-      ctx.commit('setError', "Unable to get submissions: "+error.response.data) 
+      ctx.commit('setError', "Unable to get recent submissions: "+error.response.data) 
+    })
+  },
+  getRecentThumbs( ctx ) {
+    ctx.commit('clearSubmissions' )
+    axios.get("/api/recents").then((response)  =>  {
+      ctx.commit('addSubmissions', response.data )
+    }).catch((error) => {
+      ctx.commit('setError', "Unable to get recent submissions: "+error.response.data) 
     })
   },
   getSubmissionDetail( ctx, id ) {

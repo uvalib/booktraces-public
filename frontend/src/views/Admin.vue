@@ -6,7 +6,10 @@
 
 <script>
 export default {
-   name: "admin"
+   name: "admin",
+   created() {
+      this.$store.dispatch("getSubmissions")
+   }
 };
 </script>
 
@@ -15,5 +18,6 @@ div.admin {
    padding: 15px 25px;
    min-height: 600px;
    background: white;
+   color: #444;
 }
 </style>
