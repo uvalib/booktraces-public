@@ -29,7 +29,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 		Author      string    `json:"author" db:"author"`
 		Tags        string    `json:"tags" db:"tags"`
 		SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
-		Published   bool      `json:"published" db:"-"`
+		Published   int       `json:"published" db:"approved"`
 	}
 	type SubmissionsPage struct {
 		Total       int             `json:"total"`

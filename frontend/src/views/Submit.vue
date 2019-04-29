@@ -55,7 +55,7 @@
           <p class="note">We will keep your email address private and will only use if if we need to contact you about your submission.</p>
         </div>
         <div class="pure-u-1-1 gap">
-          <label for="tags">Post Tags</label>
+          <label for="tags">Post Tags<span class="required">*</span></label>
           <div class="choices">
             <span v-for="tag in tags" :key="tag.id">
                <label class="pure-checkbox inline">
@@ -64,6 +64,7 @@
                </label>
             </span>
          </div>
+         <p class="note">At least one tag is required.</p>
         </div>
       </fieldset>
     </form>
@@ -122,6 +123,10 @@ export default {
       formData.append('uploadID', this.uploadID);
     },
     submitClicked(/*event*/) {
+      if (this.selectedTags.length == 0) {
+         this.$store.commit("setError", "At least one tag is required") 
+         return
+      }
       let form = {
         uploadID: this.uploadID,
         title: document.getElementById("title").value,
@@ -135,6 +140,7 @@ export default {
         email: document.getElementById("email").value,
         tags: this.selectedTags
       }
+      
       axios.post("/api/submit", form).then((/*response*/)  =>  {
         this.$store.commit("public/clearUploadedFiles")
         this.submitted = true
