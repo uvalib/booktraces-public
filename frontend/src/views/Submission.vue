@@ -39,8 +39,8 @@ export default {
    name: "submission",
    computed: {
       ...mapState({
-         details: state => state.details,
-         loading: state => state.loading,
+         details: state => state.core.details,
+         loading: state => state.core.loading,
       }),
       submitDate() {
          return this.details.submittedAt.split("T")[0]
@@ -49,7 +49,7 @@ export default {
    methods: {
    },
    created() {
-      this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
+      this.$store.dispatch("core/getSubmissionDetail", this.$route.params.id)
    }
 };
 </script>

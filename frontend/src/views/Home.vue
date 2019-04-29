@@ -52,8 +52,8 @@ export default {
    name: "home",
    computed: {
       ...mapState({
-         total: state => state.totalSubmissions,
-         submissions: state => state.submissions,
+         total: state => state.core.totalSubmissions,
+         submissions: state => state.core.submissions,
       }),
    },
    methods: {
@@ -65,7 +65,7 @@ export default {
       }
    },
    created() {
-      this.$store.dispatch("getRecentThumbs")
+      this.$store.dispatch("core/getRecentThumbs")
    }
 };
 </script>

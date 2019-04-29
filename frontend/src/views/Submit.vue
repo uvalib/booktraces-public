@@ -76,6 +76,7 @@
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 import axios from 'axios'
+import { mapState } from 'vuex'
 
 export default {
   name: 'submit',
@@ -98,50 +99,44 @@ export default {
     }
   },
   computed: {
-    error: function() {
-      return this.$store.state.error
-    },
-    uploadedFiles: function() {
-      return this.$store.state.uploadedFiles
-    },
-    uploadID: function() {
-      return this.$store.state.uploadID
-    },
-    tags: function() {
-      return this.$store.state.tags
-    }
+    ...mapState({
+        error: state => state.core.error,
+        uploadedFiles: state => state.core.uploadedFiles,
+        uploadID: state => state.core.uploadID,
+        tags: state => state.core.tags,
+    }),
   },
   created: function () {
-    this.$store.dispatch('getTags')
+    this.$store.dispatch('core/getTags')
   },
   methods: {
     fileAddedEvent (file) {
-      this.$store.commit("addUploadedFile",file.name)
+      this.$store.commit("core/addUploadedFile",file.name)
     },
     fileRemovedEvent (file) {
       if ( this.submitted === false) {
-        this.$store.dispatch("removeUploadedFile",file.name)
+        this.$store.dispatch("core/removeUploadedFile",file.name)
       }
     },
     sendingEvent (file, xhr, formData) {
-      formData.append('uploadID', this.$store.state.uploadID);
+      formData.append('uploadID', this.uploadID);
     },
     submitClicked(/*event*/) {
       let form = {
-        uploadID: this.$store.state.uploadID,
+        uploadID: this.uploadID,
         title: document.getElementById("title").value,
         author: document.getElementById("author").value,
         publication: document.getElementById("publication").value,
         library: document.getElementById("library").value,
         callNumber: document.getElementById("call-number").value,
         description: document.getElementById("description").value,
-        files: this.$store.state.uploadedFiles,
+        files: this.uploadedFiles,
         submitter: document.getElementById("submitter").value,
         email: document.getElementById("email").value,
         tags: this.selectedTags
       }
       axios.post("/api/submit", form).then((/*response*/)  =>  {
-        this.$store.commit("clearUploadedFiles")
+        this.$store.commit("core/clearUploadedFiles")
         this.submitted = true
         this.$router.push("thanks")
       }).catch((error) => {
