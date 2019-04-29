@@ -53,7 +53,7 @@ func (svc *ServiceContext) AuthMiddleware(c *gin.Context) {
 	cookieStr, err := c.Cookie("bt_admin_user")
 	if err != nil {
 		log.Printf("ERROR: unable to retrieve access cookie")
-		c.Redirect(http.StatusForbidden, "/forbidden")
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 	log.Printf("AuthMiddleware found cookie %s; verifying", cookieStr)
@@ -61,7 +61,7 @@ func (svc *ServiceContext) AuthMiddleware(c *gin.Context) {
 	err = json.Unmarshal([]byte(cookieStr), &cookieUser)
 	if err != nil {
 		log.Printf("ERROR: Unable to parse cookie: %s", err.Error())
-		c.Redirect(http.StatusForbidden, "/forbidden")
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
@@ -69,18 +69,16 @@ func (svc *ServiceContext) AuthMiddleware(c *gin.Context) {
 	err = user.FindByEmail(svc.DB, cookieUser.Email)
 	if err != nil {
 		log.Printf("No user record found for %s. Not authorized.", cookieUser.Email)
-		c.Redirect(http.StatusForbidden, "/forbidden")
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
 	if cookieUser.Token != user.Token {
 		log.Printf("User access token mismatch")
-		c.Redirect(http.StatusForbidden, "/forbidden")
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
 	log.Printf("User %s is authorized for %s", user.Email, c.Request.RequestURI)
-	c.Header("cache-control", "private, max-age=0, no-cache")
-
 	c.Next()
 }

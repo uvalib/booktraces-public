@@ -150,7 +150,7 @@ func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 
 	qs := fmt.Sprintf(`select s.id as sub_id,upload_id,submitted_at,filename from submissions s 
 			inner join submission_files f on f.submission_id = s.id where approved = 1
-			group by s.id order by submitted_at asc limit %d,%d`, start, pageSize)
+			group by s.id order by submitted_at desc limit %d,%d`, start, pageSize)
 	q := svc.DB.NewQuery(qs)
 	rows, err := q.Rows()
 	if err != nil {
