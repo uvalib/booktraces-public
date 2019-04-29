@@ -27,8 +27,8 @@ const auth = {
     },
     addSubmissions(state, submissionInfo) {
       state.totalSubmissions = submissionInfo.total
-      submissionInfo.thumbs.forEach( function(thumb) {
-        state.submissions.push(thumb)
+      submissionInfo.submissions.forEach( function(sub) {
+        state.submissions.push(sub)
       })
     },
     clearSubmissions(state) {
@@ -47,7 +47,7 @@ const auth = {
       axios.get("/api/admin/submissions",{ withCredentials: true }).then((response)  =>  {
         ctx.commit('addSubmissions', response.data )
       }).catch((error) => {
-        ctx.commit('setError', "Unable to get recent submissions: "+error.response.data) 
+        ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
         if (error.response.status == 403) {
           router.push("/forbidden")
         }

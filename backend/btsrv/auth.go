@@ -17,8 +17,10 @@ import (
 func (svc *ServiceContext) Authenticate(c *gin.Context) {
 	log.Printf("Checking authentication headers...")
 	computingID := c.GetHeader("remote_user")
+	devMode := false
 	if svc.DevAuthUser != "" {
 		computingID = svc.DevAuthUser
+		devMode = true
 		log.Printf("Using dev auth user ID: %s", computingID)
 	}
 	if computingID == "" {
@@ -42,8 +44,11 @@ func (svc *ServiceContext) Authenticate(c *gin.Context) {
 
 	log.Printf("Authentication successful for %s", computingID)
 	json, _ := json.Marshal(user)
-	log.Printf(string(json))
-	c.SetCookie("bt_admin_user", string(json), 3600, "/", "", false, false)
+	if devMode {
+		c.SetCookie("bt_admin_user", string(json), 3600, "/", "", false, false)
+	} else {
+		c.SetCookie("bt_admin_user", string(json), 3600, "/", "", true, false)
+	}
 	c.Redirect(http.StatusFound, "/admin")
 }
 

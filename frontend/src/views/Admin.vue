@@ -8,7 +8,13 @@
 export default {
    name: "admin",
    created() {
-      this.$store.dispatch("admin/getSubmissions")
+      let authUser = this.$cookies.get("bt_admin_user")
+      if (authUser) {
+         this.$store.commit("admin/setUser", authUser)
+         this.$store.dispatch("admin/getSubmissions")
+      } else {
+         this.$router.push("forbidden")
+      }
    }
 };
 </script>

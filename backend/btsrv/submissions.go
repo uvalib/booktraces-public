@@ -104,20 +104,6 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 	}
 }
 
-// SubmissionThumb contains the ID and URL for a submission thumbnail
-type SubmissionThumb struct {
-	SubmissionID int    `json:"submissionID"`
-	URL          string `json:"url"`
-}
-
-// RecentSubmissions contains into from a single page of most recent submissions
-type RecentSubmissions struct {
-	Total    int               `json:"total"`
-	Page     int               `json:"page"`
-	PageSize int               `json:"pageSize"`
-	Thumbs   []SubmissionThumb `json:"thumbs"`
-}
-
 // GetSubmissionDetail gets full details of a submission
 func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	tgtID := c.Param("id")
@@ -142,6 +128,18 @@ func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 		}
 	}
 	start := (page - 1) * pageSize
+
+	type Thumb struct {
+		SubmissionID int    `json:"submissionID"`
+		URL          string `json:"url"`
+	}
+	type RecentSubmissions struct {
+		Total    int     `json:"total"`
+		Page     int     `json:"page"`
+		PageSize int     `json:"pageSize"`
+		Thumbs   []Thumb `json:"thumbs"`
+	}
+
 	out := RecentSubmissions{Total: 0, Page: page, PageSize: pageSize}
 
 	log.Printf("Get total submissions")
@@ -168,7 +166,7 @@ func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 		rows.ScanStruct(&fi)
 		dateStr := strings.Join(strings.Split(fi.Submitted, "-")[:2], "/")
 		url := fmt.Sprintf("/uploads/%s/%s/%s", dateStr, fi.UploadID, getThumbFilename(fi.Filename))
-		out.Thumbs = append(out.Thumbs, SubmissionThumb{SubmissionID: fi.SubID, URL: url})
+		out.Thumbs = append(out.Thumbs, Thumb{SubmissionID: fi.SubID, URL: url})
 	}
 
 	c.JSON(http.StatusOK, out)
