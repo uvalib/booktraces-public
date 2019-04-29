@@ -27,7 +27,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 		ID          int       `json:"id" db:"id"`
 		Title       string    `json:"title" db:"title"`
 		Author      string    `json:"author" db:"author"`
-		Tags        []string  `json:"tags" db:"-"`
+		Tags        string    `json:"tags" db:"tags"`
 		SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
 		Published   bool      `json:"published" db:"-"`
 	}
@@ -43,26 +43,16 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	tq := svc.DB.NewQuery("select count(*) as total from submissions where approved=1")
 	tq.One(&out)
 
-	qs := fmt.Sprintf(`select s.id as id, title, author, submitted_at, approved, t.name as tag 
+	qs := fmt.Sprintf(`select s.id as id, title, author, submitted_at, approved, group_concat(t.name) as tags
 		from submissions s, submission_tags st, tags t
-		where st.submission_id=s.id and t.id=st.tag_id  
+		where st.submission_id=s.id and t.id=st.tag_id group by s.id 
 		order by submitted_at desc limit %d,%d`, start, pageSize)
 	q := svc.DB.NewQuery(qs)
-	rows, err := q.Rows()
+	err := q.All(&out.Submissions)
 	if err != nil {
-		log.Printf("ERROR: Unable to get submissions %s", err.Error())
-		c.String(http.StatusInternalServerError, "Unable to retrieve submissions")
+		log.Printf("ERROR: Unable to get submisions: %s", err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
-	}
-	for rows.Next() {
-		var sr SubmissionRow
-		rowErr := rows.ScanStruct(&sr)
-		if rowErr != nil {
-			log.Printf("ERROR: Unable to get submissions row %s", rowErr.Error())
-			c.String(http.StatusInternalServerError, "Unable to retrieve submissions")
-			return
-		}
-		out.Submissions = append(out.Submissions, sr)
 	}
 
 	c.JSON(http.StatusOK, out)
