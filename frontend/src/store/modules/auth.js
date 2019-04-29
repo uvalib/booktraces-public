@@ -14,6 +14,9 @@ const auth = {
   // and the getters themselves as the second param. Getter params are passed 
   // as a function. Access as a property like: this.$store.getters.NAME
   getters: {
+    loginName: state => {
+      return state.user.firstName + " ("+state.user.email+")"
+    }
   },
 
   // Synchronous updates to the state. Can be called directly in components like this:

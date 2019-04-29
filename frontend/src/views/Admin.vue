@@ -1,6 +1,6 @@
 <template>
    <div class="admin">
-      <h2>Book Traces System Admin Panel</h2>
+      <h2>Book Traces System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>Submissions</h3>
          <table class="pure-table">
@@ -34,6 +34,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
    name: "admin",
    computed: {
@@ -41,6 +42,9 @@ export default {
          total: state => state.admin.totalSubmissions,
          submissions: state => state.admin.submissions,
       }),
+      ...mapGetters({
+         loginName: 'admin/loginName',
+      })
    },
    methods: {
       isPublished(sub) {
@@ -67,6 +71,15 @@ export default {
 </script>
 
 <style scoped>
+span.login {
+   font-family: sans-serif;
+   font-size: 0.5em;
+   float: right;
+   font-weight: 100;
+}
+span.login b {
+   margin-right: 5px;
+}
 i.fas.action.disabled {
    cursor: default;
    opacity: 0.2;
