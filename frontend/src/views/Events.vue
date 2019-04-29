@@ -15,11 +15,11 @@ export default {
    name: "events",
    computed: {
       events() {
-         return this.$store.state.core.events
+         return this.$store.state.events
       }
    },
    created: function () {
-      this.$store.dispatch('core/getEvents')
+      this.$store.dispatch('getEvents')
    },
    methods: {
    }

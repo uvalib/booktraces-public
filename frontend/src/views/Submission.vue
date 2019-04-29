@@ -3,6 +3,9 @@
       <template v-if="loading">
          <h1>Loading Details...</h1>
       </template>
+      <template v-else-if="hasError">
+        <div class="error">{{error}}</div>
+      </template>
       <template v-else>
          <div class="submit-header">
             <h3><b>BOOK SUBMISSION:</b> {{details.title}}</h3>
@@ -39,17 +42,21 @@ export default {
    name: "submission",
    computed: {
       ...mapState({
-         details: state => state.core.details,
-         loading: state => state.core.loading,
+         details: state => state.public.details,
+         loading: state => state.loading,
+         error: state => state.error,
       }),
       submitDate() {
          return this.details.submittedAt.split("T")[0]
+      },
+      hasError() {
+         return this.$store.getters.hasError
       }
    },
    methods: {
    },
    created() {
-      this.$store.dispatch("core/getSubmissionDetail", this.$route.params.id)
+      this.$store.dispatch("public/getSubmissionDetail", this.$route.params.id)
    }
 };
 </script>
@@ -119,5 +126,10 @@ div.tag {
    border-radius: 10px;
    text-transform: uppercase;
    font-weight: 500;
+}
+.error {
+  margin: 5px 0 10px 0;
+  color: firebrick;
+  font-style: italic;
 }
 </style>

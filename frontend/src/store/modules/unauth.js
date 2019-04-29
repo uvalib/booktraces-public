@@ -1,19 +1,16 @@
 import axios from 'axios'
 
-const core = {
+const unauth = {
   namespaced: true,
   
   // root state object. Holds all of the state for the system
   state: {
-    tags: [],
-    events: [],
     uploadID: null,
     error: null,
     uploadedFiles: [],
     totalSubmissions: 0,
     submissions: [],
     details: null,
-    loading: true
   },
 
   // state getter functions. All are functions that take state as the first param 
@@ -25,21 +22,6 @@ const core = {
   // Synchronous updates to the state. Can be called directly in components like this:
   // this.$store.commit('mutation_name') or called from asynchronous actions
   mutations: {
-    setTags (state, tags) {
-      state.tags = tags
-    },
-    setEvents (state, events) {
-      state.events = events
-    },
-    setUser (state, user) {
-      state.user = user
-    },
-    clearUser(state) {
-      state.user = null
-    },
-    setError (state, error) {
-      state.error = error
-    },
     setUploadID (state, uploadID) {
       state.uploadID = uploadID
     },
@@ -71,9 +53,6 @@ const core = {
     setSubmissionDetail (state, details) {
       state.details = details
     },
-    setloading (state, isLoading) {
-      state.loading = isLoading
-    }
   },
 
   // Actions are asynchronous calls that commit mutatations to the state.
@@ -86,34 +65,18 @@ const core = {
       axios.get("/api/recents").then((response)  =>  {
         ctx.commit('addSubmissions', response.data )
       }).catch((error) => {
-        ctx.commit('setError', "Unable to get recent submissions: "+error.response.data) 
+        ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
       })
     },
     getSubmissionDetail( ctx, id ) {
-      ctx.commit("setloading", true)
+      ctx.commit("setLoading", true, {root: true})
       ctx.commit('clearSubmissionDetail' )
       axios.get("/api/submissions/"+id).then((response)  =>  {
         ctx.commit('setSubmissionDetail', response.data )
-        ctx.commit("setloading", false)
+        ctx.commit("setLoading", false, {root: true}) 
       }).catch((error) => {
-        ctx.commit('setError', "Unable to get submission detail: "+error.response.data) 
-        ctx.commit("setloading", false)
-      })
-    },
-    getTags( ctx ) {
-      axios.get("/api/tags").then((response)  =>  {
-        ctx.commit('setTags', response.data )
-      }).catch((error) => {
-        ctx.commit('setTags', []) 
-        ctx.commit('setError', "Unable to get tags: "+error.response.data) 
-      })
-    },
-    getEvents( ctx ) {
-      axios.get("/api/events").then((response)  =>  {
-        ctx.commit('setEvents', response.data )
-      }).catch((error) => {
-        ctx.commit('setEvents', []) 
-        ctx.commit('setError', "Unable to get events: "+error.response.data) 
+        ctx.commit('setError', "Unable to get submission detail: "+error.response.data, {root: true}) 
+        ctx.commit("setLoading", false, {root: true}) 
       })
     },
     getUploadID( ctx ) {
@@ -121,14 +84,14 @@ const core = {
         ctx.commit('setUploadID', response.data )
       }).catch((error) => {
         ctx.commit('setUploadID', []) 
-        ctx.commit('setError', "Unable to get uploadID: "+error.response.data) 
+        ctx.commit('setError', "Unable to get uploadID: "+error.response.data, {root: true}) 
       })
     },
     removeUploadedFile( ctx, filename ) {
       ctx.commit("removeUploadedFile",filename)
-      axios.delete("/api/upload/"+filename+"?key="+ctx.getters.uploadID)
+      axios.delete("/api/upload/"+filename+"?key="+ctx.getters.uploadID, {root: true}) 
     }
   }
 }
 
-export default core
+export default unauth

@@ -48,7 +48,7 @@ export default new Router({
       name: 'submit',
       component: Submit,
       beforeEnter: (_to, _from, next) => {
-        store.dispatch('core/getUploadID')
+        store.dispatch('public/getUploadID')
         next()
       }
     },

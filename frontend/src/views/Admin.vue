@@ -8,7 +8,7 @@
 export default {
    name: "admin",
    created() {
-      this.$store.dispatch("getSubmissions")
+      this.$store.dispatch("admin/getSubmissions")
    }
 };
 </script>

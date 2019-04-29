@@ -100,22 +100,22 @@ export default {
   },
   computed: {
     ...mapState({
-        error: state => state.core.error,
-        uploadedFiles: state => state.core.uploadedFiles,
-        uploadID: state => state.core.uploadID,
-        tags: state => state.core.tags,
+        error: state => state.error,
+        uploadedFiles: state => state.public.uploadedFiles,
+        uploadID: state => state.public.uploadID,
+        tags: state => state.tags,
     }),
   },
   created: function () {
-    this.$store.dispatch('core/getTags')
+    this.$store.dispatch('getTags')
   },
   methods: {
     fileAddedEvent (file) {
-      this.$store.commit("core/addUploadedFile",file.name)
+      this.$store.commit("public/addUploadedFile",file.name)
     },
     fileRemovedEvent (file) {
       if ( this.submitted === false) {
-        this.$store.dispatch("core/removeUploadedFile",file.name)
+        this.$store.dispatch("public/removeUploadedFile",file.name)
       }
     },
     sendingEvent (file, xhr, formData) {
@@ -136,7 +136,7 @@ export default {
         tags: this.selectedTags
       }
       axios.post("/api/submit", form).then((/*response*/)  =>  {
-        this.$store.commit("core/clearUploadedFiles")
+        this.$store.commit("public/clearUploadedFiles")
         this.submitted = true
         this.$router.push("thanks")
       }).catch((error) => {

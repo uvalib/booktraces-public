@@ -1,7 +1,7 @@
 import axios from 'axios'
 import router from '../../router'
 
-const admin = {
+const auth = {
    namespaced: true,
   // root state object. Holds all of the state for the system
   state: {
@@ -56,4 +56,4 @@ const admin = {
   }
 }
 
-export default admin
+export default auth
