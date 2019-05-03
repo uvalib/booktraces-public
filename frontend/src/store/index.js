@@ -23,7 +23,8 @@ export default new Vuex.Store({
     tags: [],
     events: [],
     error: null,
-    loading: true
+    loading: true,
+    details: null,
   },
   getters: {
     hasError: state => {
@@ -42,7 +43,18 @@ export default new Vuex.Store({
     },
     setLoading (state, isLoading) {
       state.loading = isLoading
-    }
+    },
+    clearSubmissionDetail (state) {
+      state.details = null
+    },
+    setSubmissionDetail (state, details) {
+      state.details = details
+    },
+    setCurrSubPublished (state) {
+      if (state.details) {
+        state.details.published = true
+      }
+    },
   },
   actions: {
     getTags( ctx ) {
@@ -59,6 +71,17 @@ export default new Vuex.Store({
       }).catch((error) => {
         ctx.commit('setEvents', []) 
         ctx.commit('setError', "Unable to get events: "+error.response.data) 
+      })
+    },
+    getSubmissionDetail( ctx, id ) {
+      ctx.commit("setLoading", true)
+      ctx.commit('clearSubmissionDetail' )
+      axios.get("/api/submissions/"+id).then((response)  =>  {
+        ctx.commit('setSubmissionDetail', response.data )
+        ctx.commit("setLoading", false) 
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get submission detail: "+error.response.data) 
+        ctx.commit("setLoading", false) 
       })
     },
   },

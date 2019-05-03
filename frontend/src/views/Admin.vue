@@ -66,7 +66,7 @@ export default {
          let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
          if (resp) {
             let id = event.currentTarget.dataset.id
-            this.$store.dispatch("admin/deleteSubmission", id)
+            this.$store.dispatch("admin/deleteSubmission", {id:id})
          }
       },
       publishClicked(event) {
@@ -82,6 +82,7 @@ export default {
       }
    },
    created() {
+      this.$store.commit("clearSubmissionDetail")
       this.$store.dispatch("admin/getSubmissions")
    }
 };

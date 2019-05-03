@@ -35,6 +35,7 @@ export default {
       return {}
    },
    created: function() {
+      this.$store.commit("clearSubmissionDetail")
       if (this.$route.meta.requiresAuth) {
          if (this.isAuthenticated == false) {
             let authUser = this.$cookies.get("bt_admin_user")

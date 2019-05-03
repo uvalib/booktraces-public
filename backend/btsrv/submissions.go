@@ -31,6 +31,7 @@ type Submission struct {
 	Email       string    `json:"email" binding:"required" db:"submitter_email"`
 	Tags        []string  `json:"tags" db:"-"`
 	SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
+	Approved    bool      `json:"published" db:"approved"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to
@@ -110,7 +111,11 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	q := svc.DB.NewQuery("select * from submissions where id={:id}")
 	q.Bind((dbx.Params{"id": tgtID}))
 	var sub Submission
-	q.One(&sub)
+	err := q.One(&sub)
+	if err != nil {
+		log.Printf("ERROR: %s", err.Error())
+	}
+	log.Printf("GOT %+v", sub)
 	sub.GetTags(svc.DB)
 	sub.GetFileURLs(svc.DB)
 	c.JSON(http.StatusOK, sub)

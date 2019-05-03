@@ -9,8 +9,7 @@ const unauth = {
     error: null,
     uploadedFiles: [],
     totalSubmissions: 0,
-    submissions: [],
-    details: null,
+    submissions: []
   },
 
   // state getter functions. All are functions that take state as the first param 
@@ -47,12 +46,6 @@ const unauth = {
         state.uploadedFiles.splice(index, 1)
       }
     },
-    clearSubmissionDetail (state) {
-      state.details = null
-    },
-    setSubmissionDetail (state, details) {
-      state.details = details
-    },
   },
 
   // Actions are asynchronous calls that commit mutatations to the state.
@@ -66,17 +59,6 @@ const unauth = {
         ctx.commit('addSubmissions', response.data )
       }).catch((error) => {
         ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
-      })
-    },
-    getSubmissionDetail( ctx, id ) {
-      ctx.commit("setLoading", true, {root: true})
-      ctx.commit('clearSubmissionDetail' )
-      axios.get("/api/submissions/"+id).then((response)  =>  {
-        ctx.commit('setSubmissionDetail', response.data )
-        ctx.commit("setLoading", false, {root: true}) 
-      }).catch((error) => {
-        ctx.commit('setError', "Unable to get submission detail: "+error.response.data, {root: true}) 
-        ctx.commit("setLoading", false, {root: true}) 
       })
     },
     getUploadID( ctx ) {

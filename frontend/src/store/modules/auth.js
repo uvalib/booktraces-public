@@ -86,17 +86,22 @@ const auth = {
       ctx.commit("setLoading", true, {root: true})
       axios.post("/api/admin/submissions/"+id+"/publish", {userID:ctx.state.user.id }).then((/*response*/)  =>  {
         ctx.commit("setPublished", id)
+        ctx.commit("setCurrSubPublished", null, {root: true})
         ctx.commit("setLoading", false, {root: true})
       }).catch((error) => {
         ctx.commit("setError",error.response.data, {root: true}) 
         ctx.commit("setLoading", false, {root: true})
       })
     },
-    deleteSubmission( ctx, id ) {
+    deleteSubmission( ctx, payload ) {
+      let id=payload.id
       ctx.commit("setLoading", true, {root: true})
       axios.delete("/api/admin/submissions/"+id).then((/*response*/)  =>  {
         ctx.commit("deleteSubmission", id)
         ctx.commit("setLoading", false, {root: true})
+        if (payload.backToIndex) {
+          router.push("/admin")
+        }
       }).catch((error) => {
         ctx.commit("setError",error.response.data, {root: true}) 
         ctx.commit("setLoading", false, {root: true})

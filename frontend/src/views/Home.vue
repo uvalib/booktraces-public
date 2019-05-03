@@ -58,7 +58,7 @@ export default {
    },
    methods: {
       thumbURL(id) {
-         return "/submission/"+id
+         return "/submissions/"+id
       },
       adminClicked() {
          window.location.href = "/authenticate?url=/admin"

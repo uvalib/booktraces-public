@@ -42,7 +42,7 @@ export default {
    name: "submission",
    computed: {
       ...mapState({
-         details: state => state.public.details,
+         details: state => state.details,
          loading: state => state.loading,
          error: state => state.error,
       }),
@@ -55,8 +55,8 @@ export default {
    },
    methods: {
    },
-   created() {
-      this.$store.dispatch("public/getSubmissionDetail", this.$route.params.id)
+   created: function() {
+      this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
    }
 };
 </script>
