@@ -15,9 +15,10 @@
 
 
 <script>
-import BookTracesSidebar from "@/components/BookTracesSidebar";
-import BookTracesHeader from "@/components/BookTracesHeader";
-import BookTracesFooter from "@/components/BookTracesFooter";
+import BookTracesSidebar from "@/components/BookTracesSidebar"
+import BookTracesHeader from "@/components/BookTracesHeader"
+import BookTracesFooter from "@/components/BookTracesFooter"
+import { mapGetters } from "vuex"
 
 export default {
    components: {
@@ -25,10 +26,28 @@ export default {
       BookTracesSidebar,
       BookTracesFooter
    },
-   data: function() {
-      return {};
+   computed: {
+      ...mapGetters({
+         isAuthenticated: "admin/isAuthenticated"
+      })
    },
-   created: function() {}
+   data: function() {
+      return {}
+   },
+   created: function() {
+      if (this.$route.meta.requiresAuth) {
+         if (this.isAuthenticated == false) {
+            let authUser = this.$cookies.get("bt_admin_user")
+            if (authUser) {
+               authUser.authenticated = true
+               this.$store.commit("admin/setUser", authUser)
+               this.$cookies.remove("bt_admin_user")
+            } else {
+               window.location.href = "/authenticate?url="+this.$router.currentRoute.path
+            }
+         }
+      }
+   }
 };
 </script>
 

@@ -5,7 +5,6 @@
          <h3>Submissions</h3>
          <table class="pure-table">
             <thead>
-               <th style="width:12px"/>
                <th>Title</th>
                <th>Author</th>
                <th>Tags</th>
@@ -13,18 +12,15 @@
                <th class="checkbox">Public</th>
                <th>Actions</th>
             </thead>
-            <tr v-for="sub in submissions" :key="sub.id">
-               <td><input :data-id="sub.id" type="checkbox"/></td>
+            <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
                <td>{{ sub.title }}</td>
                <td>{{ sub.author }}</td>
                <td>{{ sub.tags }}</td>
                <td>{{ sub.submittedAt.split("T")[0] }}</td>
                <td class="centered"><span v-html="publishIcon(sub)"></span></td>
                <td>
-                  <i title="view" class="action fas fa-eye"></i>
-                  <i title="edit" class="action fas fa-edit"></i>
-                  <i title="delete" class="action fas fa-trash-alt"></i>
-                  <i v-bind:class="{disabled: isPublished(sub)}" title="publish" class="action fas fa-thumbs-up"></i>
+                  <i title="delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
+                  <i v-bind:class="{disabled: isPublished(sub)}" title="publish" class="action fas fa-thumbs-up" @click="publishClicked"></i>
                </td>
             </tr>
          </table>
@@ -56,16 +52,26 @@ export default {
          } else {
             return ""
          }
+      },
+      submissionClicked(event) {
+         let tgt = event.currentTarget
+         let subID = tgt.dataset.id
+         this.$router.push("admin/submissions/" + subID)
+      },
+      deleteClicked(event) {
+         event.stopPropagation()
+         confirm("Delete this submission?")
+      },
+      publishClicked(event) {
+         event.stopPropagation()
+         if (event.currentTarget.classList.contains("disabled")) {
+            return
+         }
+         confirm("Publish this submission?")
       }
    },
    created() {
-      let authUser = this.$cookies.get("bt_admin_user")
-      if (authUser) {
-         this.$store.commit("admin/setUser", authUser)
-         this.$store.dispatch("admin/getSubmissions")
-      } else {
-         this.$router.push("forbidden")
-      }
+      this.$store.dispatch("admin/getSubmissions")
    }
 };
 </script>
@@ -111,6 +117,10 @@ table {
    width: 100%;
    font-size: 0.85em;
    color: #444;
+}
+table tr:hover {
+   cursor: pointer;
+   background: #f5f5f5;
 }
 th.checkbox {
    width: 40px;

@@ -89,7 +89,7 @@ const unauth = {
     },
     removeUploadedFile( ctx, filename ) {
       ctx.commit("removeUploadedFile",filename)
-      axios.delete("/api/upload/"+filename+"?key="+ctx.getters.uploadID, {root: true}) 
+      axios.delete("/api/upload/"+filename+"?key="+ctx.getters.uploadID) 
     }
   }
 }

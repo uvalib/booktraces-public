@@ -14,8 +14,17 @@ const auth = {
   // and the getters themselves as the second param. Getter params are passed 
   // as a function. Access as a property like: this.$store.getters.NAME
   getters: {
+    isAuthenticated(state) {
+      if (state.user == null) {
+         return false
+      }
+      return state.user.authenticated
+    },
     loginName: state => {
-      return state.user.firstName + " ("+state.user.email+")"
+      if (state.user) {
+        return state.user.firstName + " ("+state.user.email+")"
+      }
+      return ""
     }
   },
 

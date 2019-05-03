@@ -61,7 +61,7 @@ export default {
          return "/submission/"+id
       },
       adminClicked() {
-         window.location.href = "/authenticate"
+         window.location.href = "/authenticate?url=/admin"
       }
    },
    created() {
@@ -81,6 +81,9 @@ h3 {
 }
 .pure-g.thumbs > [class *=pure-u]{
    margin:3px;
+}
+.pure-img.thumb:hover {
+   box-shadow: 0 0 5px green;
 }
 .pure-button.submit {
    background: #24890d;

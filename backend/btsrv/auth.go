@@ -43,7 +43,8 @@ func (svc *ServiceContext) Authenticate(c *gin.Context) {
 	user.Token = xid.New().String()
 	svc.DB.Model(&user).Update("Token")
 
-	log.Printf("Authentication successful for %s", computingID)
+	tgtURL := c.Query("url")
+	log.Printf("Authentication successful for %s at URL %s", computingID, tgtURL)
 	json, _ := json.Marshal(user)
 
 	// Set user account into in an open cookie, and place the access token
@@ -52,11 +53,11 @@ func (svc *ServiceContext) Authenticate(c *gin.Context) {
 	c.SetCookie("bt_admin_user", string(json), 3600, "/", "", false, false)
 	adminSess := fmt.Sprintf("%s|%s", user.Token, user.Email)
 	if devMode {
-		c.SetCookie("bt_admin_session", adminSess, 3600, "/", "", false, true)
+		c.SetCookie("bt_admin_session", adminSess, 0, "/", "", false, true)
 	} else {
-		c.SetCookie("bt_admin_session", adminSess, 3600, "/", "", true, true)
+		c.SetCookie("bt_admin_session", adminSess, 0, "/", "", true, true)
 	}
-	c.Redirect(http.StatusFound, "/admin")
+	c.Redirect(http.StatusFound, tgtURL)
 }
 
 // AuthMiddleware sits in front of all admin API calls and makes the auth token generated

@@ -9,6 +9,7 @@ import Submit from './views/Submit.vue'
 import Submission from './views/Submission.vue'
 import Thanks from './views/Thanks.vue'
 import Admin from './views/Admin.vue'
+import AdminSubmission from './views/AdminSubmission.vue'
 import Forbidden from './views/Forbidden.vue'
 import store from './store'
 
@@ -53,7 +54,7 @@ export default new Router({
       }
     },
     {
-      path: '/submission/:id',
+      path: '/submissions/:id',
       name: 'submission',
       component: Submission
     },
@@ -65,7 +66,14 @@ export default new Router({
     {
       path: '/admin',
       name: 'admin',
-      component: Admin
+      component: Admin,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/submissions/:id',
+      name: 'admin-submission',
+      component: AdminSubmission,
+      meta: { requiresAuth: true }
     },
     {
       path: '/forbidden',
