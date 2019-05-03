@@ -43,6 +43,9 @@ func main() {
 		admin := api.Group("/admin")
 		{
 			admin.GET("/submissions", svc.AuthMiddleware, svc.GetSubmissions)
+			admin.DELETE("/submissions/:id", svc.AuthMiddleware, svc.DeleteSubmission)
+			admin.POST("/submissions/:id/publish", svc.AuthMiddleware, svc.PublishSubmission)
+			admin.POST("/submissions/:id", svc.AuthMiddleware, svc.UpdateSubmission)
 		}
 	}
 

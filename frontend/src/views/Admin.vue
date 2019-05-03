@@ -3,6 +3,7 @@
       <h2>Book Traces System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>Submissions</h3>
+         <div class="error">{{error}}</div>
          <table class="pure-table">
             <thead>
                <th>Title</th>
@@ -19,8 +20,9 @@
                <td>{{ sub.submittedAt.split("T")[0] }}</td>
                <td class="centered"><span v-html="publishIcon(sub)"></span></td>
                <td>
-                  <i title="delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-                  <i v-bind:class="{disabled: isPublished(sub)}" title="publish" class="action fas fa-thumbs-up" @click="publishClicked"></i>
+                  <i :data-id="sub.id"  title="delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
+                  <i :data-id="sub.id" v-bind:class="{disabled: isPublished(sub)}" 
+                     title="publish" class="action fas fa-thumbs-up" @click="publishClicked"></i>
                </td>
             </tr>
          </table>
@@ -37,6 +39,7 @@ export default {
       ...mapState({
          total: state => state.admin.totalSubmissions,
          submissions: state => state.admin.submissions,
+         error: state => state.error,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -60,14 +63,22 @@ export default {
       },
       deleteClicked(event) {
          event.stopPropagation()
-         confirm("Delete this submission?")
+         let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
+         if (resp) {
+            let id = event.currentTarget.dataset.id
+            this.$store.dispatch("admin/deleteSubmission", id)
+         }
       },
       publishClicked(event) {
          event.stopPropagation()
          if (event.currentTarget.classList.contains("disabled")) {
             return
          }
-         confirm("Publish this submission?")
+         let resp = confirm("Publish this submission?")
+         if (resp) {
+            let id = event.currentTarget.dataset.id
+            this.$store.dispatch("admin/publishSubmission", id)
+         }
       }
    },
    created() {

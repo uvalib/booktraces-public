@@ -43,6 +43,23 @@ const auth = {
         state.submissions.push(sub)
       })
     },
+    setPublished(state, subID) {
+      state.submissions.some( function(sub) {
+        if (sub.id == subID) {
+          sub.published = 1
+        }
+        return sub.id == subID
+      })
+    },
+    deleteSubmission(state, subID) {
+      state.submissions.some( function(sub,idx) {
+        if (sub.id == subID) {
+          state.submissions.splice(idx, 1)
+          return true
+        }
+        return false
+      })
+    },
     clearSubmissions(state) {
       state.totalSubmissions = 0
       state.submissions = []
@@ -65,6 +82,26 @@ const auth = {
         }
       })
     },
+    publishSubmission( ctx, id ) {
+      ctx.commit("setLoading", true, {root: true})
+      axios.post("/api/admin/submissions/"+id+"/publish", {userID:ctx.state.user.id }).then((/*response*/)  =>  {
+        ctx.commit("setPublished", id)
+        ctx.commit("setLoading", false, {root: true})
+      }).catch((error) => {
+        ctx.commit("setError",error.response.data, {root: true}) 
+        ctx.commit("setLoading", false, {root: true})
+      })
+    },
+    deleteSubmission( ctx, id ) {
+      ctx.commit("setLoading", true, {root: true})
+      axios.delete("/api/admin/submissions/"+id).then((/*response*/)  =>  {
+        ctx.commit("deleteSubmission", id)
+        ctx.commit("setLoading", false, {root: true})
+      }).catch((error) => {
+        ctx.commit("setError",error.response.data, {root: true}) 
+        ctx.commit("setLoading", false, {root: true})
+      })
+    }
   }
 }
 
