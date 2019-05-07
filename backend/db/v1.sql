@@ -100,11 +100,8 @@ CREATE TABLE submissions (
    call_number varchar(20) DEFAULT NULL,
    description text DEFAULT NULL,
    submitted_at datetime default CURRENT_TIMESTAMP,
-   approved boolean default false,
-   approved_at datetime default NULL,
-   approved_by_id int(11) default NULL,
-   UNIQUE KEY (upload_id),
-   FOREIGN KEY (approved_by_id) REFERENCES users(id) ON DELETE CASCADE
+   public boolean default false,
+   UNIQUE KEY (upload_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

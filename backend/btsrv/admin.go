@@ -61,7 +61,7 @@ func (svc *ServiceContext) PublishSubmission(c *gin.Context) {
 	}
 	log.Printf("User %s is publishing submission %s", posted.UserID, subID)
 	_, err = svc.DB.Update("submissions",
-		dbx.Params{"approved": 1, "approved_at": time.Now(), "approved_by_id": posted.UserID},
+		dbx.Params{"public": 1},
 		dbx.HashExp{"id": subID}).Execute()
 	if err != nil {
 		log.Printf("ERROR: Unable to publish submission %s: %s", subID, err.Error())
@@ -97,7 +97,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 		Author      string    `json:"author" db:"author"`
 		Tags        string    `json:"tags" db:"tags"`
 		SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
-		Published   int       `json:"published" db:"approved"`
+		Published   int       `json:"published" db:"public"`
 	}
 	type SubmissionsPage struct {
 		Total       int             `json:"total"`
@@ -108,10 +108,10 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	out := SubmissionsPage{Total: 0, Page: page, PageSize: pageSize}
 
 	log.Printf("Get total submissions")
-	tq := svc.DB.NewQuery("select count(*) as total from submissions where approved=1")
+	tq := svc.DB.NewQuery("select count(*) as total from submissions where public=1")
 	tq.One(&out)
 
-	qs := fmt.Sprintf(`select s.id as id, title, author, submitted_at, approved, group_concat(t.name) as tags
+	qs := fmt.Sprintf(`select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags
 		from submissions s, submission_tags st, tags t
 		where st.submission_id=s.id and t.id=st.tag_id group by s.id 
 		order by submitted_at desc limit %d,%d`, start, pageSize)

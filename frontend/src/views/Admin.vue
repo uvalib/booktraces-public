@@ -9,7 +9,7 @@
                <th>Title</th>
                <th>Author</th>
                <th>Tags</th>
-               <th>Submitted</th>
+               <th style="width:75px;">Submitted</th>
                <th class="checkbox">Public</th>
                <th>Actions</th>
             </thead>
@@ -17,7 +17,7 @@
                <td>{{ sub.title }}</td>
                <td>{{ sub.author }}</td>
                <td>{{ sub.tags }}</td>
-               <td>{{ sub.submittedAt.split("T")[0] }}</td>
+               <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
                <td class="centered"><span v-html="publishIcon(sub)"></span></td>
                <td>
                   <i :data-id="sub.id"  title="delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>

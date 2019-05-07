@@ -31,7 +31,7 @@ type Submission struct {
 	Email       string    `json:"email" binding:"required" db:"submitter_email"`
 	Tags        []string  `json:"tags" db:"-"`
 	SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
-	Approved    bool      `json:"published" db:"approved"`
+	Public      bool      `json:"published" db:"public"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to
@@ -40,12 +40,12 @@ func (sub *Submission) TableName() string {
 }
 
 // WriteFiles commits submission files to DB
-func (sub *Submission) WriteFiles(db *dbx.DB) {
+func (sub *Submission) WriteFiles(db *dbx.DB, dateDirs string) {
 	log.Printf("Attach files to submission")
 	for _, fn := range sub.Files {
 		_, err := db.Insert("submission_files", dbx.Params{
 			"submission_id": sub.ID,
-			"filename":      fn,
+			"filename":      fmt.Sprintf("%s/%s/%s", sub.UploadID, dateDirs, fn),
 		}).Execute()
 		if err != nil {
 			log.Printf("WARN: Unable to attach %s to submission %d", fn, sub.ID)
@@ -95,13 +95,10 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 		return
 	}
 
-	log.Printf("Submission DATE: %s", sub.SubmittedAt)
-	dateDirs := sub.SubmittedAt.Format("2006/01")
-	baseURL := fmt.Sprintf("/uploads/%s/%s", dateDirs, sub.UploadID)
 	for rows.Next() {
 		var f struct{ Filename string }
 		rows.ScanStruct(&f)
-		sub.Files = append(sub.Files, fmt.Sprintf("%s/%s", baseURL, f.Filename))
+		sub.Files = append(sub.Files, fmt.Sprintf("uploads/%s", f.Filename))
 	}
 }
 
@@ -192,7 +189,8 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 
 	// Submitted dir gets broken up by YYYY/MM before the submissionID
 	currTime := time.Now()
-	submittedDir := fmt.Sprintf("%s/%s/%s", svc.UploadDir, "submitted", currTime.Format("2006/01"))
+	dateDirs := currTime.Format("2006/01")
+	submittedDir := fmt.Sprintf("%s/%s/%s", svc.UploadDir, "submitted", dateDirs)
 	os.MkdirAll(submittedDir, 0777)
 	tgtDir := fmt.Sprintf("%s/%s", submittedDir, submission.UploadID)
 	log.Printf("Moving pending upload files from %s to %s", uploadDir, tgtDir)
@@ -220,7 +218,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		return
 	}
 
-	submission.WriteFiles(svc.DB)
+	submission.WriteFiles(svc.DB, dateDirs)
 	submission.WriteTags(svc.DB)
 
 	c.JSON(http.StatusOK, submission)
