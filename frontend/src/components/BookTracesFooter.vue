@@ -36,9 +36,16 @@ footer {
    font-size: 0.9em;
    font-weight: 500;
 }
-footer .external_links {
-   float:right;
-   text-align: right;
+@media only screen and (min-width: 768px) {
+   footer .external_links {
+      float:right;
+      text-align: right;
+   }
+}
+@media only screen and (max-width: 768px) {
+   footer .external_links {
+     display: none;
+   }
 }
 footer p.copy {
    margin-top:20px;

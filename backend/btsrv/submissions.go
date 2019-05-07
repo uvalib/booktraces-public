@@ -45,7 +45,7 @@ func (sub *Submission) WriteFiles(db *dbx.DB, dateDirs string) {
 	for _, fn := range sub.Files {
 		_, err := db.Insert("submission_files", dbx.Params{
 			"submission_id": sub.ID,
-			"filename":      fmt.Sprintf("%s/%s/%s", sub.UploadID, dateDirs, fn),
+			"filename":      fmt.Sprintf("%s/%s/%s", dateDirs, sub.UploadID, fn),
 		}).Execute()
 		if err != nil {
 			log.Printf("WARN: Unable to attach %s to submission %d", fn, sub.ID)
@@ -98,7 +98,7 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 	for rows.Next() {
 		var f struct{ Filename string }
 		rows.ScanStruct(&f)
-		sub.Files = append(sub.Files, fmt.Sprintf("uploads/%s", f.Filename))
+		sub.Files = append(sub.Files, fmt.Sprintf("/uploads/%s", f.Filename))
 	}
 }
 
@@ -145,11 +145,11 @@ func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 	out := RecentSubmissions{Total: 0, Page: page, PageSize: pageSize}
 
 	log.Printf("Get total submissions")
-	tq := svc.DB.NewQuery("select count(*) as total from submissions where approved=1")
+	tq := svc.DB.NewQuery("select count(*) as total from submissions where public=1")
 	tq.One(&out)
 
 	qs := fmt.Sprintf(`select s.id as sub_id,upload_id,submitted_at,filename from submissions s 
-			inner join submission_files f on f.submission_id = s.id where approved = 1
+			inner join submission_files f on f.submission_id = s.id where public = 1
 			group by s.id order by submitted_at desc limit %d,%d`, start, pageSize)
 	q := svc.DB.NewQuery(qs)
 	rows, err := q.Rows()
@@ -166,8 +166,7 @@ func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 			Submitted string `db:"submitted_at"`
 		}
 		rows.ScanStruct(&fi)
-		dateStr := strings.Join(strings.Split(fi.Submitted, "-")[:2], "/")
-		url := fmt.Sprintf("/uploads/%s/%s/%s", dateStr, fi.UploadID, getThumbFilename(fi.Filename))
+		url := fmt.Sprintf("/uploads/%s", getThumbFilename(fi.Filename))
 		out.Thumbs = append(out.Thumbs, Thumb{SubmissionID: fi.SubID, URL: url})
 	}
 

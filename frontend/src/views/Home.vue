@@ -37,8 +37,8 @@
       <div class="recents">
          <h3>Recently Submitted Books</h3>
          <p>Total Submission: {{total}}</p>
-         <div class="pure-g thumbs">
-            <div class="pure-u-1-5" v-for="thumb in submissions" :key="thumb.submissionID">
+         <div class="pure-g thumbs" style="text-align:center;">
+            <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in submissions" :key="thumb.submissionID">
                <router-link :to="thumbURL(thumb.submissionID)"><img class="pure-img thumb" :src="thumb.url"/></router-link>
             </div>
          </div>
@@ -79,8 +79,9 @@ h3 {
   margin-bottom: 20px;
   font-weight: 500;
 }
-.pure-g.thumbs > [class *=pure-u]{
-   margin:3px;
+.pure-g.thumbs a {
+   display: inline-block;
+   padding:5px;
 }
 .pure-img.thumb:hover {
    box-shadow: 0 0 5px green;

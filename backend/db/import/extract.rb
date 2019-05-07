@@ -65,7 +65,7 @@ csv.each do |row|
                end
             end
          else
-            out[:description] << line.gsub(/<br \/>/, "").gsub(/<p>/, "").gsub(/<\/p>/, "")
+            out[:description] << line.gsub(/<br \/>/, "").gsub(/<p>/, "").gsub(/<\/p>/, "").gsub(/<\/strong>/, "").gsub(/^\s*/, "")
          end
       else
          if line.include?(">Title:<")

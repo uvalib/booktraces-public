@@ -55,16 +55,17 @@ export default {
 <style>
 html,
 body {
-   height: 100%;
    margin: 0;
    padding: 0;
    background-image: url(./assets/main-bkg.jpg);
+}
+#app .main { 
+   padding-top:55px;
 }
 #app {
    font-family: "Avenir", Helvetica, Arial, sans-serif;
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
-   min-height: 100%;
    position: relative;
    max-width: 1260px;
    background-color: black;

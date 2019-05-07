@@ -66,4 +66,10 @@ li.pure-menu-item {
 .pure-menu-item a:hover {
    border-bottom: 2px solid white;
 }
+.bt-header {
+   position: fixed !important;
+   width: 100%;
+   z-index: 1000;
+   max-width: 1230px;
+}
 </style>
