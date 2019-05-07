@@ -12,6 +12,9 @@
       </div>
       <div class="section">
          <p class="subtitle pad">Archives</p>
+         <div class="archive" v-for="(archive,idx) in archives" :key="idx">
+            {{archive.displayDate}}
+         </div>
       </div>
    </div>
 </template>
@@ -40,7 +43,7 @@ div.recent a:hover {
 div.section {
    margin-top: 20px;
 }
-.recent {
+.recent, .archive {
    font-size: 0.9em; 
    margin: 0 0 5px 8px;
 }

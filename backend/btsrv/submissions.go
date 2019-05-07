@@ -105,8 +105,8 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 // GetArchivesList will get a sorted list of archives dates
 func (svc *ServiceContext) GetArchivesList(c *gin.Context) {
 	type Archives struct {
-		Display  string
-		Internal string
+		Display  string `json:"displayDate"`
+		Internal string `json:"internalDate"`
 	}
 	var data []Archives
 	q := svc.DB.NewQuery(`select distinct DATE_FORMAT(submitted_at,'%M %Y') display, DATE_FORMAT(submitted_at,'%Y-%m') as internal

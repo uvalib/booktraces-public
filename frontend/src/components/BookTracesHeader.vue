@@ -13,6 +13,7 @@
             <li class="pure-menu-item"><router-link to="/faq">FAQ</router-link></li>
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>
+         <span class="search"><i class="fas fa-search"></i></span>
       </div>
       <div class="uva-icon">
          <a target="_blank" href="https://library.virginia.edu"><img class="uva-library" src="../assets/uvalogo.png"/></a>
@@ -29,6 +30,13 @@ export default {
 #app .menubar .pure-menu-item .router-link-active {
    color: #55d737;
    border-bottom: 2px solid green;
+}
+.search {
+   font-size: 1.25em;
+}
+.search:hover {
+   color: #55d737;  
+   cursor: pointer;
 }
 div.bt-header {
    background-color: black;
