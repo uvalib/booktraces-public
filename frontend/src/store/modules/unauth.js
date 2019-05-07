@@ -6,33 +6,42 @@ const unauth = {
   // root state object. Holds all of the state for the system
   state: {
     uploadID: null,
-    error: null,
     uploadedFiles: [],
     totalSubmissions: 0,
-    submissions: []
+    thumbs: [],
+    archives: [],
+    recents: [],
+    currPage: 0
   },
 
   // state getter functions. All are functions that take state as the first param 
   // and the getters themselves as the second param. Getter params are passed 
   // as a function. Access as a property like: this.$store.getters.NAME
   getters: {
+    thumbsCount: state => {
+      return state.thumbs.length
+    }
   },
 
   // Synchronous updates to the state. Can be called directly in components like this:
   // this.$store.commit('mutation_name') or called from asynchronous actions
   mutations: {
+    nextPage(state) {
+      state.currPage++
+    },
     setUploadID (state, uploadID) {
       state.uploadID = uploadID
     },
-    addSubmissions(state, submissionInfo) {
+    addThumbs(state, submissionInfo) {
       state.totalSubmissions = submissionInfo.total
       submissionInfo.thumbs.forEach( function(thumb) {
-        state.submissions.push(thumb)
+        state.thumbs.push(thumb)
       })
     },
-    clearSubmissions(state) {
+    clearThumbs(state) {
+      state.currPage = 0
       state.totalSubmissions = 0
-      state.submissions = []
+      state.thumbs = []
     },
     clearUploadedFiles(state) {
       state.uploadedFiles = []
@@ -46,6 +55,12 @@ const unauth = {
         state.uploadedFiles.splice(index, 1)
       }
     },
+    setArchives (state, archives) {
+      state.archives = archives
+    },
+    setRecents (state, recents) {
+      state.recents = recents
+    },
   },
 
   // Actions are asynchronous calls that commit mutatations to the state.
@@ -53,12 +68,29 @@ const unauth = {
   // Vuex instance. It has access to all getters, setters and commit. They are 
   // called from components like: this.$store.dispatch('action_name', data_object)
   actions: {
-    getRecentThumbs( ctx ) {
-      ctx.commit('clearSubmissions' )
+    getArchives( ctx ) {
+      axios.get("/api/archives").then((response)  =>  {
+        ctx.commit('setArchives', response.data )
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get archives: "+error.response.data, {root: true}) 
+      })
+    },
+    getRecentSubmissions( ctx ) {
       axios.get("/api/recents").then((response)  =>  {
-        ctx.commit('addSubmissions', response.data )
+        ctx.commit('setRecents', response.data )
       }).catch((error) => {
         ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
+      })
+    },
+    getRecentThumbs( ctx ) {
+      ctx.commit('setLoading', true, {root: true}) 
+      ctx.commit('nextPage')
+      axios.get("/api/thumbs?page="+ctx.state.currPage).then((response)  =>  {
+        ctx.commit('addThumbs', response.data )
+        ctx.commit('setLoading', false, {root: true}) 
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get recent thumbs: "+error.response.data, {root: true}) 
+        ctx.commit('setLoading', false, {root: true}) 
       })
     },
     getUploadID( ctx ) {

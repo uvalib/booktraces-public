@@ -38,22 +38,29 @@
          <h3>Recently Submitted Books</h3>
          <p>Total Submission: {{total}}</p>
          <div class="pure-g thumbs" style="text-align:center;">
-            <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in submissions" :key="thumb.submissionID">
+            <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in thumbs" :key="thumb.submissionID">
                <router-link :to="thumbURL(thumb.submissionID)"><img class="pure-img thumb" :src="thumb.url"/></router-link>
             </div>
          </div>
+         <h4 v-if="loading===true">Loading...</h4>
+         <button v-if="thumbsCount < total" @click="moreClicked" class="more pure-button pure-button-primary">More</button>
       </div>
    </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
    name: "home",
    computed: {
       ...mapState({
          total: state => state.public.totalSubmissions,
-         submissions: state => state.public.submissions,
+         thumbs: state => state.public.thumbs,
+         loading: state => state.loading,
+      }),
+      ...mapGetters({
+         thumbsCount: 'public/thumbsCount',
       }),
    },
    methods: {
@@ -62,10 +69,16 @@ export default {
       },
       adminClicked() {
          window.location.href = "/authenticate?url=/admin"
+      },
+      moreClicked() {
+         this.$store.dispatch("public/getRecentThumbs")
       }
    },
    created() {
+      this.$store.commit('public/clearThumbs' )
       this.$store.dispatch("public/getRecentThumbs")
+      this.$store.dispatch("public/getArchives")
+      this.$store.dispatch("public/getRecentSubmissions")
    }
 };
 </script>
@@ -86,7 +99,7 @@ h3 {
 .pure-img.thumb:hover {
    box-shadow: 0 0 5px green;
 }
-.pure-button.submit {
+.pure-button.submit, .pure-button.more  {
    background: #24890d;
    font-weight: bold;
 }

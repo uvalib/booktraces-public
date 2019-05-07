@@ -102,6 +102,23 @@ func (sub *Submission) GetFileURLs(db *dbx.DB) {
 	}
 }
 
+// GetArchivesList will get a sorted list of archives dates
+func (svc *ServiceContext) GetArchivesList(c *gin.Context) {
+	type Archives struct {
+		Display  string
+		Internal string
+	}
+	var data []Archives
+	q := svc.DB.NewQuery(`select distinct DATE_FORMAT(submitted_at,'%M %Y') display, DATE_FORMAT(submitted_at,'%Y-%m') as internal
+		 from submissions order by submitted_at desc`)
+	err := q.All(&data)
+	if err != nil {
+		log.Printf("ERROR: Unable to get archives list: %s", err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
 // GetSubmissionDetail gets full details of a submission
 func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	tgtID := c.Param("id")
@@ -110,16 +127,35 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	var sub Submission
 	err := q.One(&sub)
 	if err != nil {
-		log.Printf("ERROR: %s", err.Error())
+		log.Printf("ERROR: Unable to get details for submission %s:%s", tgtID, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
 	}
-	log.Printf("GOT %+v", sub)
 	sub.GetTags(svc.DB)
 	sub.GetFileURLs(svc.DB)
 	c.JSON(http.StatusOK, sub)
 }
 
-// GetRecentThumbs gets one page of recent submissions and returns it along with some context
-func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
+// GetRecents gets some details on the 5 most recent submissions
+func (svc *ServiceContext) GetRecents(c *gin.Context) {
+	type Recent struct {
+		ID          int    `json:"id"`
+		Title       string `json:"title"`
+		SubmittedAt string `json:"submittedAt" db:"submitted"`
+	}
+	var data []Recent
+	q := svc.DB.NewQuery(`select id,title,DATE_FORMAT(submitted_at,'%M %d, %Y') submitted from submissions 
+		where public=1 order by submitted_at desc limit 5`)
+	err := q.All(&data)
+	if err != nil {
+		log.Printf("ERROR: Unable to get archives list: %s", err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+// GetThumbs gets one page of recent submissions and returns it along with some context
+func (svc *ServiceContext) GetThumbs(c *gin.Context) {
 	pageStr := c.Query("page")
 	const pageSize = 50
 	page := 1
@@ -135,14 +171,14 @@ func (svc *ServiceContext) GetRecentThumbs(c *gin.Context) {
 		SubmissionID int    `json:"submissionID"`
 		URL          string `json:"url"`
 	}
-	type RecentSubmissions struct {
+	type RecentThumbs struct {
 		Total    int     `json:"total"`
 		Page     int     `json:"page"`
 		PageSize int     `json:"pageSize"`
 		Thumbs   []Thumb `json:"thumbs"`
 	}
 
-	out := RecentSubmissions{Total: 0, Page: page, PageSize: pageSize}
+	out := RecentThumbs{Total: 0, Page: page, PageSize: pageSize}
 
 	log.Printf("Get total submissions")
 	tq := svc.DB.NewQuery("select count(*) as total from submissions where public=1")
