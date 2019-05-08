@@ -18,9 +18,6 @@
             <i v-bind:class="{selected: showSearch}" class="fas fa-search"></i>
          </span>
       </div>
-      <div class="uva-icon">
-         <a target="_blank" href="https://library.virginia.edu"><img class="uva-library" src="../assets/uvalogo.png"/></a>
-      </div>
    </div>
 </template>
 
@@ -78,16 +75,10 @@ div.bt-header span.site-name {
    font-size: 24px;
    position: relative;
 }
-img.uva-library {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  max-height: 40px;
-}
 .pure-menu-horizontal.menubar {
    position: absolute;
    bottom: 7px;
-   right: 110px;
+   right: 15px;
    white-space: inherit;
    width: auto;
    display: inline-block;
@@ -97,11 +88,5 @@ li.pure-menu-item {
 }
 .pure-menu-item a:hover {
    border-bottom: 2px solid white;
-}
-.bt-header {
-   position: fixed !important;
-   width: 100%;
-   z-index: 1000;
-   max-width: 1230px;
 }
 </style>

@@ -14,7 +14,9 @@ const unauth = {
     currPage: 0,
     showSearch: false,
     searchResults: [],
-    query: ""
+    query: "",
+    archiveDate: "",
+    tgtTag: "",
   },
 
   // state getter functions. All are functions that take state as the first param 
@@ -26,15 +28,38 @@ const unauth = {
     },
     searchHitCount: state => {
       return state.searchResults.length
+    },
+    searchType: state => {
+      if (state.tgtTag.length > 0) {
+        return "tag"
+      }
+      if (state.archiveDate.length > 0) {
+        return "archive"
+      }
+      return "query"
     }
   },
 
   // Synchronous updates to the state. Can be called directly in components like this:
   // this.$store.commit('mutation_name') or called from asynchronous actions
   mutations: {
+    setArchiveDate (state, date) {
+      state.archiveDate = date
+      state.searchResults =[]
+      state.query = ""
+      state.tgtTag = ""
+    },
+    setTargetTag (state, t) {
+      state.searchResults =[]
+      state.query = ""
+      state.archiveDate = ""
+      state.tgtTag = t
+    },
     updateSearchQuery(state, q) {
       state.query = q
       state.searchResults = []
+      state.archiveDate = ""
+      state.tgtTag = ""
     },
     nextThumbsPage(state) {
       state.currPage++
@@ -96,7 +121,33 @@ const unauth = {
         ctx.commit('setLoading', false, {root: true}) 
       })
     },
-    getArchives( ctx ) {
+    getArchive( ctx, date ) {
+      ctx.commit('setLoading', true, {root: true}) 
+      ctx.commit('showSearch', false) 
+      ctx.commit('setArchiveDate', date)
+      axios.get("/api/search?a="+date).then((response)  =>  {
+        ctx.commit('setSearchResults', response.data )
+        ctx.commit('setLoading', false, {root: true}) 
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get archives: "+error.response.data, {root: true}) 
+        ctx.commit('setSearchResults', [] )
+        ctx.commit('setLoading', false, {root: true}) 
+      })
+    },
+    getTaggedSubmissions( ctx, tag ) {
+      ctx.commit('setLoading', true, {root: true}) 
+      ctx.commit('showSearch', false) 
+      ctx.commit('setTargetTag', tag)
+      axios.get("/api/search?t="+tag).then((response)  =>  {
+        ctx.commit('setSearchResults', response.data )
+        ctx.commit('setLoading', false, {root: true}) 
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get archives: "+error.response.data, {root: true}) 
+        ctx.commit('setSearchResults', [] )
+        ctx.commit('setLoading', false, {root: true}) 
+      })
+    },
+    getArchiveDates( ctx ) {
       axios.get("/api/archives").then((response)  =>  {
         ctx.commit('setArchives', response.data )
       }).catch((error) => {

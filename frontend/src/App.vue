@@ -60,17 +60,16 @@ html,
 body {
    margin: 0;
    padding: 0;
-   background-image: url(./assets/main-bkg.jpg);
+   /* background-image: url(./assets/main-bkg.jpg); */
+   background-color: black;
 }
 #app .main { 
-   padding-top:55px;
+   padding-top:0;
 }
 #app {
    font-family: "Avenir", Helvetica, Arial, sans-serif;
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
-   position: relative;
-   max-width: 1260px;
    background-color: black;
    border-right: 1px solid black;
 }
@@ -103,8 +102,8 @@ div.bkg {
    font-weight: 400;
    color: #444;
    border: 1px solid black;
-   width: 80%;
-   margin: 25px auto;
+   /* width: 80%; */
+   margin: 25px;
 }
 #app .content h2 {
    font-size: 1.5em;

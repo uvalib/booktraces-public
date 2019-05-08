@@ -13,7 +13,9 @@
       <div class="section">
          <p class="subtitle pad">Archives</p>
          <div class="archive" v-for="(archive,idx) in archives" :key="idx">
-            {{archive.displayDate}}
+            <span @click="archiveClicked" :data-date="archive.internalDate" class="archive-date">
+               {{archive.displayDate}}
+            </span>
          </div>
       </div>
    </div>
@@ -32,6 +34,10 @@ export default {
       thumbURL(id) {
          return "/submissions/"+id
       },
+      archiveClicked(event) {
+         let tgtDate = event.currentTarget.dataset.date 
+         alert(tgtDate)
+      }
     }
 }
 </script>
@@ -72,5 +78,12 @@ div.sidebar {
 }
 .subtitle.pad {
    margin-bottom: 5px;
+}
+.archive-date {
+   cursor:pointer;
+}
+.archive-date:hover {
+   font-weight: bold;
+   text-decoration: underline;
 }
 </style>

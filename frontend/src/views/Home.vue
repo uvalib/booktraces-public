@@ -74,7 +74,7 @@ export default {
    created() {
       this.$store.commit('public/clearThumbs' )
       this.$store.dispatch("public/getRecentThumbs")
-      this.$store.dispatch("public/getArchives")
+      this.$store.dispatch("public/getArchiveDates")
       this.$store.dispatch("public/getRecentSubmissions")
    }
 };

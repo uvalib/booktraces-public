@@ -90,8 +90,8 @@ div.hits a.hit {
 }
 div.hit {
    border:1px solid #ccc;
-   padding: 5px;
-   margin: 5px;
+   padding: 10px 0;
+   margin: 5px 0;
    min-height:150px;
    max-height:150px;
    font-size: 0.9em;
