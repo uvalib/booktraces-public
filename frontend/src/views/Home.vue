@@ -2,9 +2,6 @@
    <div class="home content">
       <div class="bt-banner">
          <h1>Book Traces</h1>
-         <span class="admin">
-            <button @click="adminClicked" class="pure-button pure-button-primary">Admin Access</button>
-         </span>
       </div>
       <div class="info">
          <h3>Find unique copies of 19th- and early 20th-century books on library shelves</h3>
@@ -37,7 +34,7 @@
       <div class="recents">
          <h3>Recently Submitted Books</h3>
          <p>Total Submission: {{total}}</p>
-         <div class="pure-g thumbs" style="text-align:center;">
+         <div class="pure-g thumbs">
             <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in thumbs" :key="thumb.submissionID">
                <router-link :to="thumbURL(thumb.submissionID)"><img class="pure-img thumb" :src="thumb.url"/></router-link>
             </div>
@@ -105,12 +102,6 @@ h3 {
 }
 .bt-banner {
    position: relative;
-}
-span.admin {
-   font-size: 11px;
-   position: absolute;
-   right: 0;
-   top:0;
 }
 div.info {
    margin-bottom: 30px;

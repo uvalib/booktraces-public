@@ -11,7 +11,10 @@ const unauth = {
     thumbs: [],
     archives: [],
     recents: [],
-    currPage: 0
+    currPage: 0,
+    showSearch: false,
+    searchResults: [],
+    query: ""
   },
 
   // state getter functions. All are functions that take state as the first param 
@@ -20,14 +23,24 @@ const unauth = {
   getters: {
     thumbsCount: state => {
       return state.thumbs.length
+    },
+    searchHitCount: state => {
+      return state.searchResults.length
     }
   },
 
   // Synchronous updates to the state. Can be called directly in components like this:
   // this.$store.commit('mutation_name') or called from asynchronous actions
   mutations: {
-    nextPage(state) {
+    updateSearchQuery(state, q) {
+      state.query = q
+      state.searchResults = []
+    },
+    nextThumbsPage(state) {
       state.currPage++
+    },
+    showSearch(state, show) {
+      state.showSearch = show
     },
     setUploadID (state, uploadID) {
       state.uploadID = uploadID
@@ -61,6 +74,9 @@ const unauth = {
     setRecents (state, recents) {
       state.recents = recents
     },
+    setSearchResults(state, results) {
+      state.searchResults = results
+    },
   },
 
   // Actions are asynchronous calls that commit mutatations to the state.
@@ -68,6 +84,18 @@ const unauth = {
   // Vuex instance. It has access to all getters, setters and commit. They are 
   // called from components like: this.$store.dispatch('action_name', data_object)
   actions: {
+    search( ctx ) {
+      ctx.commit('setLoading', true, {root: true}) 
+      ctx.commit('showSearch', false) 
+      axios.get("/api/search?q="+ctx.state.query).then((response)  =>  {
+        ctx.commit('setSearchResults', response.data )
+        ctx.commit('setLoading', false, {root: true}) 
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get search results: "+error.response.data, {root: true}) 
+        ctx.commit('setSearchResults', [] )
+        ctx.commit('setLoading', false, {root: true}) 
+      })
+    },
     getArchives( ctx ) {
       axios.get("/api/archives").then((response)  =>  {
         ctx.commit('setArchives', response.data )
@@ -84,7 +112,7 @@ const unauth = {
     },
     getRecentThumbs( ctx ) {
       ctx.commit('setLoading', true, {root: true}) 
-      ctx.commit('nextPage')
+      ctx.commit('nextThumbsPage')
       axios.get("/api/thumbs?page="+ctx.state.currPage).then((response)  =>  {
         ctx.commit('addThumbs', response.data )
         ctx.commit('setLoading', false, {root: true}) 

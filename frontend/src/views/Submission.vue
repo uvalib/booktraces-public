@@ -8,7 +8,7 @@
       </template>
       <template v-else>
          <div class="submit-header">
-            <router-link to="/"><i class="fas fa-arrow-left"></i>&nbsp;Back to Home</router-link>
+            <router-link class="back" to="/"><i class="fas fa-arrow-left"></i>&nbsp;Back to Home</router-link>
             <h3><b>BOOK SUBMISSION:</b> {{details.title}}</h3>
             <div class="submit-time">
                <i class="far fa-clock"></i><span>{{submitDate}}</span>

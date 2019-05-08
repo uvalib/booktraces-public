@@ -6,6 +6,7 @@
             <BookTracesSidebar/>
          </div>
          <div class="pure-u-5-6 bkg">
+            <BookTracesSearch/>
             <router-view/>
          </div>
       </div>
@@ -15,6 +16,7 @@
 
 
 <script>
+import BookTracesSearch from "@/components/BookTracesSearch"
 import BookTracesSidebar from "@/components/BookTracesSidebar"
 import BookTracesHeader from "@/components/BookTracesHeader"
 import BookTracesFooter from "@/components/BookTracesFooter"
@@ -22,6 +24,7 @@ import { mapGetters } from "vuex"
 
 export default {
    components: {
+      BookTracesSearch,
       BookTracesHeader,
       BookTracesSidebar,
       BookTracesFooter
@@ -83,8 +86,14 @@ body {
 #app a:hover {
    text-decoration: underline;
 }
+#app a.back {
+   position: absolute;
+   top: 15px;
+   left: 15px;
+}
 div.bkg {
    background-image: url(./assets/books-bkg.jpg);
+   position: relative;
 }
 #app div.content {
    position: relative;

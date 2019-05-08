@@ -6,6 +6,7 @@ import Press from './views/Press.vue'
 import Events from './views/Events.vue'
 import FAQ from './views/FAQ.vue'
 import Submit from './views/Submit.vue'
+import SearchResults from './views/SearchResults.vue'
 import Submission from './views/Submission.vue'
 import Thanks from './views/Thanks.vue'
 import Admin from './views/Admin.vue'
@@ -59,6 +60,11 @@ export default new Router({
       component: Submission
     },
     {
+      path: '/results',
+      name: 'results',
+      component: SearchResults
+    },
+    {
       path: '/thanks',
       name: 'thanks',
       component: Thanks
@@ -80,5 +86,8 @@ export default new Router({
       name: 'forbidden',
       component: Forbidden
     }
-  ]
+  ],
+  scrollBehavior (/*to, from, savedPosition*/) {
+    return { x: 0, y: 0 }
+  }
 })

@@ -7,13 +7,16 @@
       </div>
       <div class="pure-menu pure-menu-horizontal menubar">
          <ul class="pure-menu-list">
+            <li @click="adminClicked" class="pure-menu-item admin">Admin</li>
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
             <li class="pure-menu-item"><router-link to="/events">Events</router-link></li>
             <li class="pure-menu-item"><router-link to="/faq">FAQ</router-link></li>
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>
-         <span class="search"><i class="fas fa-search"></i></span>
+         <span @click="showSearchClick" class="search">
+            <i v-bind:class="{selected: showSearch}" class="fas fa-search"></i>
+         </span>
       </div>
       <div class="uva-icon">
          <a target="_blank" href="https://library.virginia.edu"><img class="uva-library" src="../assets/uvalogo.png"/></a>
@@ -22,7 +25,21 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
+   computed: {
+      ...mapState({
+         showSearch: state => state.public.showSearch
+      }),
+   },
+   methods: {
+      adminClicked() {
+         window.location.href = "/authenticate?url=/admin"
+      },
+      showSearchClick() {
+         this.$store.commit('public/showSearch', !this.showSearch )
+      },
+   }
 }
 </script>
 
@@ -34,8 +51,15 @@ export default {
 .search {
    font-size: 1.25em;
 }
+.fas.selected {
+   color: #55d737;  
+}
 .search:hover {
    color: #55d737;  
+   cursor: pointer;
+}
+.admin:hover {
+   color:palevioletred;
    cursor: pointer;
 }
 div.bt-header {
