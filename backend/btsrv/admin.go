@@ -95,7 +95,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 		ID          int       `json:"id" db:"id"`
 		Title       string    `json:"title" db:"title"`
 		Author      string    `json:"author" db:"author"`
-		Tags        string    `json:"tags" db:"tags"`
+		Tags        *string   `json:"tags" db:"tags"`
 		SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
 		Published   int       `json:"published" db:"public"`
 	}
@@ -112,9 +112,10 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	tq.One(&out)
 
 	qs := fmt.Sprintf(`select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags
-		from submissions s, submission_tags st, tags t
-		where st.submission_id=s.id and t.id=st.tag_id group by s.id 
-		order by submitted_at desc limit %d,%d`, start, pageSize)
+		from submissions s
+		left outer  join submission_tags st on st.submission_id = s.id
+		left outer  join tags t on t.id = st.tag_id
+		group by s.id order by submitted_at desc limit %d,%d`, start, pageSize)
 	q := svc.DB.NewQuery(qs)
 	err := q.All(&out.Submissions)
 	if err != nil {

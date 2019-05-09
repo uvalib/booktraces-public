@@ -2,17 +2,16 @@ import axios from 'axios'
 import router from '../../router'
 
 const auth = {
-   namespaced: true,
-  // root state object. Holds all of the state for the system
+  namespaced: true,
   state: {
     totalSubmissions: 0,
+    pageSize: 0,
+    page: 1,
     submissions: [],
     user: null,
   },
 
-  // state getter functions. All are functions that take state as the first param 
-  // and the getters themselves as the second param. Getter params are passed 
-  // as a function. Access as a property like: this.$store.getters.NAME
+  // Properties that are computed based on state
   getters: {
     isAuthenticated(state) {
       if (state.user == null) {
@@ -28,20 +27,31 @@ const auth = {
     }
   },
 
-  // Synchronous updates to the state. Can be called directly in components like this:
-  // this.$store.commit('mutation_name') or called from asynchronous actions
+  // Synchronous updates to the state
   mutations: {
+    gotoFirstPage(state) {
+      state.page = 1
+    },
+    gotoLastPage(state) {
+      state.page = Math.floor( state.totalSubmissions / state.pageSize)+1
+    },
+    nextPage(state) {
+      state.page++
+    },
+    prevPage(state) {
+      state.page--
+    },
     setUser (state, user) {
       state.user = user
     },
     clearUser(state) {
       state.user = {firstName: "", lastName:"", title:"", affiliation:"", email:"", phone:""}
     },
-    addSubmissions(state, submissionInfo) {
+    setSubbmissionPage(state, submissionInfo) {
       state.totalSubmissions = submissionInfo.total
-      submissionInfo.submissions.forEach( function(sub) {
-        state.submissions.push(sub)
-      })
+      state.pageSize = submissionInfo.pageSize
+      state.page = submissionInfo.page
+      state.submissions = submissionInfo.submissions
     },
     setPublished(state, subID) {
       state.submissions.some( function(sub) {
@@ -60,21 +70,29 @@ const auth = {
         return false
       })
     },
-    clearSubmissions(state) {
-      state.totalSubmissions = 0
-      state.submissions = []
-    },
   },
 
-  // Actions are asynchronous calls that commit mutatations to the state.
-  // All actions get context as a param which is essentially the entirety of the 
-  // Vuex instance. It has access to all getters, setters and commit. They are 
-  // called from components like: this.$store.dispatch('action_name', data_object)
+  // Asynchronous updates to the state
   actions: {
+    firstPage( ctx ) {
+      ctx.commit('gotoFirstPage')
+      ctx.dispatch("getSubmissions")
+    },
+    prevPage( ctx ) {
+      ctx.commit('prevPage')
+      ctx.dispatch("getSubmissions")
+    },
+    nextPage( ctx ) {
+      ctx.commit('nextPage')
+      ctx.dispatch("getSubmissions")
+    },
+    lastPage( ctx ) {
+      ctx.commit('gotoLastPage')
+      ctx.dispatch("getSubmissions")
+    },
     getSubmissions( ctx ) {
-      ctx.commit('clearSubmissions' )
-      axios.get("/api/admin/submissions",{ withCredentials: true }).then((response)  =>  {
-        ctx.commit('addSubmissions', response.data )
+      axios.get("/api/admin/submissions?page="+ctx.state.page,{ withCredentials: true }).then((response)  =>  {
+        ctx.commit('setSubbmissionPage', response.data )
       }).catch((error) => {
         ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
         if (error.response.status == 403) {

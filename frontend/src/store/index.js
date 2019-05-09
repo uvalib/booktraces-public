@@ -25,6 +25,7 @@ export default new Vuex.Store({
     error: null,
     loading: true,
     details: null,
+    adminMode: false
   },
   getters: {
     hasError: state => {
@@ -32,6 +33,9 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    setAdminMode (state, mode) {
+      state.adminMode = mode
+    },
     setTags (state, tags) {
       state.tags = tags
     },

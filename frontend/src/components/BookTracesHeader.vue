@@ -5,9 +5,9 @@
             <span class="site-name">Book Traces</span>
          </router-link>
       </div>
-      <div class="pure-menu pure-menu-horizontal menubar">
+      <div v-if="!adminMode" class="pure-menu pure-menu-horizontal menubar">
          <ul class="pure-menu-list">
-            <li @click="adminClicked" class="pure-menu-item admin">Admin</li>
+            <li @click="adminClicked" v-bind:class="{active: adminMode}" class="pure-menu-item admin">Admin</li>
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
             <li class="pure-menu-item"><router-link to="/events">Events</router-link></li>
@@ -26,7 +26,8 @@ import { mapState } from 'vuex'
 export default {
    computed: {
       ...mapState({
-         showSearch: state => state.public.showSearch
+         showSearch: state => state.public.showSearch,
+         adminMode: state => state.adminMode
       }),
    },
    methods: {
@@ -58,6 +59,9 @@ export default {
 .admin:hover {
    color:palevioletred;
    cursor: pointer;
+}
+.admin.active {
+   color: #55d737;
 }
 div.bt-header {
    background-color: black;

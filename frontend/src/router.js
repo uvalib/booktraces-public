@@ -16,7 +16,7 @@ import store from './store'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -87,7 +87,32 @@ export default new Router({
       component: Forbidden
     }
   ],
-  scrollBehavior (/*to, from, savedPosition*/) {
+  scrollBehavior(/*to, from, savedPosition*/) {
     return { x: 0, y: 0 }
-  }
+  },
 })
+
+router.beforeEach((to, _from, next) => {
+  if (to.meta.requiresAuth == true) {
+    store.commit("setAdminMode", true)
+    let getters = store.getters
+    if (getters["admin/isAuthenticated"] == false) {
+      let authUser = Vue.cookies.get("bt_admin_user")
+      if (authUser) {
+        authUser.authenticated = true
+        store.commit("admin/setUser", authUser)
+        Vue.cookies.remove("bt_admin_user")
+      } else {
+        window.location.href = "/authenticate?url=" + to.fullPath
+      }
+    }
+  } else {
+    store.commit("setAdminMode", false)
+    store.commit("clearSubmissionDetail")
+    store.dispatch("public/getArchiveDates")
+    store.dispatch("public/getRecentSubmissions")
+  }
+  next()
+})
+
+export default router

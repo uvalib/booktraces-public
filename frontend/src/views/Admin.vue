@@ -1,11 +1,18 @@
 <template>
    <div class="admin">
-      <h2>Book Traces System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
+      <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>Submissions</h3>
          <div class="error">{{error}}</div>
+         <div class="list-controls">
+            <div class="search pure-button-group" role="group">
+               <input type="text" id="search"><button class="search pure-button pure-button-primary">Search</button>
+            </div>
+            <AdminPager/>
+         </div>
          <table class="pure-table">
             <thead>
+               <th>ID</th>
                <th>Title</th>
                <th>Author</th>
                <th>Tags</th>
@@ -14,6 +21,7 @@
                <th>Actions</th>
             </thead>
             <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
+               <td>{{ sub.id }}</td>
                <td>{{ sub.title }}</td>
                <td>{{ sub.author }}</td>
                <td>{{ sub.tags }}</td>
@@ -33,8 +41,12 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
+import AdminPager from "@/components/AdminPager"
 export default {
    name: "admin",
+   components: {
+      AdminPager
+   },
    computed: {
       ...mapState({
          total: state => state.admin.totalSubmissions,
@@ -89,6 +101,20 @@ export default {
 </script>
 
 <style scoped>
+div.list-controls {
+  position:relative;
+  margin: 25px 0 5px 0;
+}
+div.search {
+  font-size: 14px;
+}
+div.search button.search.pure-button {
+  padding: 3px 15px;
+}
+div.search input {
+  width:300px;
+  outline:none;
+}
 span.login {
    font-family: sans-serif;
    font-size: 0.5em;

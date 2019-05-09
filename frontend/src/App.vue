@@ -1,15 +1,20 @@
 <template>
    <div id="app">
       <BookTracesHeader/>
-      <div class="main pure-g">
-         <div class="pure-u-1-6">
-            <BookTracesSidebar/>
+      <template v-if="adminMode">
+         <router-view/>
+      </template>
+      <template v-else>
+         <div class="main pure-g">
+            <div class="pure-u-1-6">
+               <BookTracesSidebar/>
+            </div>
+            <div class="pure-u-5-6 bkg">
+               <BookTracesSearch/>
+               <router-view/>
+            </div>
          </div>
-         <div class="pure-u-5-6 bkg">
-            <BookTracesSearch/>
-            <router-view/>
-         </div>
-      </div>
+      </template>
       <BookTracesFooter/>
    </div>
 </template>
@@ -21,6 +26,7 @@ import BookTracesSidebar from "@/components/BookTracesSidebar"
 import BookTracesHeader from "@/components/BookTracesHeader"
 import BookTracesFooter from "@/components/BookTracesFooter"
 import { mapGetters } from "vuex"
+import { mapState } from 'vuex'
 
 export default {
    components: {
@@ -32,29 +38,14 @@ export default {
    computed: {
       ...mapGetters({
          isAuthenticated: "admin/isAuthenticated"
+      }),
+      ...mapState({
+         adminMode: state => state.adminMode,
       })
    },
    data: function() {
       return {}
    },
-   created: function() {
-      this.$store.commit("clearSubmissionDetail")
-      if (this.$route.meta.requiresAuth) {
-         if (this.isAuthenticated == false) {
-            let authUser = this.$cookies.get("bt_admin_user")
-            if (authUser) {
-               authUser.authenticated = true
-               this.$store.commit("admin/setUser", authUser)
-               this.$cookies.remove("bt_admin_user")
-            } else {
-               window.location.href = "/authenticate?url="+this.$router.currentRoute.path
-            }
-         }
-      } else {
-         this.$store.dispatch("public/getArchiveDates")
-         this.$store.dispatch("public/getRecentSubmissions")
-      }
-   }
 };
 </script>
 
