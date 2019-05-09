@@ -13,6 +13,9 @@
                   <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search">
                   <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
                </div>
+               <span class="tag-filter" v-if="tgtTag.length > 0">
+                  <b>Items Tagged:</b> {{tgtTag}} <i class="unfilter fas fa-times-circle"></i>
+               </span>
                <AdminPager/>
             </div>
             <table class="pure-table">
@@ -61,6 +64,7 @@ export default {
          submissions: state => state.admin.submissions,
          error: state => state.error,
          loading: state => state.loading,
+         tgtTag: state => state.admin.tgtTag,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -122,7 +126,7 @@ export default {
       tagClicked(event) {
          event.stopPropagation()
          let tag = event.currentTarget.textContent
-         alert(tag)
+         this.$store.commit('admin/setTagFilter', tag)
       }
    },
    created() {
@@ -133,6 +137,13 @@ export default {
 </script>
 
 <style scoped>
+.tag-filter {
+   font-size: 0.8em;
+   border: 1px solid #ccc;
+   padding: 2px 4px 0 10px;
+   border-radius: 20px;
+   cursor: pointer;
+}
 span.tag {
    display: inline-block;
    margin: 0 4px 4px 0;
@@ -144,6 +155,15 @@ span.tag {
    opacity: 0.6;
 }
 span.tag:hover {
+   cursor: pointer;
+   opacity: 1;
+}
+i.fas.unfilter {
+   color: firebrick;
+   margin-left: 5px;
+   opacity: 0.6;
+}
+i.fas.unfilter:hover {
    cursor: pointer;
    opacity: 1;
 }
@@ -165,6 +185,8 @@ div.list-controls {
 }
 div.search {
   font-size: 14px;
+  display: inline-block;
+  margin-right: 10px;
 }
 div.search button.search.pure-button {
   padding: 3px 15px;

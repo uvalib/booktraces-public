@@ -10,7 +10,8 @@ const auth = {
     page: 1,
     submissions: [],
     user: null,
-    queryStr: ""
+    queryStr: "",
+    tgtTag: ""
   },
 
   // Properties that are computed based on state
@@ -31,6 +32,9 @@ const auth = {
 
   // Synchronous updates to the state
   mutations: {
+    setTagFilter(state, val) {
+      state.tgtTag = val
+    },
     updateSearchQuery(state, val) {
       state.queryStr = val
     },
