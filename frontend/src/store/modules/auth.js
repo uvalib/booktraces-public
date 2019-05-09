@@ -101,13 +101,16 @@ const auth = {
       ctx.dispatch("getSubmissions")
     },
     getSubmissions( ctx ) {
+      ctx.commit("setLoading", true, {root: true})
       let url = "/api/admin/submissions?page="+ctx.state.page
       if (ctx.state.queryStr.length > 0 ) {
         url = url +"&q="+ctx.state.queryStr
       }
       axios.get(url,{ withCredentials: true }).then((response)  =>  {
         ctx.commit('setSubbmissionPage', response.data )
+        ctx.commit("setLoading", false, {root: true})
       }).catch((error) => {
+        ctx.commit("setLoading", false, {root: true})
         ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
         if (error.response.status == 403) {
           router.push("/forbidden")

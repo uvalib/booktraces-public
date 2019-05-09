@@ -3,38 +3,45 @@
       <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>Submissions</h3>
-         <div class="error">{{error}}</div>
-         <div class="list-controls">
-            <div class="search pure-button-group" role="group">
-               <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search">
-               <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
+         <template v-if="loading">
+            <h1>Loading...</h1>
+         </template>
+         <template v-else>
+            <div class="error">{{error}}</div>
+            <div class="list-controls">
+               <div class="search pure-button-group" role="group">
+                  <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search">
+                  <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
+               </div>
+               <AdminPager/>
             </div>
-            <AdminPager/>
-         </div>
-         <table class="pure-table">
-            <thead>
-               <th>ID</th>
-               <th>Title</th>
-               <th style="width:200px;">Author</th>
-               <th style="width:200px;">Tags</th>
-               <th style="width:75px;">Submitted</th>
-               <th class="checkbox">Public</th>
-               <th style="width:35px;"></th>
-            </thead>
-            <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
-               <td>{{ sub.id }}</td>
-               <td>{{ sub.title }}</td>
-               <td>{{ sub.author }}</td>
-               <td>{{ tagList(sub) }}</td>
-               <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
-               <td class="centered">
-                  <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
-               </td>
-               <td class="centered">
-                  <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-               </td>
-            </tr>
-         </table>
+            <table class="pure-table">
+               <thead>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th style="width:200px;">Author</th>
+                  <th style="width:200px;">Tags</th>
+                  <th style="width:75px;">Submitted</th>
+                  <th class="checkbox">Public</th>
+                  <th style="width:35px;"></th>
+               </thead>
+               <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
+                  <td>{{ sub.id }}</td>
+                  <td>{{ sub.title }}</td>
+                  <td>{{ sub.author }}</td>
+                  <td>
+                     <span class="tag" v-for="(tag,idx) in tagList(sub)" :key="idx" @click="tagClicked">{{tag}}</span>   
+                  </td>
+                  <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
+                  <td class="centered">
+                     <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
+                  </td>
+                  <td class="centered">
+                     <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
+                  </td>
+               </tr>
+            </table>
+         </template>
       </div>
    </div>
 </template>
@@ -53,6 +60,7 @@ export default {
          total: state => state.admin.totalSubmissions,
          submissions: state => state.admin.submissions,
          error: state => state.error,
+         loading: state => state.loading,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -61,9 +69,9 @@ export default {
    methods: {
       tagList( sub ) {
          if (sub.tags) {
-            return sub.tags.split(",").join(", ")
+            return sub.tags.split(",")
          } 
-         return ""
+         return []
       },
       updateSearchQuery(e) {
          this.$store.commit('admin/updateSearchQuery', e.target.value)
@@ -110,6 +118,11 @@ export default {
          }
          let id = event.currentTarget.dataset.id
          this.$store.dispatch("admin/updatePublicationStatus", {id:id, public: !published})
+      },
+      tagClicked(event) {
+         event.stopPropagation()
+         let tag = event.currentTarget.textContent
+         alert(tag)
       }
    },
    created() {
@@ -120,6 +133,20 @@ export default {
 </script>
 
 <style scoped>
+span.tag {
+   display: inline-block;
+   margin: 0 4px 4px 0;
+   font-size: 0.9em;
+   background: #0078e7;
+   color: white;
+   padding: 2px 10px 2px 10px;
+   font-weight: 500;
+   opacity: 0.6;
+}
+span.tag:hover {
+   cursor: pointer;
+   opacity: 1;
+}
 td span >>> .published {
    color:green;font-size:1.25em;
    opacity: 0.5;
