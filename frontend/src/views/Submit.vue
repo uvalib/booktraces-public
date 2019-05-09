@@ -144,7 +144,7 @@ export default {
       axios.post("/api/submit", form).then((/*response*/)  =>  {
         this.$store.commit("public/clearUploadedFiles")
         this.submitted = true
-        this.$router.push("thanks")
+        this.$router.push("/thanks")
       }).catch((error) => {
         this.$store.commit("setError",error.response.data) 
       })

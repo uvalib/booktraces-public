@@ -50,6 +50,9 @@ export default {
                window.location.href = "/authenticate?url="+this.$router.currentRoute.path
             }
          }
+      } else {
+         this.$store.dispatch("public/getArchiveDates")
+         this.$store.dispatch("public/getRecentSubmissions")
       }
    }
 };

@@ -51,6 +51,10 @@ func getArchives(db *dbx.DB, c *gin.Context, tgtYearMonth string) {
 
 func getTaggedSubmissions(db *dbx.DB, c *gin.Context, tgtTag string) {
 	log.Printf("Get submission tagged [%s]", tgtTag)
+	searchQ := fmt.Sprintf(`%s and t.name = {:t} group by s.id order by submitted_at`, getBaseQuery())
+	q := db.NewQuery(searchQ)
+	q.Bind(dbx.Params{"t": tgtTag})
+	getHits(c, q)
 }
 
 func doQuery(db *dbx.DB, c *gin.Context, query string) {

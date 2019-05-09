@@ -29,7 +29,7 @@
             </div>
          </div>
          <div class="tags">
-            <div class="tag" v-for="(tag,idx) in details.tags" :key="idx">
+            <div @click="tagClicked" class="tag" v-for="(tag,idx) in details.tags" :key="idx">
                {{tag}}
             </div>
          </div>
@@ -55,6 +55,11 @@ export default {
       }
    },
    methods: {
+      tagClicked(event) {
+         let t = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
+         this.$store.dispatch("public/getTaggedSubmissions", t)
+         this.$router.push("/results")
+      }
    },
    created: function() {
       this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
@@ -127,6 +132,10 @@ div.tag {
    border-radius: 10px;
    text-transform: uppercase;
    font-weight: 500;
+}
+div.tag:hover {
+   cursor:pointer;
+   background: #79d;
 }
 .error {
   margin: 5px 0 10px 0;

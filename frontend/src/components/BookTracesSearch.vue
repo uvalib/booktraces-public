@@ -21,7 +21,7 @@ export default {
       },
       doSearch() {
          this.$store.dispatch("public/search")
-         this.$router.push("results")
+         this.$router.push("/results")
       }
    }
 }

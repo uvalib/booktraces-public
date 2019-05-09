@@ -151,6 +151,9 @@ const unauth = {
       })
     },
     getArchiveDates( ctx ) {
+      if (ctx.state.archives.length > 0) {
+        return
+      }
       axios.get("/api/archives").then((response)  =>  {
         ctx.commit('setArchives', response.data )
       }).catch((error) => {
@@ -158,6 +161,9 @@ const unauth = {
       })
     },
     getRecentSubmissions( ctx ) {
+      if (ctx.state.recents.length > 0) {
+        return
+      }
       axios.get("/api/recents").then((response)  =>  {
         ctx.commit('setRecents', response.data )
       }).catch((error) => {
