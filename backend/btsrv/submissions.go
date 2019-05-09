@@ -110,7 +110,7 @@ func (svc *ServiceContext) GetArchivesList(c *gin.Context) {
 	}
 	var data []Archives
 	q := svc.DB.NewQuery(`select distinct DATE_FORMAT(submitted_at,'%M %Y') display, DATE_FORMAT(submitted_at,'%Y-%m') as internal
-		 from submissions order by submitted_at desc`)
+		 from submissions where public=1 order by submitted_at desc`)
 	err := q.All(&data)
 	if err != nil {
 		log.Printf("ERROR: Unable to get archives list: %s", err.Error())

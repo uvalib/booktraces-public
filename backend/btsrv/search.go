@@ -4,10 +4,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
+
+type searchHit struct {
+	ID          int     `json:"id" db:"id"`
+	Title       string  `json:"title" db:"title"`
+	Tags        *string `json:"tags" db:"tags"`
+	URL         string  `json:"url" db:"url"`
+	Description string  `json:"description" db:"description"`
+	SubmittedOn string  `json:"submittedOn" db:"submitted"`
+}
 
 // Search executes a full search over the submissions table
 func (svc *ServiceContext) Search(c *gin.Context) {
@@ -28,6 +38,15 @@ func (svc *ServiceContext) Search(c *gin.Context) {
 
 func getArchives(db *dbx.DB, c *gin.Context, tgtYearMonth string) {
 	log.Printf("Get archives from [%s]", tgtYearMonth)
+	year := strings.Split(tgtYearMonth, "-")[0]
+	month := strings.Split(tgtYearMonth, "-")[1]
+	searchQ := fmt.Sprintf(`%s 
+		and year(submitted_at) = {:y} and month(submitted_at) = {:m} 
+		group by s.id
+		order by submitted_at`, getBaseQuery())
+	q := db.NewQuery(searchQ)
+	q.Bind(dbx.Params{"y": year, "m": month})
+	getHits(c, q)
 }
 
 func getTaggedSubmissions(db *dbx.DB, c *gin.Context, tgtTag string) {
@@ -45,16 +64,11 @@ func doQuery(db *dbx.DB, c *gin.Context, query string) {
 		order by submitted_at`, getBaseQuery())
 	q := db.NewQuery(searchQ)
 	q.Bind(dbx.Params{"q": searchStr})
+	getHits(c, q)
+}
 
-	type Hit struct {
-		ID          int     `json:"id" db:"id"`
-		Title       string  `json:"title" db:"title"`
-		Tags        *string `json:"tags" db:"tags"`
-		URL         string  `json:"url" db:"url"`
-		Description string  `json:"description" db:"description"`
-		SubmittedOn string  `json:"submittedOn" db:"submitted"`
-	}
-	var hits []Hit
+func getHits(c *gin.Context, q *dbx.Query) {
+	var hits []searchHit
 	err := q.All(&hits)
 	if err != nil {
 		log.Printf("ERROR: Unable to get search results: %s", err.Error())
@@ -63,7 +77,6 @@ func doQuery(db *dbx.DB, c *gin.Context, query string) {
 	for idx := range hits {
 		hit := &hits[idx]
 		thumb := GetThumbFilename(hit.URL)
-		log.Print(thumb)
 		hit.URL = thumb
 	}
 	c.JSON(http.StatusOK, hits)

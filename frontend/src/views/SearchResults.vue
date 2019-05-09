@@ -3,7 +3,9 @@
       <div class="bt-banner">
          <router-link class="back" to="/"><i class="fas fa-arrow-left"></i>&nbsp;Back to Home</router-link>
          <h1>Book Traces</h1>
-         <h3>Search Results for: {{query}}</h3>
+         <h3 v-if="searchType=='query'">Search Results for: {{query}}</h3>
+         <h3 v-if="searchType=='archive'">Submissions from: {{archiveDate}}</h3>
+         <h3 v-if="searchType=='tag'">Submissions tagged: {{tgtTag}}</h3>
       </div>
       <h4 v-if="loading===true">Loading...</h4>
       <template v-else>
@@ -42,14 +44,17 @@ export default {
       ...mapState({
          hits: state => state.public.searchResults,
          loading: state => state.loading,
-         query: state => state.public.query
+         query: state => state.public.query,
+         archiveDate: state => state.public.archiveDate,
+         tgtTag: state => state.public.tgtTag
       }),
       ...mapGetters({
          searchHitCount: 'public/searchHitCount',
+         searchType: 'public/searchType',
       }),
    },
    created() {
-      if (this.query.length == 0) {
+      if (this.searchType == "none") {
          this.$router.replace("/")
       }
    },

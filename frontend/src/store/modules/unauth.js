@@ -36,7 +36,10 @@ const unauth = {
       if (state.archiveDate.length > 0) {
         return "archive"
       }
-      return "query"
+      if (state.query.length > 0) {
+        return "query"
+      }
+      return "none"
     }
   },
 

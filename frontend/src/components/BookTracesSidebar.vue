@@ -36,7 +36,8 @@ export default {
       },
       archiveClicked(event) {
          let tgtDate = event.currentTarget.dataset.date 
-         alert(tgtDate)
+         this.$store.dispatch("public/getArchive", tgtDate)
+         this.$router.push("results")
       }
     }
 }
