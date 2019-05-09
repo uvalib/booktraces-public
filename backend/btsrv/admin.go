@@ -50,21 +50,28 @@ func (svc *ServiceContext) DeleteSubmission(c *gin.Context) {
 // PublishSubmission publishes a previously unpublished submission
 func (svc *ServiceContext) PublishSubmission(c *gin.Context) {
 	subID := c.Param("id")
-	var posted struct {
-		UserID string `json:"userID" binding:"required"`
-	}
-	err := c.BindJSON(&posted)
-	if err != nil {
-		log.Printf("ERROR: UserID not found in publish")
-		c.String(http.StatusBadRequest, "UserID is required")
-		return
-	}
-	log.Printf("User %s is publishing submission %s", posted.UserID, subID)
-	_, err = svc.DB.Update("submissions",
+	log.Printf("Publishing submission %s", subID)
+	_, err := svc.DB.Update("submissions",
 		dbx.Params{"public": 1},
 		dbx.HashExp{"id": subID}).Execute()
 	if err != nil {
 		log.Printf("ERROR: Unable to publish submission %s: %s", subID, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	log.Printf("Submission %s has been published", subID)
+	c.String(http.StatusOK, "ok")
+}
+
+// UnpublishSubmission publishes a previously unpublished submission
+func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
+	subID := c.Param("id")
+	log.Printf("UNPublishing submission %s", subID)
+	_, err := svc.DB.Update("submissions",
+		dbx.Params{"public": 0},
+		dbx.HashExp{"id": subID}).Execute()
+	if err != nil {
+		log.Printf("ERROR: Unable to unpublish submission %s: %s", subID, err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -100,23 +107,51 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 		Published   int       `json:"published" db:"public"`
 	}
 	type SubmissionsPage struct {
-		Total       int             `json:"total"`
-		Page        int             `json:"page"`
-		PageSize    int             `json:"pageSize"`
-		Submissions []SubmissionRow `json:"submissions"`
+		Total         int             `json:"total"`
+		FilteredTotal int             `json:"filteredTotal"`
+		Page          int             `json:"page"`
+		PageSize      int             `json:"pageSize"`
+		Submissions   []SubmissionRow `json:"submissions"`
 	}
 	out := SubmissionsPage{Total: 0, Page: page, PageSize: pageSize}
 
 	log.Printf("Get total submissions")
-	tq := svc.DB.NewQuery("select count(*) as total from submissions where public=1")
-	tq.One(&out)
+	tq := svc.DB.NewQuery("select count(*) as total from submissions")
+	tq.Row(&out.Total)
 
-	qs := fmt.Sprintf(`select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags
-		from submissions s
+	// Generate the basic SQL strings used to get submission rows
+	selSQL := "select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags"
+	fromSQL := ` from submissions s
 		left outer  join submission_tags st on st.submission_id = s.id
-		left outer  join tags t on t.id = st.tag_id
-		group by s.id order by submitted_at desc limit %d,%d`, start, pageSize)
+		left outer  join tags t on t.id = st.tag_id `
+	qs := selSQL + fromSQL
+	countQS := ""
+	pageQS := fmt.Sprintf(" group by s.id order by submitted_at desc limit %d,%d", start, pageSize)
+
+	// Check for and apply and filter / query params
+	queryStr := c.Query("q")
+	if queryStr != "" {
+		log.Printf("Filter submission by query string [%s]", queryStr)
+		queryStr = "%" + queryStr + "%"
+		searchQS := `(t.name like {:q} or s.title like {:q} or s.author like {:q}
+			or s.publication_info like {:q} or s.library like {:q} or s.call_number like {:q}
+			or s.description like {:q} or s.description like {:q} or s.submitted_at like {:q})`
+		qs = qs + " where " + searchQS
+		countQS = "select count(distinct s.id) as filtered_cnt " + fromSQL + " where " + searchQS
+	}
+
+	if countQS != "" {
+		log.Printf("Get filtered total")
+		cq := svc.DB.NewQuery(countQS)
+		cq.Bind(dbx.Params{"q": queryStr})
+		cq.Row(&out.FilteredTotal)
+	}
+
+	log.Printf("Get one page of submission data")
+	qs = fmt.Sprintf("%s %s", qs, pageQS)
 	q := svc.DB.NewQuery(qs)
+	q.Bind(dbx.Params{"q": queryStr})
+
 	err := q.All(&out.Submissions)
 	if err != nil {
 		log.Printf("ERROR: Unable to get submisions: %s", err.Error())

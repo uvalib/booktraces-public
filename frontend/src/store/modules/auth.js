@@ -5,10 +5,12 @@ const auth = {
   namespaced: true,
   state: {
     totalSubmissions: 0,
+    filteredTotal: 0,
     pageSize: 0,
     page: 1,
     submissions: [],
     user: null,
+    queryStr: ""
   },
 
   // Properties that are computed based on state
@@ -29,6 +31,9 @@ const auth = {
 
   // Synchronous updates to the state
   mutations: {
+    updateSearchQuery(state, val) {
+      state.queryStr = val
+    },
     gotoFirstPage(state) {
       state.page = 1
     },
@@ -47,16 +52,21 @@ const auth = {
     clearUser(state) {
       state.user = {firstName: "", lastName:"", title:"", affiliation:"", email:"", phone:""}
     },
-    setSubbmissionPage(state, submissionInfo) {
-      state.totalSubmissions = submissionInfo.total
-      state.pageSize = submissionInfo.pageSize
-      state.page = submissionInfo.page
-      state.submissions = submissionInfo.submissions
+    setSubbmissionPage(state, resp) {
+      state.filteredTotal = resp.filteredTotal
+      state.totalSubmissions = resp.total
+      state.pageSize = resp.pageSize
+      state.page = resp.page
+      state.submissions = resp.submissions
     },
-    setPublished(state, subID) {
+    setPublished(state, payload) {
+      if (!payload) {
+        return
+      }
+      let subID = payload.id
       state.submissions.some( function(sub) {
         if (sub.id == subID) {
-          sub.published = 1
+          sub.published = payload.public
         }
         return sub.id == subID
       })
@@ -91,7 +101,11 @@ const auth = {
       ctx.dispatch("getSubmissions")
     },
     getSubmissions( ctx ) {
-      axios.get("/api/admin/submissions?page="+ctx.state.page,{ withCredentials: true }).then((response)  =>  {
+      let url = "/api/admin/submissions?page="+ctx.state.page
+      if (ctx.state.queryStr.length > 0 ) {
+        url = url +"&q="+ctx.state.queryStr
+      }
+      axios.get(url,{ withCredentials: true }).then((response)  =>  {
         ctx.commit('setSubbmissionPage', response.data )
       }).catch((error) => {
         ctx.commit('setError', "Unable to get recent submissions: "+error.response.data, {root: true}) 
@@ -100,11 +114,17 @@ const auth = {
         }
       })
     },
-    publishSubmission( ctx, id ) {
+    updatePublicationStatus( ctx, payload ) {
+      let id = payload.id 
+      let published = payload.public
+      let url = "/api/admin/submissions/"+id+"/publish"
+      if (!published) {
+        url = "/api/admin/submissions/"+id+"/unpublish"
+      }
       ctx.commit("setLoading", true, {root: true})
-      axios.post("/api/admin/submissions/"+id+"/publish", {userID:ctx.state.user.id }).then((/*response*/)  =>  {
-        ctx.commit("setPublished", id)
-        ctx.commit("setCurrSubPublished", null, {root: true})
+      axios.post(url).then((/*response*/)  =>  {
+        ctx.commit("setPublished", payload )
+        ctx.commit("setCurrSubPublished", published, {root: true})
         ctx.commit("setLoading", false, {root: true})
       }).catch((error) => {
         ctx.commit("setError",error.response.data, {root: true}) 

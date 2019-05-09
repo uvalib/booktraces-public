@@ -6,7 +6,8 @@
          <div class="error">{{error}}</div>
          <div class="list-controls">
             <div class="search pure-button-group" role="group">
-               <input type="text" id="search"><button class="search pure-button pure-button-primary">Search</button>
+               <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search">
+               <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
             </div>
             <AdminPager/>
          </div>
@@ -14,23 +15,23 @@
             <thead>
                <th>ID</th>
                <th>Title</th>
-               <th>Author</th>
-               <th>Tags</th>
+               <th style="width:200px;">Author</th>
+               <th style="width:200px;">Tags</th>
                <th style="width:75px;">Submitted</th>
                <th class="checkbox">Public</th>
-               <th>Actions</th>
+               <th style="width:35px;"></th>
             </thead>
             <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
                <td>{{ sub.id }}</td>
                <td>{{ sub.title }}</td>
                <td>{{ sub.author }}</td>
-               <td>{{ sub.tags }}</td>
+               <td>{{ tagList(sub) }}</td>
                <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
-               <td class="centered"><span v-html="publishIcon(sub)"></span></td>
-               <td>
-                  <i :data-id="sub.id"  title="delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-                  <i :data-id="sub.id" v-bind:class="{disabled: isPublished(sub)}" 
-                     title="publish" class="action fas fa-thumbs-up" @click="publishClicked"></i>
+               <td class="centered">
+                  <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
+               </td>
+               <td class="centered">
+                  <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
                </td>
             </tr>
          </table>
@@ -58,14 +59,26 @@ export default {
       })
    },
    methods: {
+      tagList( sub ) {
+         if (sub.tags) {
+            return sub.tags.split(",").join(", ")
+         } 
+         return ""
+      },
+      updateSearchQuery(e) {
+         this.$store.commit('admin/updateSearchQuery', e.target.value)
+      },
+      searchClicked() {
+         this.$store.dispatch("admin/getSubmissions")
+      },
       isPublished(sub) {
-         return sub.published === 1
+         return sub.published
       },
       publishIcon(sub) {
-         if (sub.published === 1) {
-            return '<i style="color:green" class="fas fa-check-circle"></i>'
+         if (sub.published) {
+            return '<i class="published fas fa-check-circle"></i>'
          } else {
-            return ""
+            return '<i class="unpublished fas fa-times-circle"></i>'
          }
       },
       submissionClicked(event) {
@@ -81,26 +94,44 @@ export default {
             this.$store.dispatch("admin/deleteSubmission", {id:id})
          }
       },
-      publishClicked(event) {
+      togglePublishClicked(event) {
          event.stopPropagation()
-         if (event.currentTarget.classList.contains("disabled")) {
-            return
+         let published = event.currentTarget.dataset.published
+         if (published ) {
+            let resp = confirm("Unpublish this submission?")
+            if (!resp) {
+               return
+            }
+         } else {
+            let resp = confirm("Publish this submission?")
+            if (!resp) {
+               return
+            }
          }
-         let resp = confirm("Publish this submission?")
-         if (resp) {
-            let id = event.currentTarget.dataset.id
-            this.$store.dispatch("admin/publishSubmission", id)
-         }
+         let id = event.currentTarget.dataset.id
+         this.$store.dispatch("admin/updatePublicationStatus", {id:id, public: !published})
       }
    },
    created() {
       this.$store.commit("clearSubmissionDetail")
       this.$store.dispatch("admin/getSubmissions")
-   }
+   },
 };
 </script>
 
 <style scoped>
+td span >>> .published {
+   color:green;font-size:1.25em;
+   opacity: 0.5;
+}
+td span >>> .published:hover,td span >>> .unpublished:hover {
+   opacity: 1;
+   cursor: pointer;
+}
+td span >>> .unpublished {
+   color:firebrick;font-size:1.25em;
+   opacity: 0.5;
+}
 div.list-controls {
   position:relative;
   margin: 25px 0 5px 0;

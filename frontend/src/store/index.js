@@ -54,9 +54,9 @@ export default new Vuex.Store({
     setSubmissionDetail (state, details) {
       state.details = details
     },
-    setCurrSubPublished (state) {
+    setCurrSubPublished (state, pub) {
       if (state.details) {
-        state.details.published = true
+        state.details.published = pub
       }
     },
   },

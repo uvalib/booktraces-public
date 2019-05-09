@@ -108,7 +108,6 @@ router.beforeEach((to, _from, next) => {
     }
   } else {
     store.commit("setAdminMode", false)
-    store.commit("clearSubmissionDetail")
     store.dispatch("public/getArchiveDates")
     store.dispatch("public/getRecentSubmissions")
   }

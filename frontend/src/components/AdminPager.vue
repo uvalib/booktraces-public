@@ -1,6 +1,7 @@
 <template>
    <div class="pager">
-      <span class="total">{{ total }}&nbsp;submissions</span>
+      <span v-if="filteredTotal==0" class="total">{{ total }}&nbsp;submissions</span>
+      <span v-else class="total">{{filteredTotal}} filtered from {{ total }}&nbsp;submissions</span>
       <i @click="firstPageClicked" v-bind:class="{disabled: isFirstPage}" class="button fas fa-angle-double-left"></i>
       <i @click="prevPageClicked" v-bind:class="{disabled: isFirstPage}" class="button fas fa-angle-left"></i>
       <span class="curr">{{ page }} of {{ lastPage }}</span>
@@ -15,10 +16,15 @@ export default {
    computed: {
       ...mapState({
          total: state => state.admin.totalSubmissions,
+         filteredTotal: state => state.admin.filteredTotal,
          page: state => state.admin.page,
          pageSize: state => state.admin.pageSize,
+         queryStr: state => state.admin.queryStr,
       }),
       lastPage() {
+         if ( this.queryStr.length > 0) {
+            return  Math.floor( this.filteredTotal / this.pageSize)+1
+         }
          return  Math.floor( this.total / this.pageSize)+1
       },
       isFirstPage() {
