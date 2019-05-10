@@ -82,7 +82,25 @@ func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 
 // UpdateSubmission updates the details (aside from publish status) of a submission
 func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "not yet")
+	var submission Submission
+	err := c.ShouldBindJSON(&submission)
+	if err != nil {
+		log.Printf("ERROR: Submission update failed - %s", err.Error())
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	log.Printf("Received updated submission: %+v", submission)
+	err = svc.DB.Model(&submission).Exclude("Files", "Tags", "UploadID", "SubmittedAt", "Public").Update()
+	if err != nil {
+		log.Printf("ERROR: Unable to update submission - %s", err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// TODO: clear out old tags, then
+	//submission.WriteTags(svc.DB)
+
+	c.String(http.StatusOK, "ok")
 }
 
 // GetSubmissions gets one page of admin submissions data

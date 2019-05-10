@@ -154,6 +154,17 @@ const auth = {
         ctx.commit("setError",error.response.data, {root: true}) 
         ctx.commit("setLoading", false, {root: true})
       })
+    },
+    updateSubmission(ctx, modified) {
+      return new Promise((resolve, reject) => {
+        axios.post("/api/admin/submissions/"+modified.id, modified).then((/*response*/)  =>  {
+          ctx.commit("setSubmissionDetail", modified, {root: true}) 
+          resolve()
+        }).catch((error) => {
+          ctx.commit("setError", error.response.data, {root: true}) 
+          reject(error)
+        })  
+      })
     }
   }
 }
