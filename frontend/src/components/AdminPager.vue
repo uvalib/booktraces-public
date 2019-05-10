@@ -22,7 +22,7 @@ export default {
          queryStr: state => state.admin.queryStr,
       }),
       lastPage() {
-         if ( this.queryStr.length > 0) {
+         if ( this.filteredTotal > 0) {
             return  Math.floor( this.filteredTotal / this.pageSize)+1
          }
          return  Math.floor( this.total / this.pageSize)+1

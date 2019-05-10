@@ -110,6 +110,9 @@ const auth = {
       if (ctx.state.queryStr.length > 0 ) {
         url = url +"&q="+ctx.state.queryStr
       }
+      if (ctx.state.tgtTag.length > 0 ) {
+        url = url +"&t="+ctx.state.tgtTag
+      }
       axios.get(url,{ withCredentials: true }).then((response)  =>  {
         ctx.commit('setSubbmissionPage', response.data )
         ctx.commit("setLoading", false, {root: true})

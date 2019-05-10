@@ -3,48 +3,43 @@
       <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>Submissions</h3>
-         <template v-if="loading">
-            <h1>Loading...</h1>
-         </template>
-         <template v-else>
-            <div class="error">{{error}}</div>
-            <div class="list-controls">
-               <div class="search pure-button-group" role="group">
-                  <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search">
-                  <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
-               </div>
-               <span class="tag-filter" v-if="tgtTag.length > 0">
-                  <b>Items Tagged:</b> {{tgtTag}} <i class="unfilter fas fa-times-circle"></i>
-               </span>
-               <AdminPager/>
+         <div class="error">{{error}}</div>
+         <div class="list-controls">
+            <div class="search pure-button-group" role="group">
+               <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search" :value="queryStr">
+               <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
             </div>
-            <table class="pure-table">
-               <thead>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th style="width:200px;">Author</th>
-                  <th style="width:200px;">Tags</th>
-                  <th style="width:75px;">Submitted</th>
-                  <th class="checkbox">Public</th>
-                  <th style="width:35px;"></th>
-               </thead>
-               <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
-                  <td>{{ sub.id }}</td>
-                  <td>{{ sub.title }}</td>
-                  <td>{{ sub.author }}</td>
-                  <td>
-                     <span class="tag" v-for="(tag,idx) in tagList(sub)" :key="idx" @click="tagClicked">{{tag}}</span>   
-                  </td>
-                  <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
-                  <td class="centered">
-                     <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
-                  </td>
-                  <td class="centered">
-                     <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-                  </td>
-               </tr>
-            </table>
-         </template>
+            <span class="tag-filter" v-if="tgtTag.length > 0">
+               <b>Items Tagged:</b> {{tgtTag}} <i @click="removeFilter" class="unfilter fas fa-times-circle"></i>
+            </span>
+            <AdminPager/>
+         </div>
+         <table class="pure-table">
+            <thead>
+               <th>ID</th>
+               <th>Title</th>
+               <th style="width:200px;">Author</th>
+               <th style="width:200px;">Tags</th>
+               <th style="width:75px;">Submitted</th>
+               <th class="checkbox">Public</th>
+               <th style="width:35px;"></th>
+            </thead>
+            <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
+               <td>{{ sub.id }}</td>
+               <td>{{ sub.title }}</td>
+               <td>{{ sub.author }}</td>
+               <td>
+                  <span class="tag" v-for="(tag,idx) in tagList(sub)" :key="idx" @click="tagClicked">{{tag}}</span>   
+               </td>
+               <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
+               <td class="centered">
+                  <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
+               </td>
+               <td class="centered">
+                  <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
+               </td>
+            </tr>
+         </table>
       </div>
    </div>
 </template>
@@ -65,6 +60,7 @@ export default {
          error: state => state.error,
          loading: state => state.loading,
          tgtTag: state => state.admin.tgtTag,
+         queryStr: state => state.admin.queryStr,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -125,8 +121,14 @@ export default {
       },
       tagClicked(event) {
          event.stopPropagation()
-         let tag = event.currentTarget.textContent
+         // textContent may return whitepace before/after tag. Strip it
+         let tag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
          this.$store.commit('admin/setTagFilter', tag)
+         this.$store.dispatch("admin/getSubmissions")
+      },
+      removeFilter() {
+         this.$store.commit('admin/setTagFilter', "")
+         this.$store.dispatch("admin/getSubmissions")
       }
    },
    created() {
@@ -187,6 +189,11 @@ div.search {
   font-size: 14px;
   display: inline-block;
   margin-right: 10px;
+}
+#search {
+   border: 1px solid #ccc;
+   padding: 2px 4px;
+   outline: none;
 }
 div.search button.search.pure-button {
   padding: 3px 15px;

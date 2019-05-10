@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -63,7 +64,7 @@ func (svc *ServiceContext) PublishSubmission(c *gin.Context) {
 	c.String(http.StatusOK, "ok")
 }
 
-// UnpublishSubmission publishes a previously unpublished submission
+// UnpublishSubmission makes a previoulsy public submission private
 func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 	subID := c.Param("id")
 	log.Printf("UNPublishing submission %s", subID)
@@ -122,35 +123,62 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	// Generate the basic SQL strings used to get submission rows
 	selSQL := "select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags"
 	fromSQL := ` from submissions s
-		left outer  join submission_tags st on st.submission_id = s.id
-		left outer  join tags t on t.id = st.tag_id `
+		left outer join submission_tags st on st.submission_id = s.id
+		left outer join tags t on t.id = st.tag_id`
 	qs := selSQL + fromSQL
-	countQS := ""
-	pageQS := fmt.Sprintf(" group by s.id order by submitted_at desc limit %d,%d", start, pageSize)
+	groupQS := " group by s.id"
+	pageQS := fmt.Sprintf(" order by submitted_at desc limit %d,%d", start, pageSize)
 
 	// Check for and apply and filter / query params
-	queryStr := c.Query("q")
-	if queryStr != "" {
-		log.Printf("Filter submission by query string [%s]", queryStr)
-		queryStr = "%" + queryStr + "%"
-		searchQS := `(t.name like {:q} or s.title like {:q} or s.author like {:q}
+	qParam := strings.TrimSpace(c.Query("q"))
+	qQuery := ""
+	if qParam != "" {
+		log.Printf("Filter submission by query string [%s]", qParam)
+		qParam = "%" + qParam + "%"
+		qQuery = ` where (t.name like {:q} or s.title like {:q} or s.author like {:q}
 			or s.publication_info like {:q} or s.library like {:q} or s.call_number like {:q}
 			or s.description like {:q} or s.description like {:q} or s.submitted_at like {:q})`
-		qs = qs + " where " + searchQS
-		countQS = "select count(distinct s.id) as filtered_cnt " + fromSQL + " where " + searchQS
+		qs += qQuery
 	}
 
-	if countQS != "" {
+	tParam := strings.TrimSpace(c.Query("t"))
+	if tParam != "" {
+		log.Printf("Filter submission by tag [%s]", tParam)
+		// To ensure all tags are included in result, can't use where clause.
+		// If used, only the single matching tag is returned. Instead add a having
+		// clause to the group by. The is leaves all tags in the results and matches
+		// on the CSV tag list instead.
+		groupQS += " having Find_In_Set({:t}, tags)"
+	}
+
+	if qParam != "" || tParam != "" {
+		countQS := "select count(distinct s.id) as filtered_cnt " + fromSQL
+		if qQuery != "" {
+			countQS += qQuery
+		}
+
+		// Since all of the tags are not required for a simple match count,
+		// the weird group by and having find_in_set is not needed.
+		// Just a simple where will work.
+		if tParam != "" {
+			if strings.Contains(countQS, " where ") {
+				countQS += " and "
+			} else {
+				countQS += " where "
+			}
+			countQS += " t.name={:t}"
+		}
+
 		log.Printf("Get filtered total")
 		cq := svc.DB.NewQuery(countQS)
-		cq.Bind(dbx.Params{"q": queryStr})
+		cq.Bind(dbx.Params{"q": qParam, "t": tParam})
 		cq.Row(&out.FilteredTotal)
 	}
 
 	log.Printf("Get one page of submission data")
-	qs = fmt.Sprintf("%s %s", qs, pageQS)
+	qs = qs + groupQS + pageQS
 	q := svc.DB.NewQuery(qs)
-	q.Bind(dbx.Params{"q": queryStr})
+	q.Bind(dbx.Params{"q": qParam, "t": tParam})
 
 	err := q.All(&out.Submissions)
 	if err != nil {

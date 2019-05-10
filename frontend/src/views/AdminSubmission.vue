@@ -42,7 +42,7 @@ export default {
    name: "admin-submission",
    computed: {
       ...mapState({
-         details: state => state.details,
+         details: state => state.submissionDetail,
          loading: state => state.loading,
          error: state => state.error,
       }),

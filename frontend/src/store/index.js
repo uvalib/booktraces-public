@@ -24,7 +24,7 @@ export default new Vuex.Store({
     events: [],
     error: null,
     loading: true,
-    details: null,
+    submissionDetail: null,
     adminMode: false
   },
   getters: {
@@ -49,14 +49,14 @@ export default new Vuex.Store({
       state.loading = isLoading
     },
     clearSubmissionDetail (state) {
-      state.details = null
+      state.submissionDetail = null
     },
     setSubmissionDetail (state, details) {
-      state.details = details
+      state.submissionDetail = details
     },
     setCurrSubPublished (state, pub) {
-      if (state.details) {
-        state.details.published = pub
+      if (state.submissionDetail) {
+        state.submissionDetail.published = pub
       }
     },
   },
