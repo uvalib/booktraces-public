@@ -156,8 +156,22 @@ const auth = {
       })
     },
     updateSubmission(ctx, modified) {
+      // update wants tags to be a list of IDs, but currently has names...
+      // clone the original list of tag names
+      var tagNames = modified.tags.slice(0)
+      for ( let i=0; i<modified.tags.length; i++) {
+        let tn = modified.tags[i]
+        ctx.rootState.tags.some( function(t) {
+          if (t.name == tn) {
+            modified.tags[i] = t.id
+          }
+          return t.name == tn
+        })
+      }
       return new Promise((resolve, reject) => {
         axios.post("/api/admin/submissions/"+modified.id, modified).then((/*response*/)  =>  {
+          // put the string tags back in place and update the model in root state
+          modified.tags = tagNames.slice(0)
           ctx.commit("setSubmissionDetail", modified, {root: true}) 
           resolve()
         }).catch((error) => {

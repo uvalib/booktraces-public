@@ -97,8 +97,11 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 		return
 	}
 
-	// TODO: clear out old tags, then
-	//submission.WriteTags(svc.DB)
+	log.Printf("Updating all tags")
+	dq := svc.DB.NewQuery("delete from submission_tags where submission_id={:id}")
+	dq.Bind(dbx.Params{"id": submission.ID})
+	dq.Execute()
+	submission.WriteTags(svc.DB)
 
 	c.String(http.StatusOK, "ok")
 }
