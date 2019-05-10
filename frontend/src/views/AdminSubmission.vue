@@ -35,46 +35,59 @@
          </div>
          <div v-else class="edit details">
             <table>
-            <tr>
-               <td class="label">Visible to public:</td>
-               <td class="value">{{published}}</td>
-            </tr>
-            <tr>
-               <td class="label">Title:</td>
-               <td class="value"><input id="title" type="text" v-model="editDetails.title"></td>
-            </tr>
-            <tr>
-               <td class="label">Author:</td>
-               <td class="value"><input id="author" type="text" v-model="editDetails.author"></td>
-            </tr>
-            <tr>
-               <td class="label">Publication details:</td>
-               <td class="value"><input id="publication" type="text" v-model="editDetails.publication"></td>
-            </tr>
-            <tr>
-               <td class="label">Library:</td>
-               <td class="value"><input id="library" type="text" v-model="editDetails.library"></td>
-            </tr>
-            <tr>
-               <td class="label">Call number:</td>
-               <td class="value"><input id="callNumber" type="text" v-model="editDetails.callNumber"></td>
-            </tr>
-            <tr>
-               <td class="label">Submitted by:</td>
-               <td class="value"><input id="submitter" type="text" v-model="editDetails.submitter"></td>
-            </tr>
-            <tr>
-               <td class="label">Submitted on:</td>
-               <td class="value">{{submitDate}}</td>
-            </tr>
-            <tr>
-               <td class="label">Tags:</td>
-               <td class="value">{{editDetails.tags.join(", ")}}</td>
-            </tr>
-            <tr>
-               <td class="label">Description:</td>
-               <td class="value"><textarea rows="5" id="description" v-model="editDetails.description"></textarea></td>
-            </tr>
+               <tr>
+                  <td class="label">Visible to public:</td>
+                  <td class="value">{{published}}</td>
+               </tr>
+               <tr>
+                  <td class="label">Title:</td>
+                  <td class="value"><input id="title" type="text" v-model="editDetails.title"></td>
+               </tr>
+               <tr>
+                  <td class="label">Author:</td>
+                  <td class="value"><input id="author" type="text" v-model="editDetails.author"></td>
+               </tr>
+               <tr>
+                  <td class="label">Publication details:</td>
+                  <td class="value"><input id="publication" type="text" v-model="editDetails.publication"></td>
+               </tr>
+               <tr>
+                  <td class="label">Library:</td>
+                  <td class="value"><input id="library" type="text" v-model="editDetails.library"></td>
+               </tr>
+               <tr>
+                  <td class="label">Call number:</td>
+                  <td class="value"><input id="callNumber" type="text" v-model="editDetails.callNumber"></td>
+               </tr>
+               <tr>
+                  <td class="label">Submitted by:</td>
+                  <td class="value"><input id="submitter" type="text" v-model="editDetails.submitter"></td>
+               </tr>
+               <tr>
+                  <td class="label">Submitted on:</td>
+                  <td class="value">{{submitDate}}</td>
+               </tr>
+               <tr>
+                  <td class="label">Tags:</td>
+                  <td class="value" style="position:relative;">
+                     <div v-if="showTagList" class="source-tags">
+                        <p class="head">Available Tags</p>
+                        <div class="list">
+                           <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">{{tag.name}}</p>
+                        </div>
+                        <span @click="closeTagList" class="add-tag pure-button pure-button-primary">Done</span>
+                     </div>
+                     <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">Add</span>
+                     <span class="tag" v-for="(tag,idx) in editDetails.tags" :key="idx" @click="removeTag">
+                        {{tag}} 
+                        <i class="fas fa-times-circle"></i>
+                     </span>   
+                  </td>
+               </tr>
+               <tr>
+                  <td class="label">Description:</td>
+                  <td class="value"><textarea rows="5" id="description" v-model="editDetails.description"></textarea></td>
+               </tr>
             </table>
          </div>
          <div class="thumbs">
@@ -95,6 +108,7 @@ export default {
       return {
          edit: false,
          editDetails: null,
+         showTagList: false,
       }
    },
    computed: {
@@ -102,6 +116,7 @@ export default {
          details: state => state.submissionDetail,
          loading: state => state.loading,
          error: state => state.error,
+         tags: state => state.tags,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -121,6 +136,31 @@ export default {
       }
    },
    methods: {
+      addTag(event) {
+         let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
+         if ( this.editDetails.tags.includes(addTag)) {
+            return
+         }
+         this.editDetails.tags.push(addTag)
+      },
+      closeTagList() {
+         this.showTagList = false
+      },
+      removeTag(event) {
+         let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
+         var delIdx = -1
+         this.editDetails.tags.some( function(tag,idx) {
+            if (tag == delTag) {
+               delIdx = idx
+               return true
+            }
+            return false
+         })
+         this.editDetails.tags.splice(delIdx, 1)
+      },
+      addTagClicked() {
+         this.showTagList = true
+      },
       deleteClicked() {
          let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
          if (resp) {
@@ -149,11 +189,52 @@ export default {
    },
    created() {
       this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
+      this.$store.dispatch('getTags')
    }
 };
 </script>
 
 <style scoped>
+.source-tags {
+   position: absolute;
+   left: -100px;
+   top: -100px;
+   width:175px;
+   font-size: 0.9em;
+   border: 1px solid #cccc;
+   display: inline-block;
+   box-shadow: 2px 2px 10px #aaa;
+   border-radius: 10px;
+   text-align: center;
+   background: #efefef;
+   padding-bottom: 10px;
+}
+.source-tags p.head {
+   padding: 4px 20px;
+   font-weight: bold;
+   margin: 0;
+   background: #888;
+   border-radius: 10px 10px 0 0;
+   text-align: center;
+   color: white;
+}
+.source-tags p {
+   margin: 2px 0;
+}
+.source-tags p:hover {
+   cursor: pointer;
+   text-decoration: underline;
+}
+.source-tags .list {
+   margin: 10px;
+   max-height: 150px;
+   overflow: scroll;
+   text-align: left;
+   border: 1px solid #ccc;
+   padding: 5px;
+   border-radius: 5px;
+   background: white;
+}
 span.login {
    font-family: sans-serif;
    font-size: 0.5em;
@@ -227,6 +308,9 @@ div.buttons {
   color: firebrick;
   font-style: italic;
 }
+table {
+   width:100%;
+}
 td {
    padding: 2px 0
 }
@@ -240,12 +324,30 @@ td.label {
 }
 td input {
    border:1px solid #ccc;
-   width:500px;
+   width: 90%;
    outline:none;  
 }
 td textarea {
    display: block;
    border: 1px solid #ccc;
-   width: 500px;
+   width:  90%;
+}
+span.add-tag.pure-button {
+   margin-right: 10px;
+   padding: 1px 20px 0px 20px;
+   font-size: 0.9em;
+}
+span.tag {
+   cursor: pointer;
+   padding: 1px 4px 0px 12px;
+   display:inline-block;
+   border: 1px solid #ccc;
+   border-radius: 20px;
+   margin-right: 5px;
+   font-size: 0.9em;
+}
+i.fas.fa-times-circle {
+   color: firebrick;
+   margin-left: 5px;
 }
 </style>
