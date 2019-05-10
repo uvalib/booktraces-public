@@ -29,7 +29,7 @@
                <tr><td class="label">Call number:</td><td class="value">{{details.callNumber}}</td></tr>
                <tr><td class="label">Submitted by:</td><td class="value">{{details.submitter}}</td></tr>
                <tr><td class="label">Submitted on:</td><td class="value">{{submitDate}}</td></tr>
-               <tr><td class="label">Tags:</td><td class="value">{{details.tags.join(", ")}}</td></tr>
+               <tr><td class="label">Tags:</td><td class="value">{{submissionTagCSV}}</td></tr>
                <tr><td class="label">Description:</td><td class="value">{{details.description}}</td></tr>
             </table>
          </div>
@@ -133,6 +133,12 @@ export default {
          } else {
             return "NO"
          }
+      },
+      submissionTagCSV() {
+         if (this.details.tags) {
+            return this.details.tags.join(", ")
+         }
+         return ""
       }
    },
    methods: {
