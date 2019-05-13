@@ -11,9 +11,11 @@
          </div>
       </div>
       <div class="section tweets">
-         <Timeline id="booktracesuva" sourceType="profile" 
-            :options="{ height: 350, theme: 'dark', chrome: 'nofooter' }"/>
+         <p class="subtitle pad">Recent Tweets</p>
       </div>
+      <Timeline id="booktracesuva" sourceType="profile" 
+         :options="{ height: 400, width: 190, theme: 'dark', chrome: 'noheader,transparent,nofooter', dnt: true }"/>
+
       <div class="section">
          <p class="subtitle pad">Archives</p>
          <div class="archive" v-for="(archive,idx) in archives" :key="idx">
