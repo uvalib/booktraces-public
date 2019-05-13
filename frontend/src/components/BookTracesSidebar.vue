@@ -11,7 +11,6 @@
          </div>
       </div>
       <div class="section">
-         <Tweet id="692527862369357824"></Tweet>
          <Timeline id="booktracesuva" sourceType="profile" :options="{ tweetLimit: '3', theme: 'dark', dnt: true, chrome: 'nofooter, noborders' }"/>
       </div>
       <div class="section">
