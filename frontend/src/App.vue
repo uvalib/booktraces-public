@@ -50,6 +50,11 @@ export default {
 </script>
 
 <style>
+.tweet-not-found {
+   color: #fe6d6d;
+   font-size: 0.9em;
+   padding: 2px 5px 2px 10px;
+}
 @media only screen and (max-width: 1050px) {
    #app .main div.pure-u-5-6.bkg {
       width: 100%;

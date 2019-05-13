@@ -58,9 +58,6 @@ export default {
 </script>
 
 <style scoped>
-.tweet-not-found {
-   color: firebrick;
-}
 @media only screen and (max-width: 1050px) {
    .sidebar {
       display:none;
