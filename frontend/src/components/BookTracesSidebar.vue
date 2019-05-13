@@ -10,11 +10,15 @@
             </router-link>
          </div>
       </div>
-      <div class="section tweets">
+      <div id="tfeed" class="section">
          <p class="subtitle pad">Recent Tweets</p>
+
+         <Timeline id="booktracesuva" sourceType="profile" 
+            :options="{ height: 400, theme: 'dark', chrome: 'noheader,transparent,nofooter', dnt: true }"
+            error-message="Timeline could not be loaded. If using an ad-blocker, try whitelisting this site." 
+            error-message-class="tweet-not-found" />
+
       </div>
-      <Timeline id="booktracesuva" sourceType="profile" 
-         :options="{ height: 400, width: 190, theme: 'dark', chrome: 'noheader,transparent,nofooter', dnt: true }"/>
 
       <div class="section">
          <p class="subtitle pad">Archives</p>
@@ -63,7 +67,7 @@ export default {
    }
 }
 @media only screen and (max-width: 1150px) {
-   .section.tweets {
+   #tfeed {
       display:none;
    }
 }
