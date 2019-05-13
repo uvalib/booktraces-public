@@ -11,7 +11,7 @@
          </div>
       </div>
       <div class="section">
-         <Timeline id="booktracesuva" sourceType="profile" :options="{ tweetLimit: '3', theme: 'dark', dnt: true, chrome: 'nofooter, noborders' }"/>
+         <Timeline id="booktracesuva" sourceType="profile" :options="{ tweetLimit: '3', theme: 'dark', chrome: 'nofooter, noborders' }"/>
       </div>
       <div class="section">
          <p class="subtitle pad">Archives</p>
