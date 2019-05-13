@@ -50,6 +50,11 @@ export default {
 </script>
 
 <style>
+@media only screen and (max-width: 1050px) {
+   #app .main div.pure-u-5-6.bkg {
+      width: 100%;
+   }
+}
 html,
 body {
    margin: 0;
