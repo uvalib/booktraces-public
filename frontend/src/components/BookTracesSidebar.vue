@@ -11,6 +11,10 @@
          </div>
       </div>
       <div class="section">
+         <Tweet id="692527862369357824"></Tweet>
+         <Timeline id="booktracesuva" sourceType="profile" :options="{ tweetLimit: '3', theme: 'dark', dnt: true, chrome: 'nofooter, noborders' }"/>
+      </div>
+      <div class="section">
          <p class="subtitle pad">Archives</p>
          <div class="archive" v-for="(archive,idx) in archives" :key="idx">
             <span @click="archiveClicked" :data-date="archive.internalDate" class="archive-date">
@@ -23,7 +27,11 @@
 
 <script>
 import { mapState } from 'vuex'
+import {Timeline} from 'vue-tweet-embed'
 export default {
+   components: {
+      Timeline,
+   },
    computed: {
       ...mapState({
          recents: state => state.public.recents,

@@ -82,7 +82,10 @@ CREATE TABLE users (
    token varchar(25) NOT NULL DEFAULT "",
    UNIQUE KEY (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-insert into users (last_name,first_name,email) values ("Foster", "Lou", "lf6f@virginia.edu");
+insert into users (last_name,first_name,email) values 
+   ('Foster', 'Lou', 'lf6f@virginia.edu'),
+	('Stauffer', 'Andrew', 'ams4k@virginia.edu'),
+	('Jensen', 'Kristin', 'khj5c@virginia.edu');
 
 --
 -- Create table for submissions
