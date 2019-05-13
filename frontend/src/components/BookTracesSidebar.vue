@@ -13,8 +13,9 @@
       <div class="section tweets">
          <p class="subtitle pad">Recent Tweets</p>
          <Timeline id="booktracesuva" sourceType="profile" 
-            errorMessage="Sorry! Unable to access this timeline. You may need to update your ad-blocker to white list this site."
-            :options="{ height: 300,theme: 'dark', chrome: 'noheader, nofooter, noborders' }"/>
+            error-message="Sorry! Unable to access this timeline. You may need to update your ad-blocker to white list this site."
+            error-message-class="tweet-not-found"
+            :options="{ tweetLimit: '3',theme: 'dark', chrome: 'noheader, nofooter, noborders' }"/>
       </div>
       <div class="section">
          <p class="subtitle pad">Archives</p>
@@ -54,6 +55,9 @@ export default {
 </script>
 
 <style scoped>
+.tweet-not-found {
+   color: firebrick;
+}
 @media only screen and (max-width: 1050px) {
    .sidebar {
       display:none;

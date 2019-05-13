@@ -18,6 +18,18 @@
             <i v-bind:class="{selected: showSearch}" class="fas fa-search"></i>
          </span>
       </div>
+      <div class="hmenu">
+         <div @click="toggleHMenu" class="hmenu-button"><i class="fas fa-bars"></i></div>
+         <ul id="hmenu" class="hmenu-items hidden">
+            <li @click="adminClicked" v-bind:class="{active: adminMode}" class="admin">Admin</li>
+            <li @click="toggleHMenu"><router-link to="/about">About</router-link></li>
+            <li @click="toggleHMenu"><router-link to="/press">Press</router-link></li>
+            <li @click="toggleHMenu"><router-link to="/events">Events</router-link></li>
+            <li @click="toggleHMenu"><router-link to="/faq">FAQ</router-link></li>
+            <li @click="toggleHMenu"><router-link to="/submit">Submit a Book</router-link></li>
+            <li><span @click="showSearchClick" class="search small">Search</span></li>
+         </ul>
+      </div>
    </div>
 </template>
 
@@ -33,15 +45,75 @@ export default {
    methods: {
       adminClicked() {
          window.location.href = "/authenticate?url=/admin"
+         this.hideHMenu()
       },
       showSearchClick() {
          this.$store.commit('public/showSearch', !this.showSearch )
+         this.hideHMenu()
       },
+      hideHMenu() {
+         let items = document.getElementById("hmenu")
+         if (!items.classList.contains("hidden")) {
+            items.classList.add("hidden")
+         }
+      },
+      toggleHMenu() {
+         let items = document.getElementById("hmenu")
+         if (items.classList.contains("hidden")) {
+            items.classList.remove("hidden")
+         } else {
+            items.classList.add("hidden")
+         }
+      }
    }
 }
 </script>
 
 <style scoped>
+span.search.small {
+   font-size: 1.05em;
+}
+.hmenu-button {
+   position: absolute;
+   right: 16px;
+   bottom: 12px;
+   font-size: 1.5em;
+   cursor: pointer;
+}
+.hmenu-items.hidden {
+   height: none;
+}
+.hmenu-items {
+   position: absolute;
+   right: 15px;
+   z-index: 1000;
+   background: black;
+   width: 100px;
+   font-size: 0.8em;
+   list-style: none;
+   padding: 10px 10px;
+   margin: 0;
+   text-align: right;
+}
+.hmenu li {
+   padding: 2px 0;
+}
+.hmenu li a:hover {
+   color: #55d737 !important; 
+}
+.hmenu li .router-link-active {
+   color: #55d737 !important; 
+}
+@media only screen and (max-width: 768px) {
+   div.pure-menu.pure-menu-horizontal.menubar {
+      display:none;
+   }
+}
+@media only screen and (min-width: 768px) {
+   div.hmenu {
+      display:none;
+   }
+}
 #app .menubar .pure-menu-item .router-link-active {
    color: #55d737;
    border-bottom: 2px solid green;

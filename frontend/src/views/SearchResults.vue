@@ -23,8 +23,13 @@
                            <p><b>Title:</b> {{ hit.title }}</p>
                            <p><b>Submitted:</b> {{ hit.submittedOn }}</p>
                            <p><b>Tags: </b>{{ formatTags(hit.tags) }}</p>
-                           <label>Description:</label>
-                           <p class="indent">{{ formatDescription(hit.description) }}</p>
+                           <div class="desc">
+                              <label>Description:</label>
+                              <p class="indent">{{ formatDescription(hit.description) }}</p>
+                           </div>
+                           <div class="small-img">
+                               <img class="thumb" :src="hit.url"/>
+                           </div>
                         </div>
                      </div>
                   </router-link>
@@ -79,6 +84,24 @@ export default {
 </script>
 
 <style scoped>
+@media only screen and (max-width: 768px) {
+   img.pure-u-1-3.thumb {
+      display: none;
+   }
+   div.pure-u-2-3.data {
+      width:100%;
+   }
+   div.desc {
+      display:none;
+   }
+   div.small-img {
+      display: block !important;
+   }
+}
+div.small-img {
+   text-align: center;
+   display:none;
+}
 h3, h1 {
    font-family: 'Special Elite', cursive;
    margin-bottom: 5px;
@@ -97,8 +120,8 @@ div.hit {
    border:1px solid #ccc;
    padding: 10px 0;
    margin: 5px 0;
-   min-height:150px;
-   max-height:150px;
+   /* min-height:150px; */
+   /* max-height:150px; */
    font-size: 0.9em;
 }
 img.thumb {
