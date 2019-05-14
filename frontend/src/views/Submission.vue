@@ -61,7 +61,10 @@ export default {
          this.$router.push("/results")
       },
       formatDescription( desc ) {
-         return desc.replace(/\n/g, "<br/><br/>")
+         console.log("fotmat desc...")
+         let out = desc.replace(/\r/g, '').replace(/\n/g, "<br/><br/>")
+         console.log("RESULT: "+out)
+         return out
       },
    },
    created: function() {
