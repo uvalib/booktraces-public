@@ -61,9 +61,7 @@ export default {
          this.$router.push("/results")
       },
       formatDescription( desc ) {
-         alert("FORMAT: "+desc)
          let out = desc.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
-         alert("RESULT: "+out)
          return out
       },
    },

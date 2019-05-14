@@ -145,7 +145,8 @@ export default {
    },
    methods: {
       formatDescription( desc ) {
-         return desc.replace(/\n/g, "<br/><br/>")
+         let out = desc.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
+         return out
       },
       addTag(event) {
          let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
