@@ -21,7 +21,7 @@
             <div><label>Library: </label><span class="value">{{details.library}}</span></div>
             <div><label>Call number: </label><span class="value">{{details.callNumber}}</span></div>
             <div><label>Submitted by: </label><span class="value">{{details.submitter}}</span></div>
-            <div><label>Description: </label><p class="value">{{details.description}}</p></div>
+            <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>
          </div>
          <div class="thumbs">
             <div class="thumb" v-for="(url,idx) in details.files" :key="idx">
@@ -59,7 +59,10 @@ export default {
          let t = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
          this.$store.dispatch("public/getTaggedSubmissions", t)
          this.$router.push("/results")
-      }
+      },
+      formatDescription( desc ) {
+         return desc.replace(/\n/g, "<br/><br/>")
+      },
    },
    created: function() {
       this.$store.dispatch("getSubmissionDetail", this.$route.params.id)

@@ -30,7 +30,9 @@
                <tr><td class="label">Submitted by:</td><td class="value">{{details.submitter}}</td></tr>
                <tr><td class="label">Submitted on:</td><td class="value">{{submitDate}}</td></tr>
                <tr><td class="label">Tags:</td><td class="value">{{submissionTagCSV}}</td></tr>
-               <tr><td class="label">Description:</td><td class="value">{{details.description}}</td></tr>
+               <tr><td class="label">Description:</td><td class="value">
+                  <span v-html="formatDescription(details.description)"></span>
+               </td></tr>
             </table>
          </div>
          <div v-else class="edit details">
@@ -142,6 +144,9 @@ export default {
       }
    },
    methods: {
+      formatDescription( desc ) {
+         return desc.replace(/\n/g, "<br/><br/>")
+      },
       addTag(event) {
          let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
          if ( this.editDetails.tags.includes(addTag)) {
