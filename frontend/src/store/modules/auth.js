@@ -142,9 +142,7 @@ const auth = {
       })
     },
     deleteEvent( ctx, id ) {
-      ctx.commit("setLoading", true, {root: true})
       axios.delete("/api/admin/events/"+id).then((/*response*/)  =>  {
-        ctx.commit("setLoading", false, {root: true})
         ctx.rootState.events.some( function(e,idx) {
           if (e.id == id) {
             ctx.rootState.events.splice(idx, 1)
@@ -154,8 +152,20 @@ const auth = {
         })
       }).catch((error) => {
         ctx.commit("setError",error.response.data, {root: true}) 
-        ctx.commit("setLoading", false, {root: true})
       })
+    },
+    updateEvent(ctx, modified) {
+      axios.put("/api/admin/events/"+modified.id, modified).then((/*response*/)  =>  {
+        ctx.rootState.events.some( function(e,idx) {
+          if (e.id == modified.id) {
+            ctx.rootState.events[idx] = modified
+            return true
+          }
+          return false
+        })
+      }).catch((error) => {
+        ctx.commit("setError", error.response.data, {root: true}) 
+      })  
     },
     deleteSubmission( ctx, payload ) {
       let id=payload.id
