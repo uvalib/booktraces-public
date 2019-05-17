@@ -9,9 +9,10 @@ import Submit from './views/Submit.vue'
 import SearchResults from './views/SearchResults.vue'
 import Submission from './views/Submission.vue'
 import Thanks from './views/Thanks.vue'
-import Admin from './views/Admin.vue'
-import AdminSubmission from './views/AdminSubmission.vue'
 import Forbidden from './views/Forbidden.vue'
+import AdminHome from './views/admin/AdminHome.vue'
+import AdminEvents from './views/admin/AdminEvents.vue'
+import AdminSubmission from './views/admin/AdminSubmission.vue'
 import store from './store'
 
 Vue.use(Router)
@@ -71,14 +72,24 @@ const router = new Router({
     },
     {
       path: '/admin',
+      redirect: '/admin/submissions',
+    },
+    {
+      path: '/admin/submissions',
       name: 'admin',
-      component: Admin,
+      component: AdminHome,
       meta: { requiresAuth: true }
     },
     {
       path: '/admin/submissions/:id',
       name: 'admin-submission',
       component: AdminSubmission,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/events',
+      name: 'admin-events',
+      component: AdminEvents,
       meta: { requiresAuth: true }
     },
     {
@@ -103,7 +114,8 @@ router.beforeEach((to, _from, next) => {
         store.commit("admin/setUser", authUser)
         Vue.cookies.remove("bt_admin_user")
       } else {
-        window.location.href = "/authenticate?url=" + to.fullPath
+        let authURL =  "/authenticate?url=" + to.fullPath
+        window.location.href = authURL
       }
     }
   } else {

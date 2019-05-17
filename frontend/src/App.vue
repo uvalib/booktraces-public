@@ -100,7 +100,7 @@ div.bkg {
 }
 #app div.content {
    position: relative;
-   padding: 30px 60px 30px 60px;
+   padding: 2vw 5vw;
    min-height: 600px;
    background: white;
    font-weight: 400;

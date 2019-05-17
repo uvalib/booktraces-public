@@ -18,7 +18,14 @@
             <i v-bind:class="{selected: showSearch}" class="fas fa-search"></i>
          </span>
       </div>
-      <div class="hmenu">
+      <div v-else class="pure-menu pure-menu-horizontal menubar">
+         <ul class="pure-menu-list">
+            <li class="public pure-menu-item"><router-link to="/">Public</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/submissions">Submissions</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/events">Events</router-link></li>
+         </ul>
+      </div>
+      <div  v-if="!adminMode" class="hmenu">
          <div @click="toggleHMenu" class="hmenu-button"><i class="fas fa-bars"></i></div>
          <ul id="hmenu" class="hmenu-items hidden">
             <li @click="adminClicked" v-bind:class="{active: adminMode}" class="admin">Admin</li>
@@ -44,7 +51,7 @@ export default {
    },
    methods: {
       adminClicked() {
-         window.location.href = "/authenticate?url=/admin"
+         window.location.href = "/authenticate?url=/admin/submissions"
          this.hideHMenu()
       },
       showSearchClick() {
@@ -89,14 +96,13 @@ span.search.small {
    z-index: 1000;
    background: black;
    width: 100px;
-   font-size: 0.8em;
    list-style: none;
    padding: 10px 10px;
    margin: 0;
    text-align: right;
 }
 .hmenu li {
-   padding: 2px 0;
+   padding: 4px 0;
 }
 .hmenu li a:hover {
    color: #55d737 !important; 
@@ -117,6 +123,14 @@ span.search.small {
 #app .menubar .pure-menu-item .router-link-active {
    color: #55d737;
    border-bottom: 2px solid green;
+}
+#app .menubar .pure-menu-item.public .router-link-active {
+   color:white;
+   border-bottom: 0;
+}
+#app .menubar .pure-menu-item.public .router-link-active:hover {
+   color:cornflowerblue !important;
+   border-bottom: 0;
 }
 .search {
    font-size: 1.25em;

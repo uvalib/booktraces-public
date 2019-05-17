@@ -141,6 +141,22 @@ const auth = {
         ctx.commit("setLoading", false, {root: true})
       })
     },
+    deleteEvent( ctx, id ) {
+      ctx.commit("setLoading", true, {root: true})
+      axios.delete("/api/admin/events/"+id).then((/*response*/)  =>  {
+        ctx.commit("setLoading", false, {root: true})
+        ctx.rootState.events.some( function(e,idx) {
+          if (e.id == id) {
+            ctx.rootState.events.splice(idx, 1)
+            return true
+          }
+          return false
+        })
+      }).catch((error) => {
+        ctx.commit("setError",error.response.data, {root: true}) 
+        ctx.commit("setLoading", false, {root: true})
+      })
+    },
     deleteSubmission( ctx, payload ) {
       let id=payload.id
       ctx.commit("setLoading", true, {root: true})
@@ -182,7 +198,7 @@ const auth = {
           reject(error)
         })  
       })
-    }
+    },
   }
 }
 

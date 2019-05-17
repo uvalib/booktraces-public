@@ -45,6 +45,9 @@ func main() {
 		api.DELETE("/upload/:file", svc.DeleteUploadedFile)
 		admin := api.Group("/admin")
 		{
+			admin.POST("/events", svc.AuthMiddleware, svc.AddEvent)
+			admin.DELETE("/events/:id", svc.AuthMiddleware, svc.DeleteEvent)
+			admin.PUT("/events/:id", svc.AuthMiddleware, svc.UpdateEvent)
 			admin.GET("/submissions", svc.AuthMiddleware, svc.GetSubmissions)
 			admin.DELETE("/submissions/:id", svc.AuthMiddleware, svc.DeleteSubmission)
 			admin.POST("/submissions/:id/publish", svc.AuthMiddleware, svc.PublishSubmission)

@@ -92,7 +92,7 @@ export default {
       submissionClicked(event) {
          let tgt = event.currentTarget
          let subID = tgt.dataset.id
-         this.$router.push("admin/submissions/" + subID)
+         this.$router.push("/admin/submissions/" + subID)
       },
       deleteClicked(event) {
          event.stopPropagation()
