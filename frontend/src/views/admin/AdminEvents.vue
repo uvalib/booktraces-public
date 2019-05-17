@@ -2,7 +2,7 @@
    <div class="admin">
       <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
-         <h3>Events</h3>
+         <h3>Events <span @click="addEventClick" class="add pure-button pure-button-primary">Add Event</span></h3>
          <div class="error">{{error}}</div>
          <table class="events pure-table">
             <thead>
@@ -42,6 +42,7 @@ export default {
       return {
          edit: false,
          editDetails: null,
+         addingNew: false,
       }
    },
    computed: {
@@ -58,12 +59,25 @@ export default {
       cancelClicked() {
          this.edit = false
          this.editDetails = null
+         if (this.addingNew) {
+            this.addingNew = false
+            this.$store.dispatch("admin/cancelAddEvent")
+         }
       },
       saveClicked() {
-         this.$store.dispatch('admin/updateEvent',this.editDetails).then((/*response*/) => {
-            this.edit=false
-            this.editDetails = null
-        })
+         if (this.addingNew) {
+            this.$store.dispatch('admin/addEvent',this.editDetails).then((/*response*/) => {
+               this.edit=false
+               this.editDetails = null
+               this.addingNew = false
+            })
+         } else {
+            this.$store.dispatch('admin/updateEvent',this.editDetails).then((/*response*/) => {
+               this.edit=false
+               this.editDetails = null
+               this.addingNew = false
+            })
+         }
       },
       editingEvent(id) {
          if (this.edit == false) return false 
@@ -92,7 +106,13 @@ export default {
            this.editDetails = Object.assign({}, this.events[evtIdx])
            this.edit = true
         }
-      }
+      },
+      addEventClick() {
+         this.$store.dispatch("admin/addEventPlaceholder")
+         this.editDetails = Object.assign({}, this.events[0])
+         this.edit = true
+         this.addingNew = true
+      },
    },
    created() {
       this.$store.dispatch('getEvents')
@@ -152,5 +172,15 @@ table td input, table td textarea {
 }
 td.centered {
    text-align: center;
+}
+h3 {
+   position: relative;
+}
+h3 span.pure-button.add {
+   font-size: 0.6em;
+   font-weight: 100;
+   position: absolute;
+   right: 0;
+   bottom:0;
 }
 </style>

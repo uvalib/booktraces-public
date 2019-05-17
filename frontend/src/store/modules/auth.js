@@ -141,6 +141,12 @@ const auth = {
         ctx.commit("setLoading", false, {root: true})
       })
     },
+    addEventPlaceholder(ctx) {
+      ctx.rootState.events.unshift({date:"",description:""})
+    },
+    cancelAddEvent(ctx) {
+      ctx.rootState.events.shift()
+    },
     deleteEvent( ctx, id ) {
       axios.delete("/api/admin/events/"+id).then((/*response*/)  =>  {
         ctx.rootState.events.some( function(e,idx) {
@@ -164,6 +170,17 @@ const auth = {
             }
             return false
           })
+          resolve()
+        }).catch((error) => {
+          ctx.commit("setError", error.response.data, {root: true}) 
+          reject(error)
+        })  
+      })
+    },
+    addEvent(ctx, newEvent) {
+      return new Promise((resolve, reject) => {
+        axios.post("/api/admin/events/", newEvent).then((/*response*/)  =>  {
+          ctx.rootState.events[0] =  Object.assign({}, newEvent)
           resolve()
         }).catch((error) => {
           ctx.commit("setError", error.response.data, {root: true}) 
