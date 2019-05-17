@@ -3,6 +3,7 @@
       <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>Events</h3>
+         <div class="error">{{error}}</div>
          <table class="events pure-table">
             <thead>
                <th>Date</th>
@@ -10,12 +11,22 @@
                <th style="width:50px;"></th>
             </thead>
             <tr v-for="event in events" :key="event.id">
-               <td class="date">{{event.date}}</td>
-               <td><span v-html="event.description"></span></td>
-               <td class="centered">
-                  <i :data-id="event.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-                  <i :data-id="event.id" title="Delete" class="action fa fa-edit" @click="editClicked"></i>
-               </td>
+               <template v-if="editingEvent(event.id)">
+                  <td class="date"><input type="text" id="date" v-model="editDetails.date"></td>
+                  <td><textarea id="description" v-model="editDetails.description"></textarea></td>
+                  <td class="centered">
+                     <i class="action cancel fas fa-times-circle" @click="cancelClicked"></i>
+                     <i class="action save fas fa-check-circle" @click="saveClicked"></i>
+                  </td>
+               </template>
+               <template v-else>
+                  <td class="date">{{event.date}}</td>
+                  <td><span v-html="event.description"></span></td>
+                  <td class="centered">
+                     <i :data-id="event.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
+                     <i :data-id="event.id" title="Edit" class="action fa fa-edit" @click="editClicked"></i>
+                  </td>
+               </template>
             </tr>
          </table>
       </div>
@@ -27,6 +38,12 @@ import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
 export default {
    name: "admin-events",
+   data: function () {
+      return {
+         edit: false,
+         editDetails: null,
+      }
+   },
    computed: {
       ...mapState({
          error: state => state.error,
@@ -38,6 +55,20 @@ export default {
       })
    },
    methods: {
+      cancelClicked() {
+         this.edit = false
+         this.editDetails = null
+      },
+      saveClicked() {
+         this.$store.dispatch('admin/updateEvent',this.editDetails).then((/*response*/) => {
+            this.edit=false
+            this.editDetails = null
+        })
+      },
+      editingEvent(id) {
+         if (this.edit == false) return false 
+         return this.editDetails.id == id
+      },
       deleteClicked(event) {
          let tgt = event.currentTarget
          let eventID = tgt.dataset.id
@@ -48,8 +79,19 @@ export default {
       },
       editClicked(event) {
          let tgt = event.currentTarget
-         let eventID = tgt.dataset.id
-         alert("edit "+eventID)
+         var eventID = tgt.dataset.id
+         var evtIdx = -1
+         this.events.some( function(e,idx) {
+          if (e.id == eventID) {
+            evtIdx = idx
+            return true
+          }
+          return false
+        })
+        if (evtIdx > -1) {
+           this.editDetails = Object.assign({}, this.events[evtIdx])
+           this.edit = true
+        }
       }
    },
    created() {
@@ -59,6 +101,12 @@ export default {
 </script>
 
 <style scoped>
+i.action.cancel, .error {
+   color: firebrick;
+}
+i.action.save {
+   color: green;
+}
 i.action {
    color: #666;
    opacity: 0.6;
@@ -95,6 +143,12 @@ table {
    width: 100%;
    font-size: 0.85em;
    color: #444;
+}
+table tr:hover {
+   background: #f0f0f0;
+}
+table td input, table td textarea {
+   width: 100%;
 }
 td.centered {
    text-align: center;

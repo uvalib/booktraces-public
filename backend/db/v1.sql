@@ -35,6 +35,17 @@ insert into tags(name)
    ("Poem"), ("Quotation"), ("Insert: paper"), ("Insert: botanical"), ("Insert: object");
 
 --
+-- Create table for news
+--
+DROP TABLE IF EXISTS news;
+CREATE TABLE news (
+   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   title varchar(255)  NOT NULL,
+   content text NOT NULL,
+   created_at datetime NOT NULL default CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Create table for events
 --
 DROP TABLE IF EXISTS events;

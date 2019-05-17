@@ -155,17 +155,21 @@ const auth = {
       })
     },
     updateEvent(ctx, modified) {
-      axios.put("/api/admin/events/"+modified.id, modified).then((/*response*/)  =>  {
-        ctx.rootState.events.some( function(e,idx) {
-          if (e.id == modified.id) {
-            ctx.rootState.events[idx] = modified
-            return true
-          }
-          return false
-        })
-      }).catch((error) => {
-        ctx.commit("setError", error.response.data, {root: true}) 
-      })  
+      return new Promise((resolve, reject) => {
+        axios.put("/api/admin/events/"+modified.id, modified).then((/*response*/)  =>  {
+          ctx.rootState.events.some( function(e,idx) {
+            if (e.id == modified.id) {
+              ctx.rootState.events[idx] = Object.assign({},   modified)
+              return true
+            }
+            return false
+          })
+          resolve()
+        }).catch((error) => {
+          ctx.commit("setError", error.response.data, {root: true}) 
+          reject(error)
+        })  
+      })
     },
     deleteSubmission( ctx, payload ) {
       let id=payload.id

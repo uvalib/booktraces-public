@@ -15,6 +15,11 @@ type Event struct {
 	Description string `json:"description"  binding:"required"`
 }
 
+// TableName sets the name of the table in the DB that this struct binds to
+func (e *Event) TableName() string {
+	return "events"
+}
+
 // GetEvents returns a list of tags as JSON
 func (svc *ServiceContext) GetEvents(c *gin.Context) {
 	q := svc.DB.NewQuery("SELECT id, event_date, description FROM events")
