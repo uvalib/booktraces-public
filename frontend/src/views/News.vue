@@ -3,7 +3,7 @@
       <h2>News</h2>
       <div class="news-item" v-for="item in news" :key="item.id">
          <h3>{{item.title}}<span class="date">{{formatDate(item.createdAt)}}</span></h3>
-         <div class="text" v-html="formatContent(item.content)"></div>
+         <div class="text" v-html="item.content"></div>
       </div>
    </div>
 </template>
@@ -24,9 +24,6 @@ export default {
       formatDate(date) {
          return date.split("T")[0]
       },
-      formatContent(content) {
-         return content.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
-      }
    }
 };
 </script>
@@ -45,6 +42,9 @@ h3 {
 }
 div.text {
    padding: 10px;
+}
+div.text >>> p {
+   margin: 0 0;
 }
 span.date {
    position: absolute;

@@ -6,15 +6,25 @@
          <div class="error">{{error}}</div>
          <div class="news-item" v-for="item in news" :key="item.id">
             <div class="controls">
-               <template v-if="!edit">
+               <template v-if="!editingItem(item.id)">
                   <i :data-id="item.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
                   <i :data-id="item.id" title="Edit" class="action fa fa-edit" @click="editClicked"></i>
                </template>
+               <template v-else>
+                  <i class="action cancel fas fa-times-circle" @click="cancelClicked"></i>
+                  <i class="action save fas fa-check-circle" @click="saveClicked"></i>
+               </template>
             </div>
-            <div class="title">{{item.title}}</div>
-            <div class="date">{{formatDate(item.createdAt)}}</div>
-            <div title="Toggle publication status" class="published">{{publishedText(item)}}</div>
-            <div class="text" v-html="formatContent(item.content)"></div>
+            <template v-if="editingItem(item.id)">
+               <div><label>Title:</label><input class="title" type="text" v-model="editDetails.title"></div>
+               <vue-editor v-model="editDetails.content"></vue-editor>
+            </template>
+            <template v-else>
+               <div class="title">{{item.title}}</div>
+               <div class="date">{{formatDate(item.createdAt)}}</div>
+               <div title="Toggle publication status" class="published">{{publishedText(item)}}</div>
+               <div class="text" v-html="item.content"></div>
+            </template>
          </div>
       </div>
    </div>
@@ -23,13 +33,18 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
+import { VueEditor } from 'vue2-editor'
 export default {
    name: "admin-news",
+   components: {
+      "vue-editor": VueEditor
+   },
    data: function () {
       return {
          edit: false,
          editDetails: null,
          addingNew: false,
+         hate: "this is test"
       }
    },
    computed: {
@@ -49,9 +64,6 @@ export default {
       },
       formatDate(date) {
          return date.split("T")[0]
-      },
-      formatContent(content) {
-         return content.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
       },
       cancelClicked() {
          this.edit = false
@@ -76,7 +88,7 @@ export default {
             })
          }
       },
-      editingEvent(id) {
+      editingItem(id) {
          if (this.edit == false) return false 
          return this.editDetails.id == id
       },
@@ -92,7 +104,7 @@ export default {
          let tgt = event.currentTarget
          var eventID = tgt.dataset.id
          var evtIdx = -1
-         this.events.some( function(e,idx) {
+         this.news.some( function(e,idx) {
           if (e.id == eventID) {
             evtIdx = idx
             return true
@@ -100,13 +112,13 @@ export default {
           return false
         })
         if (evtIdx > -1) {
-           this.editDetails = Object.assign({}, this.events[evtIdx])
+           this.editDetails = Object.assign({}, this.news[evtIdx])
            this.edit = true
         }
       },
       addNewsClick() {
          this.$store.dispatch("admin/addNewsPlaceholder")
-         this.editDetails = Object.assign({}, this.events[0])
+         this.editDetails = Object.assign({}, this.news[0])
          this.edit = true
          this.addingNew = true
       },
@@ -188,6 +200,9 @@ div.controls {
    right: 15px;
    top: 15px;
 }
+div.text >>> p {
+   margin: 0px 0;
+}
 div.title {
    color: #444;
    font-weight: bold;
@@ -195,5 +210,16 @@ div.title {
 div.date {
    font-weight: 100;
    font-size: 0.9em;
+}
+label {
+   display: inline-block;
+   font-weight: bold;
+   color: #555; 
+   text-align: right;
+   margin-right: 15px;
+}
+input.title {
+   width: 800px;
+   margin-bottom: 10px;
 }
 </style>

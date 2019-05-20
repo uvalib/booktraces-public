@@ -201,7 +201,7 @@ const auth = {
     updateNews(ctx, modified) {
       return new Promise((resolve, reject) => {
         axios.put("/api/admin/news/"+modified.id, modified).then((/*response*/)  =>  {
-          ctx.rootState.events.some( function(e,idx) {
+          ctx.state.news.some( function(e,idx) {
             if (e.id == modified.id) {
               ctx.state.news[idx] = Object.assign({},   modified)
               return true
