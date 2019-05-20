@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Press from './views/Press.vue'
 import Events from './views/Events.vue'
+import News from './views/News.vue'
 import FAQ from './views/FAQ.vue'
 import Submit from './views/Submit.vue'
 import SearchResults from './views/SearchResults.vue'
@@ -35,6 +36,11 @@ const router = new Router({
       path: '/press',
       name: 'press',
       component: Press
+    },
+    {
+      path: '/news',
+      name: 'news',
+      component: News
     },
     {
       path: '/events',

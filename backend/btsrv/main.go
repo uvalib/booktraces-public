@@ -35,6 +35,7 @@ func main() {
 		api.GET("/identifier", svc.GetUploadID)
 		api.GET("/tags", svc.GetTags)
 		api.GET("/events", svc.GetEvents)
+		api.GET("/news", svc.GetNews)
 		api.GET("/search", svc.Search)
 		api.GET("/thumbs", svc.GetThumbs)
 		api.GET("/recents", svc.GetRecents)
