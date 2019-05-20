@@ -11,7 +11,8 @@ const auth = {
     submissions: [],
     user: null,
     queryStr: "",
-    tgtTag: ""
+    tgtTag: "",
+    news: []
   },
 
   // Properties that are computed based on state
@@ -32,6 +33,9 @@ const auth = {
 
   // Synchronous updates to the state
   mutations: {
+    setNews (state, news) {
+      state.news = news
+    },
     setTagFilter(state, val) {
       state.tgtTag = val
     },
@@ -177,10 +181,44 @@ const auth = {
         })  
       })
     },
-    addEvent(ctx, newEvent) {
+    addEvent(ctx, newNews) {
       return new Promise((resolve, reject) => {
-        axios.post("/api/admin/events/", newEvent).then((/*response*/)  =>  {
-          ctx.rootState.events[0] =  Object.assign({}, newEvent)
+        axios.post("/api/admin/events/", newNews).then((/*response*/)  =>  {
+          ctx.rootState.events[0] =  Object.assign({}, newNews)
+          resolve()
+        }).catch((error) => {
+          ctx.commit("setError", error.response.data, {root: true}) 
+          reject(error)
+        })  
+      })
+    },
+    addNewsPlaceholder(ctx) {
+      ctx.state.news.unshift({createdAt:"",content:"", title: ""})
+    },
+    cancelAddNews(ctx) {
+      ctx.state.news.shift()
+    },
+    updateNews(ctx, modified) {
+      return new Promise((resolve, reject) => {
+        axios.put("/api/admin/news/"+modified.id, modified).then((/*response*/)  =>  {
+          ctx.rootState.events.some( function(e,idx) {
+            if (e.id == modified.id) {
+              ctx.state.news[idx] = Object.assign({},   modified)
+              return true
+            }
+            return false
+          })
+          resolve()
+        }).catch((error) => {
+          ctx.commit("setError", error.response.data, {root: true}) 
+          reject(error)
+        })  
+      })
+    },
+    addNews(ctx, newNews) {
+      return new Promise((resolve, reject) => {
+        axios.post("/api/admin/news/", newNews).then((/*response*/)  =>  {
+          ctx.state.news[0] =  Object.assign({}, newNews)
           resolve()
         }).catch((error) => {
           ctx.commit("setError", error.response.data, {root: true}) 
@@ -228,6 +266,14 @@ const auth = {
           ctx.commit("setError", error.response.data, {root: true}) 
           reject(error)
         })  
+      })
+    },
+    getNews( ctx ) {
+      axios.get("/api/admin/news").then((response)  =>  {
+        ctx.commit('setNews', response.data )
+      }).catch((error) => {
+        ctx.commit('setNews', []) 
+        ctx.commit('setError', "Unable to get news: "+error.response.data) 
       })
     },
   }

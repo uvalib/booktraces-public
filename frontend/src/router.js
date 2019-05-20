@@ -13,6 +13,7 @@ import Thanks from './views/Thanks.vue'
 import Forbidden from './views/Forbidden.vue'
 import AdminHome from './views/admin/AdminHome.vue'
 import AdminEvents from './views/admin/AdminEvents.vue'
+import AdminNews from './views/admin/AdminNews.vue'
 import AdminSubmission from './views/admin/AdminSubmission.vue'
 import store from './store'
 
@@ -96,6 +97,12 @@ const router = new Router({
       path: '/admin/events',
       name: 'admin-events',
       component: AdminEvents,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/news',
+      name: 'admin-news',
+      component: AdminNews,
       meta: { requiresAuth: true }
     },
     {

@@ -24,6 +24,7 @@
             <li class="public pure-menu-item"><router-link to="/">Public</router-link></li>
             <li class="pure-menu-item"><router-link to="/admin/submissions">Submissions</router-link></li>
             <li class="pure-menu-item"><router-link to="/admin/events">Events</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/news">News</router-link></li>
          </ul>
       </div>
       <div  v-if="!adminMode" class="hmenu">
