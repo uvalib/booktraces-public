@@ -117,14 +117,15 @@ func (svc *ServiceContext) UpdateNews(c *gin.Context) {
 // AddNews adds a new news
 func (svc *ServiceContext) AddNews(c *gin.Context) {
 	log.Printf("Add new news")
-	var news Event
-	err := c.ShouldBindJSON(&news)
+	var news News
+	err := c.BindJSON(&news)
 	if err != nil {
 		log.Printf("ERROR: Unable to parse news: %s ", err.Error())
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
+	news.CreatedAt = time.Now()
 	err = svc.DB.Model(&news).Exclude("ID").Insert()
 	if err != nil {
 		log.Printf("ERROR: Unable to add news: %s ", err.Error())

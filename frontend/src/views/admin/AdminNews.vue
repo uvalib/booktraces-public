@@ -22,7 +22,7 @@
             <template v-else>
                <div class="title">{{item.title}}</div>
                <div class="date">{{formatDate(item.createdAt)}}</div>
-               <div title="Toggle publication status" class="published">{{publishedText(item)}}</div>
+               <div @click="togglePublication(item)" title="Toggle publication status" class="published">{{publishedText(item)}}</div>
                <div class="text" v-html="item.content"></div>
             </template>
          </div>
@@ -58,6 +58,10 @@ export default {
       })
    },
    methods: {
+      togglePublication(item) {
+         item.published = !item.published
+         this.$store.dispatch("admin/updateNews", item)
+      },
       publishedText( item ) {
          if (item.published) return "Published"
          return "Not Published"

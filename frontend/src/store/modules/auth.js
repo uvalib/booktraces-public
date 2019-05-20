@@ -193,7 +193,7 @@ const auth = {
       })
     },
     addNewsPlaceholder(ctx) {
-      ctx.state.news.unshift({createdAt:"",content:"", title: ""})
+      ctx.state.news.unshift({content:"", title: ""})
     },
     cancelAddNews(ctx) {
       ctx.state.news.shift()
@@ -215,10 +215,23 @@ const auth = {
         })  
       })
     },
+    deleteNews( ctx, id ) {
+      axios.delete("/api/admin/news/"+id).then((/*response*/)  =>  {
+        ctx.state.news.some( function(e,idx) {
+          if (e.id == id) {
+            ctx.state.news.splice(idx, 1)
+            return true
+          }
+          return false
+        })
+      }).catch((error) => {
+        ctx.commit("setError",error.response.data, {root: true}) 
+      })
+    },
     addNews(ctx, newNews) {
       return new Promise((resolve, reject) => {
-        axios.post("/api/admin/news/", newNews).then((/*response*/)  =>  {
-          ctx.state.news[0] =  Object.assign({}, newNews)
+        axios.post("/api/admin/news/", newNews).then((response)  =>  {
+          ctx.state.news[0] =  Object.assign({}, response.data)
           resolve()
         }).catch((error) => {
           ctx.commit("setError", error.response.data, {root: true}) 
