@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 // News contains the data for a news item
 type News struct {
-	ID        string    `json:"id"`
+	ID        int       `json:"id"`
 	Title     string    `json:"title" db:"title"  binding:"required"`
 	Content   string    `json:"content"  binding:"required"`
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
@@ -62,40 +63,11 @@ func (svc *ServiceContext) DeleteNews(c *gin.Context) {
 	c.String(http.StatusOK, "ok")
 }
 
-// PublishNews publishes the specified news item
-func (svc *ServiceContext) PublishNews(c *gin.Context) {
-	newsID := c.Param("id")
-	log.Printf("Publish news item %s", newsID)
-	q := svc.DB.NewQuery("update news set published = 1 where id={:id}")
-	q.Bind(dbx.Params{"id": newsID})
-	_, err := q.Execute()
-	if err != nil {
-		log.Printf("ERROR: unable to publish news %s:%s", newsID, err.Error())
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-	c.String(http.StatusOK, "unpublished")
-}
-
-// UnpublishNews publishes the specified news item
-func (svc *ServiceContext) UnpublishNews(c *gin.Context) {
-	newsID := c.Param("id")
-	log.Printf("Unpublish news item %s", newsID)
-	q := svc.DB.NewQuery("update news set published = 0 where id={:id}")
-	q.Bind(dbx.Params{"id": newsID})
-	_, err := q.Execute()
-	if err != nil {
-		log.Printf("ERROR: unable to unpublish news %s:%s", newsID, err.Error())
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-	c.String(http.StatusOK, "unpublished")
-}
-
 // UpdateNews updates the title or content of the specified news item
 func (svc *ServiceContext) UpdateNews(c *gin.Context) {
-	newsID := c.Param("id")
-	log.Printf("Update news item %s", newsID)
+	newsIDStr := c.Param("id")
+	newsID, _ := strconv.Atoi(newsIDStr)
+	log.Printf("Update news item %d", newsID)
 
 	var news News
 	err := c.ShouldBindJSON(&news)
@@ -124,13 +96,16 @@ func (svc *ServiceContext) AddNews(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
+	log.Printf("GOT %+v", news)
 
+	news.ID = 0
 	news.CreatedAt = time.Now()
-	err = svc.DB.Model(&news).Exclude("ID").Insert()
+	err = svc.DB.Model(&news).Insert()
 	if err != nil {
 		log.Printf("ERROR: Unable to add news: %s ", err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	log.Printf("Added %+v", news)
 	c.JSON(http.StatusOK, news)
 }

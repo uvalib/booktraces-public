@@ -50,8 +50,6 @@ func main() {
 			admin.POST("/news", svc.AuthMiddleware, svc.AddNews)
 			admin.DELETE("/news/:id", svc.AuthMiddleware, svc.DeleteNews)
 			admin.PUT("/news/:id", svc.AuthMiddleware, svc.UpdateNews)
-			admin.POST("/news/:id/publish", svc.AuthMiddleware, svc.PublishNews)
-			admin.DELETE("/news/:id/publish", svc.AuthMiddleware, svc.UnpublishNews)
 			admin.POST("/events", svc.AuthMiddleware, svc.AddEvent)
 			admin.DELETE("/events/:id", svc.AuthMiddleware, svc.DeleteEvent)
 			admin.PUT("/events/:id", svc.AuthMiddleware, svc.UpdateEvent)
