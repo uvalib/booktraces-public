@@ -20,6 +20,11 @@
             (<b>not</b> rare books or special collections).  <b>Join the search!</b>
          </p>
          <p>
+            We’ve received a new Grant from the
+            <a href="https://news.library.virginia.edu/2019/04/29/book-traces-awarded-a-110000-planning-grant-from-the-andrew-w-mellon-foundation/" 
+              class="inline" target="_blank">Mellon Foundation</a> for 2019-2020!
+         </p>
+         <p>
             Explore our CLIR-funded project at the University of Virginia:<br/>
             <a href="http://booktraces.library.virginia.edu" target="_blank">
                http://booktraces.library.virginia.edu
@@ -103,6 +108,9 @@ h3 {
 }
 div.info {
    margin-bottom: 30px;
+}
+div.info a.inline {
+   margin-left:0;
 }
 div.info a {
    margin-left: 20px;

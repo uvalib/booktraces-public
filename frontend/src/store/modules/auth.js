@@ -33,8 +33,34 @@ const auth = {
 
   // Synchronous updates to the state
   mutations: {
+    addNewsPlaceholder(state) {
+      state.news.unshift({content:"", title: ""})
+    },
+    cancelAddNews(state) {
+      state.news.shift()
+    },
     setNews (state, news) {
       state.news = news
+    },
+    addNews(state, newNews) {
+      state.news[0] =  Object.assign({}, newNews)
+    },
+    deleteNews(state, id) {
+      state.news.some( function(e,idx) {
+        if (e.id == id) {
+          state.news.splice(idx, 1)
+          return true
+        }
+        return false
+      })
+    },
+    updateNews(state, modified) {
+      state.news = state.news.map(n => {
+        if (n.id === modified.id) {
+          return Object.assign({}, n, modified)
+        }
+        return n
+      })
     },
     setTagFilter(state, val) {
       state.tgtTag = val
@@ -192,22 +218,10 @@ const auth = {
         })  
       })
     },
-    addNewsPlaceholder(ctx) {
-      ctx.state.news.unshift({content:"", title: ""})
-    },
-    cancelAddNews(ctx) {
-      ctx.state.news.shift()
-    },
     updateNews(ctx, modified) {
       return new Promise((resolve, reject) => {
         axios.put("/api/admin/news/"+modified.id, modified).then((/*response*/)  =>  {
-          ctx.state.news.some( function(e,idx) {
-            if (e.id == modified.id) {
-              ctx.state.news[idx] = Object.assign({},   modified)
-              return true
-            }
-            return false
-          })
+          ctx.commit("updateNews", modified)
           resolve()
         }).catch((error) => {
           ctx.commit("setError", error.response.data, {root: true}) 
@@ -215,23 +229,27 @@ const auth = {
         })  
       })
     },
+    toggleNewsPublication( ctx, index ) {
+      let news = Object.assign({}, ctx.state.news[index])
+      news.published = !news.published
+      axios.put("/api/admin/news/"+news.id, news).then((/*response*/)  =>  {
+        ctx.commit("updateNews", news)
+      }).catch((error) => {
+        ctx.commit("setError",error.response.data, {root: true}) 
+      })
+    },
     deleteNews( ctx, id ) {
       axios.delete("/api/admin/news/"+id).then((/*response*/)  =>  {
-        ctx.state.news.some( function(e,idx) {
-          if (e.id == id) {
-            ctx.state.news.splice(idx, 1)
-            return true
-          }
-          return false
-        })
+        ctx.commit("deleteNews", id)
       }).catch((error) => {
         ctx.commit("setError",error.response.data, {root: true}) 
       })
     },
     addNews(ctx, newNews) {
       return new Promise((resolve, reject) => {
-        axios.post("/api/admin/news/", newNews).then((response)  =>  {
-          ctx.state.news[0] =  Object.assign({}, response.data)
+        let data = {title: newNews.title, content: newNews.content}
+        axios.post("/api/admin/news/", data).then((response)  =>  {
+          ctx.commit("addNews", response.data)
           resolve()
         }).catch((error) => {
           ctx.commit("setError", error.response.data, {root: true}) 

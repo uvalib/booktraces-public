@@ -4,7 +4,7 @@
       <div>
          <h3>News <span @click="addNewsClick" class="add pure-button pure-button-primary">Add News Item</span></h3>
          <div class="error">{{error}}</div>
-         <div class="news-item" v-for="item in news" :key="item.id">
+         <div class="news-item" v-for="(item,idx) in news" :key="item.id">
             <div class="controls">
                <template v-if="!editingItem(item.id)">
                   <i :data-id="item.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
@@ -22,7 +22,7 @@
             <template v-else>
                <div class="title">{{item.title}}</div>
                <div class="date">{{formatDate(item.createdAt)}}</div>
-               <div @click="togglePublication(item)" title="Toggle publication status" class="published">{{publishedText(item)}}</div>
+               <div @click="togglePublication(idx)" title="Toggle publication status" class="published">{{publishedText(item)}}</div>
                <div class="text" v-html="item.content"></div>
             </template>
          </div>
@@ -44,7 +44,6 @@ export default {
          edit: false,
          editDetails: null,
          addingNew: false,
-         hate: "this is test"
       }
    },
    computed: {
@@ -58,9 +57,8 @@ export default {
       })
    },
    methods: {
-      togglePublication(item) {
-         item.published = !item.published
-         this.$store.dispatch("admin/updateNews", item)
+      togglePublication(idx) {
+         this.$store.dispatch("admin/toggleNewsPublication", idx)
       },
       publishedText( item ) {
          if (item.published) return "Published"
@@ -74,7 +72,7 @@ export default {
          this.editDetails = null
          if (this.addingNew) {
             this.addingNew = false
-            this.$store.dispatch("admin/cancelAddNews")
+            this.$store.commit("admin/cancelAddNews")
          }
       },
       saveClicked() {
@@ -121,7 +119,7 @@ export default {
         }
       },
       addNewsClick() {
-         this.$store.dispatch("admin/addNewsPlaceholder")
+         this.$store.commit("admin/addNewsPlaceholder")
          this.editDetails = Object.assign({}, this.news[0])
          this.edit = true
          this.addingNew = true
