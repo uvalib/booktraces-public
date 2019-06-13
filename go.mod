@@ -14,8 +14,8 @@ require (
 	github.com/ugorji/go v1.1.5-pre // indirect
 	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8 // indirect
 	golang.org/x/net v0.0.0-20190611141213-3f473d35a33a // indirect
-	golang.org/x/sys v0.0.0-20190610200419-93c9922d18ae // indirect
-	golang.org/x/tools v0.0.0-20190611222205-d73e1c7e250b // indirect
+	golang.org/x/sys v0.0.0-20190613124609-5ed2794edfdc // indirect
+	golang.org/x/tools v0.0.0-20190613161334-149740340b5f // indirect
 	google.golang.org/appengine v1.6.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

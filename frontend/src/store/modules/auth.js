@@ -171,53 +171,6 @@ const auth = {
         ctx.commit("setLoading", false, {root: true})
       })
     },
-    addEventPlaceholder(ctx) {
-      ctx.rootState.events.unshift({date:"",description:""})
-    },
-    cancelAddEvent(ctx) {
-      ctx.rootState.events.shift()
-    },
-    deleteEvent( ctx, id ) {
-      axios.delete("/api/admin/events/"+id).then((/*response*/)  =>  {
-        ctx.rootState.events.some( function(e,idx) {
-          if (e.id == id) {
-            ctx.rootState.events.splice(idx, 1)
-            return true
-          }
-          return false
-        })
-      }).catch((error) => {
-        ctx.commit("setError",error.response.data, {root: true}) 
-      })
-    },
-    updateEvent(ctx, modified) {
-      return new Promise((resolve, reject) => {
-        axios.put("/api/admin/events/"+modified.id, modified).then((/*response*/)  =>  {
-          ctx.rootState.events.some( function(e,idx) {
-            if (e.id == modified.id) {
-              ctx.rootState.events[idx] = Object.assign({},   modified)
-              return true
-            }
-            return false
-          })
-          resolve()
-        }).catch((error) => {
-          ctx.commit("setError", error.response.data, {root: true}) 
-          reject(error)
-        })  
-      })
-    },
-    addEvent(ctx, newNews) {
-      return new Promise((resolve, reject) => {
-        axios.post("/api/admin/events/", newNews).then((/*response*/)  =>  {
-          ctx.rootState.events[0] =  Object.assign({}, newNews)
-          resolve()
-        }).catch((error) => {
-          ctx.commit("setError", error.response.data, {root: true}) 
-          reject(error)
-        })  
-      })
-    },
     updateNews(ctx, modified) {
       return new Promise((resolve, reject) => {
         axios.put("/api/admin/news/"+modified.id, modified).then((/*response*/)  =>  {

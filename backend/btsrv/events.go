@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
@@ -10,7 +11,7 @@ import (
 
 // Event contains the data for an event
 type Event struct {
-	ID          string `json:"id"`
+	ID          int    `json:"id"`
 	Date        string `json:"date" db:"event_date"  binding:"required"`
 	Description string `json:"description"  binding:"required"`
 }
@@ -49,8 +50,8 @@ func (svc *ServiceContext) DeleteEvent(c *gin.Context) {
 
 // UpdateEvent updates the date or description of the specified event
 func (svc *ServiceContext) UpdateEvent(c *gin.Context) {
-	eventID := c.Param("id")
-	log.Printf("Update event %s", eventID)
+	eventID, _ := strconv.Atoi(c.Param("id"))
+	log.Printf("Update event %d", eventID)
 
 	var event Event
 	err := c.ShouldBindJSON(&event)
@@ -80,7 +81,8 @@ func (svc *ServiceContext) AddEvent(c *gin.Context) {
 		return
 	}
 
-	err = svc.DB.Model(&event).Exclude("ID").Insert()
+	event.ID = 0
+	err = svc.DB.Model(&event).Insert()
 	if err != nil {
 		log.Printf("ERROR: Unable to add event: %s ", err.Error())
 		c.String(http.StatusInternalServerError, err.Error())

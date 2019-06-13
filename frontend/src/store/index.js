@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import auth from './modules/auth'
 import unauth from './modules/unauth'
+import events from './modules/events'
 import axios from 'axios'
 
 Vue.use(Vuex)
@@ -21,7 +22,6 @@ export default new Vuex.Store({
   // Global state/mutations/actions: for stuff that is used across modules
   state: {
     tags: [],
-    events: [],
     error: null,
     loading: true,
     submissionDetail: null,
@@ -38,9 +38,6 @@ export default new Vuex.Store({
     },
     setTags (state, tags) {
       state.tags = tags
-    },
-    setEvents (state, events) {
-      state.events = events
     },
     setError (state, error) {
       state.error = error
@@ -69,14 +66,6 @@ export default new Vuex.Store({
         ctx.commit('setError', "Unable to get tags: "+error.response.data) 
       })
     },
-    getEvents( ctx ) {
-      axios.get("/api/events").then((response)  =>  {
-        ctx.commit('setEvents', response.data )
-      }).catch((error) => {
-        ctx.commit('setEvents', []) 
-        ctx.commit('setError', "Unable to get events: "+error.response.data) 
-      })
-    },
     getSubmissionDetail( ctx, id ) {
       ctx.commit("setLoading", true)
       ctx.commit('clearSubmissionDetail' )
@@ -93,6 +82,7 @@ export default new Vuex.Store({
   modules: {
     public: unauth,
     admin: auth,
+    events: events
   },
 
   plugins: [errorPlugin] 

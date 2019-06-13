@@ -49,7 +49,7 @@ export default {
       ...mapState({
          error: state => state.error,
          loading: state => state.loading,
-         events: state => state.events,
+         events: state => state.events.list,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -61,18 +61,18 @@ export default {
          this.editDetails = null
          if (this.addingNew) {
             this.addingNew = false
-            this.$store.dispatch("admin/cancelAddEvent")
+            this.$store.commit("events/cancelAddEvent")
          }
       },
       saveClicked() {
          if (this.addingNew) {
-            this.$store.dispatch('admin/addEvent',this.editDetails).then((/*response*/) => {
+            this.$store.dispatch('events/addEvent',this.editDetails).then((/*response*/) => {
                this.edit=false
                this.editDetails = null
                this.addingNew = false
             })
          } else {
-            this.$store.dispatch('admin/updateEvent',this.editDetails).then((/*response*/) => {
+            this.$store.dispatch('events/updateEvent',this.editDetails).then((/*response*/) => {
                this.edit=false
                this.editDetails = null
                this.addingNew = false
@@ -88,7 +88,7 @@ export default {
          let eventID = tgt.dataset.id
          let resp = confirm("Delete this event? All data will be permanently lost. Continue?")
          if (resp) {
-             this.$store.dispatch('admin/deleteEvent', eventID)
+             this.$store.dispatch('events/deleteEvent', eventID)
          }
       },
       editClicked(event) {
@@ -108,14 +108,14 @@ export default {
         }
       },
       addEventClick() {
-         this.$store.dispatch("admin/addEventPlaceholder")
+         this.$store.commit("events/addEventPlaceholder")
          this.editDetails = Object.assign({}, this.events[0])
          this.edit = true
          this.addingNew = true
       },
    },
    created() {
-      this.$store.dispatch('getEvents')
+      this.$store.dispatch('events/getAll')
    },
 };
 </script>
