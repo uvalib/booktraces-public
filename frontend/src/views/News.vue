@@ -9,16 +9,16 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
    name: "news",
    computed: {
-      ...mapState({
-         news: state => state.public.news,
+      ...mapGetters({
+         news: "news/published"
       })
    },
    created: function () {
-      this.$store.dispatch('public/getNews')
+      this.$store.dispatch('news/getAll')
    },
    methods: {
       formatDate(date) {

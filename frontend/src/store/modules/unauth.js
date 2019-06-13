@@ -196,15 +196,7 @@ const unauth = {
     removeUploadedFile( ctx, filename ) {
       ctx.commit("removeUploadedFile",filename)
       axios.delete("/api/upload/"+filename+"?key="+ctx.getters.uploadID) 
-    },
-    getNews( ctx ) {
-      axios.get("/api/news").then((response)  =>  {
-        ctx.commit('setNews', response.data )
-      }).catch((error) => {
-        ctx.commit('setNews', []) 
-        ctx.commit('setError', "Unable to get news: "+error.response.data) 
-      })
-    },
+    }
   }
 }
 

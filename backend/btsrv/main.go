@@ -46,7 +46,6 @@ func main() {
 		api.DELETE("/upload/:file", svc.DeleteUploadedFile)
 		admin := api.Group("/admin")
 		{
-			admin.GET("/news", svc.GetAdminNews)
 			admin.POST("/news", svc.AuthMiddleware, svc.AddNews)
 			admin.DELETE("/news/:id", svc.AuthMiddleware, svc.DeleteNews)
 			admin.PUT("/news/:id", svc.AuthMiddleware, svc.UpdateNews)

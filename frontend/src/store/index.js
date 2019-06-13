@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import auth from './modules/auth'
 import unauth from './modules/unauth'
 import events from './modules/events'
+import news from './modules/news'
 import axios from 'axios'
 
 Vue.use(Vuex)
@@ -82,7 +83,8 @@ export default new Vuex.Store({
   modules: {
     public: unauth,
     admin: auth,
-    events: events
+    events: events,
+    news: news
   },
 
   plugins: [errorPlugin] 

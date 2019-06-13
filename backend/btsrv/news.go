@@ -24,20 +24,8 @@ func (e *News) TableName() string {
 	return "news"
 }
 
-// GetNews returns a list of PUBLISHED news items as JSON
+// GetNews returns a list of news items as JSON
 func (svc *ServiceContext) GetNews(c *gin.Context) {
-	var data []News
-	q := svc.DB.NewQuery(`select * from news where published=1 order by created_at desc`)
-	err := q.All(&data)
-	if err != nil {
-		log.Printf("ERROR: Unable to get news list: %s", err.Error())
-		return
-	}
-	c.JSON(http.StatusOK, data)
-}
-
-// GetAdminNews returns a list of ALL news items as JSON
-func (svc *ServiceContext) GetAdminNews(c *gin.Context) {
 	var data []News
 	q := svc.DB.NewQuery(`select * from news order by created_at desc`)
 	err := q.All(&data)

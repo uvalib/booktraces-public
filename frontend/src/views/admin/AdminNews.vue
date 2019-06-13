@@ -50,7 +50,7 @@ export default {
       ...mapState({
          error: state => state.error,
          loading: state => state.loading,
-         news: state => state.admin.news,
+         news: state => state.news.list,
       }),
       ...mapGetters({
          loginName: 'admin/loginName',
@@ -58,7 +58,7 @@ export default {
    },
    methods: {
       togglePublication(idx) {
-         this.$store.dispatch("admin/toggleNewsPublication", idx)
+         this.$store.dispatch("news/togglePublication", idx)
       },
       publishedText( item ) {
          if (item.published) return "Published"
@@ -67,23 +67,29 @@ export default {
       formatDate(date) {
          return date.split("T")[0]
       },
+      addNewsClick() {
+         this.$store.commit("news/addPlaceholder")
+         this.editDetails = Object.assign({}, this.news[0])
+         this.edit = true
+         this.addingNew = true
+      },
       cancelClicked() {
          this.edit = false
          this.editDetails = null
          if (this.addingNew) {
             this.addingNew = false
-            this.$store.commit("admin/cancelAddNews")
+            this.$store.commit("news/cancelAdd")
          }
       },
       saveClicked() {
          if (this.addingNew) {
-            this.$store.dispatch('admin/addNews',this.editDetails).then((/*response*/) => {
+            this.$store.dispatch('news/addNews',this.editDetails).then((/*response*/) => {
                this.edit=false
                this.editDetails = null
                this.addingNew = false
             })
          } else {
-            this.$store.dispatch('admin/updateNews',this.editDetails).then((/*response*/) => {
+            this.$store.dispatch('news/updateNews',this.editDetails).then((/*response*/) => {
                this.edit=false
                this.editDetails = null
                this.addingNew = false
@@ -96,37 +102,31 @@ export default {
       },
       deleteClicked(event) {
          let tgt = event.currentTarget
-         let eventID = tgt.dataset.id
+         let newsID = tgt.dataset.id
          let resp = confirm("Delete this news item? All data will be permanently lost. Continue?")
          if (resp) {
-             this.$store.dispatch('admin/deleteNews', eventID)
+             this.$store.dispatch('news/deleteNews', newsID)
          }
       },
       editClicked(event) {
          let tgt = event.currentTarget
-         var eventID = tgt.dataset.id
-         var evtIdx = -1
+         var newsID = tgt.dataset.id
+         var tgtIdx = -1
          this.news.some( function(e,idx) {
-          if (e.id == eventID) {
-            evtIdx = idx
+          if (e.id == newsID) {
+            tgtIdx = idx
             return true
           }
           return false
         })
-        if (evtIdx > -1) {
-           this.editDetails = Object.assign({}, this.news[evtIdx])
+        if (tgtIdx > -1) {
+           this.editDetails = Object.assign({}, this.news[tgtIdx])
            this.edit = true
         }
       },
-      addNewsClick() {
-         this.$store.commit("admin/addNewsPlaceholder")
-         this.editDetails = Object.assign({}, this.news[0])
-         this.edit = true
-         this.addingNew = true
-      },
    },
    created() {
-      this.$store.dispatch('admin/getNews')
+      this.$store.dispatch('news/getAll')
    },
 };
 </script>
