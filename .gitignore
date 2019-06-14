@@ -16,3 +16,4 @@ env.*
 /submissions
 backend/db/import/*.sql
 backend/db/import/*.csv
+*.xlsx
