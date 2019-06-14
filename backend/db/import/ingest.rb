@@ -70,19 +70,19 @@ xlsx.each_with_pagename do |name, sheet|
          puts "     #{row[:call_num]} has interventions"
          # generate submission insert
          upload_id="3cavaliers#{id}"
-         lib = "#{row[:library]}, #{univ_fn}"
+         lib = "#{row[:library]}, #{univ}"
          sub = "(#{id},\"#{upload_id}\",\"#{sub_name}\",\"#{sub_email}\",\"#{row[:title]}\","
          sub << "\"#{row[:author]}\",\"\",\"#{lib}\",\"#{row[:call_num]}\","
          sub << "\"#{row[:desc]}\",\"#{DateTime.now()}\",1)"
          if img_cnt > 0 
-            submit_sql << ","
+            submit_sql << ",\n"
          end
          submit_sql << sub
 
          # move images to destination and generate SQL
          img_sql = process_images(id, images, img_dir, dest_dir)
          if img_cnt > 0 
-            files_sql += ","
+            files_sql += ",\n"
          end
          files_sql += img_sql
          img_cnt+=1
