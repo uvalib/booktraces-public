@@ -63,7 +63,8 @@ func doQuery(db *dbx.DB, c *gin.Context, query string) {
 	searchQ := fmt.Sprintf(`%s 
 		and (t.name like {:q} or s.title like {:q} or s.author like {:q}
 			or s.publication_info like {:q} or s.library like {:q} or s.call_number like {:q}
-			or s.description like {:q} or s.description like {:q} or s.submitted_at like {:q})
+			or s.description like {:q} or s.description like {:q} or s.submitted_at like {:q}
+			or s.submitter_name like {:q})
 		group by s.id
 		order by submitted_at`, getBaseQuery())
 	q := db.NewQuery(searchQ)

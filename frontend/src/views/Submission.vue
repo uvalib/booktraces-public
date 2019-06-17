@@ -117,13 +117,11 @@ div.thumb {
 }
 .thumbs {
    margin-top: 20px;
-   border-top: 1px solid #ccc;
    padding-top: 20px;
 }
 div.tags {
    clear:both;
    margin-top: 20px;
-   border-top: 1px solid #ccc;
    padding-top: 20px;
 }
 div.tag {
