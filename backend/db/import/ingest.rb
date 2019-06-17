@@ -5,8 +5,12 @@ require 'fileutils'
 def process_images(sub_id, images, src_dir, dest_dir)
    sql = ""
    rel_path = dest_dir.split("submitted/")[1]
+
+   # Note: i in this loop is the relative path to the image;
+   # for example - B_Images/JMU-BX-0005.Image_2.033932.jpg
    images.each do |i|
       puts "IMG: [#{i}]"
+   
       # make sure dest dir exists and copy src file 
       dest_fn = File.join(dest_dir, i)
       dest_path = File.dirname dest_fn
@@ -18,8 +22,15 @@ def process_images(sub_id, images, src_dir, dest_dir)
          abort "ERROR: #{src_fn} not found. Skipping"
          next
       end
-      # puts "CP #{src_fn} -> #{dest_fn}"
+      # puts "CP #{src_fn} -> #{dest_fn}" 
       FileUtils.cp(src_fn, dest_fn)
+
+      # generate thumbs (get name minus ext first)
+      base_fn = File.basename(dest_fn, File.extname(dest_fn))
+      tfn = "#{base_fn}-150x150#{File.extname(dest_fn).downcase}"
+      thumb_fn = File.join(File.dirname(dest_fn), tfn)
+      cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center #{dest_fn} #{thumb_fn}"
+      `#{cmd}`
 
       if sql != "" 
          sql += ","
@@ -56,7 +67,12 @@ puts "Ingest #{univ}:  #{fn}, images: #{img_dir}\n\tDestination: #{dest_dir}, St
 puts "========================================================================================"
 xlsx = Roo::Excelx.new(fn)
 img_cnt = 0
+tgt_sheets = [ "B", "D", "E", "PR", "PS", "U"]
 xlsx.each_with_pagename do |name, sheet|
+   if tgt_sheets.include?(name) == false 
+      puts "skipping unrecognized sheet #{name}"
+      next
+   end
    puts "Process  sheet #{name}"
    sheet.parse(title: 'Title', author: "Author" , library: /Location*/, 
       call_num: "Call Number", desc: "Notes",
@@ -71,9 +87,10 @@ xlsx.each_with_pagename do |name, sheet|
          # generate submission insert
          upload_id="3cavaliers#{id}"
          lib = "#{row[:library]}, #{univ}"
+         ingest_date = DateTime.now().strftime("%F %T")
          sub = "(#{id},\"#{upload_id}\",\"#{sub_name}\",\"#{sub_email}\",\"#{row[:title]}\","
          sub << "\"#{row[:author]}\",\"\",\"#{lib}\",\"#{row[:call_num]}\","
-         sub << "\"#{row[:desc]}\",\"#{DateTime.now()}\",1)"
+         sub << "\"#{row[:desc]}\",\"#{ingest_date}\",1)"
          if img_cnt > 0 
             submit_sql << ",\n"
          end
