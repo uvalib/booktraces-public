@@ -15,5 +15,6 @@ env.*
 /uploads
 /submissions
 backend/db/import/*.sql
+backend/db/import/done/*.sql
 backend/db/import/*.csv
 *.xlsx

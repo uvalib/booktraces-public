@@ -120,6 +120,8 @@ puts "DONE!!"
 # problems
 # william and mary
 # EMU
+
+# DOWNLOADED, not processed
 # Univerity of Richmond
 
 ## UPDATES
@@ -135,4 +137,4 @@ puts "DONE!!"
 # XX virginia_tech (1269-1301)
 # XX roanoke (1302-1347)
 # XX VMI (1348-1502)
-# VUU (1503-1619)
+# xx VUU (1503-1619)
