@@ -67,7 +67,7 @@ puts "Ingest #{univ}:  #{fn}, images: #{img_dir}\n\tDestination: #{dest_dir}, St
 puts "========================================================================================"
 xlsx = Roo::Excelx.new(fn)
 img_cnt = 0
-tgt_sheets = [ "B", "D", "E", "PR", "PS", "U"]
+tgt_sheets = [ "B", "D", "E", "PR", "PS", "U", "multivolumes", "all"]
 xlsx.each_with_pagename do |name, sheet|
    if tgt_sheets.include?(name) == false 
       puts "skipping unrecognized sheet #{name}"
@@ -108,10 +108,31 @@ xlsx.each_with_pagename do |name, sheet|
    end
  end
 
- puts "DONE! #{img_cnt} records generated, writing SQL"
-f = File.open("import_#{univ_fn}.sql", 'w')
+sql_out = "import_#{univ_fn}.sql"
+f = File.open(sql_out, 'w')
+puts "DONE! #{img_cnt} records generated, writing SQL to #{sql_out}"
 f.write(submit_sql)
 f.write(";\n")
 f.write(files_sql)
 f.write(";\n")
 puts "DONE!!"
+
+# problems
+# william and mary
+# EMU
+# Univerity of Richmond
+
+## UPDATES
+## ALTER TABLE submissions MODIFY title TEXT NOT NULL;
+## ALTER TABLE submissions MODIFY call_number varchar(100);
+
+# sequence
+# XX mary_baldwin (1054-1071) xxx ingested 
+# XX jmu (1072-1105)
+# XX VCU (1106-1110)
+# XX washington_and_lee (1111-1232)
+# XX emory and  henry (1233-1268)
+# XX virginia_tech (1269-1301)
+# XX roanoke (1302-1347)
+# XX VMI (1348-1502)
+# VUU (1503-1619)
