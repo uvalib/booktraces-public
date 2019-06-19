@@ -29,7 +29,7 @@ def process_images(sub_id, images, src_dir, dest_dir)
       base_fn = File.basename(dest_fn, File.extname(dest_fn))
       tfn = "#{base_fn}-150x150#{File.extname(dest_fn).downcase}"
       thumb_fn = File.join(File.dirname(dest_fn), tfn)
-      cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center #{dest_fn} #{thumb_fn}"
+      cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center \"#{dest_fn}\" \"#{thumb_fn}\""
       `#{cmd}`
 
       if sql != "" 
@@ -67,7 +67,7 @@ puts "Ingest #{univ}:  #{fn}, images: #{img_dir}\n\tDestination: #{dest_dir}, St
 puts "========================================================================================"
 xlsx = Roo::Excelx.new(fn)
 img_cnt = 0
-tgt_sheets = [ "B", "D", "E", "PR", "PS", "U", "multivolumes", "all"]
+tgt_sheets = [ "B", "D", "E", "PR", "PS", "U", "multivolumes", "all", "EMU list"]
 xlsx.each_with_pagename do |name, sheet|
    if tgt_sheets.include?(name) == false 
       puts "skipping unrecognized sheet #{name}"
@@ -117,18 +117,15 @@ f.write(files_sql)
 f.write(";\n")
 puts "DONE!!"
 
-# problems
+# problems (huge download; google drive not responding well to access)
 # william and mary
-# EMU
-
-# DOWNLOADED, not processed
-# Univerity of Richmond
 
 ## UPDATES
 ## ALTER TABLE submissions MODIFY title TEXT NOT NULL;
 ## ALTER TABLE submissions MODIFY call_number varchar(100);
 
-# sequence
+# sequence (XX has been ingested on prod)
+# =======================================
 # XX mary_baldwin (1054-1071) xxx ingested 
 # XX jmu (1072-1105)
 # XX VCU (1106-1110)
@@ -138,3 +135,7 @@ puts "DONE!!"
 # XX roanoke (1302-1347)
 # XX VMI (1348-1502)
 # xx VUU (1503-1619)
+# EMU (1620-1714)
+# U Richmond (1715-1783)
+
+## ruby ingest.rb ~/Desktop/urichmond/richmond.xlsx "University of Richmond" ~/Desktop/urichmond/ ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2019/ 1715
