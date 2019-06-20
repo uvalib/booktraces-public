@@ -1,5 +1,8 @@
 require 'roo'
 require 'fileutils'
+require 'find'
+
+$img_cnt = 0
 
 # copy images from src into proper structure at dest. return insert sql
 def process_images(sub_id, images, src_dir, dest_dir)
@@ -10,6 +13,23 @@ def process_images(sub_id, images, src_dir, dest_dir)
    # for example - B_Images/JMU-BX-0005.Image_2.033932.jpg
    images.each do |i|
       puts "IMG: [#{i}]"
+
+      # Look for source image in correct matching location
+      src_fn = File.join(src_dir, i) 
+      if File.exist?(src_fn) == false 
+         # Not found; just look for the filename anywhere in the source tree
+         img_fn = "**/#{File.basename(i)}"
+         hits = Dir.glob(File.join(src_dir, img_fn))
+         if hits.length == 0 
+            puts "ERROR: #{img_fn} not found. Skipping"
+            next
+         elsif hits.length > 1 
+            puts "ERROR: Multiple hits for #{img_fn} found. Skipping"
+            next
+         else 
+            src_fn = hits.first
+         end
+      end
    
       # make sure dest dir exists and copy src file 
       dest_fn = File.join(dest_dir, i)
@@ -17,20 +37,17 @@ def process_images(sub_id, images, src_dir, dest_dir)
       if Dir.exist?(dest_path) == false
          FileUtils.mkdir_p(dest_path)
       end
-      src_fn = File.join(src_dir, i) 
-      if File.exist?(src_fn) == false 
-         abort "ERROR: #{src_fn} not found. Skipping"
-         next
-      end
+      
       # puts "CP #{src_fn} -> #{dest_fn}" 
-      FileUtils.cp(src_fn, dest_fn)
-
-      # generate thumbs (get name minus ext first)
+      $img_cnt += 1
       base_fn = File.basename(dest_fn, File.extname(dest_fn))
       tfn = "#{base_fn}-150x150#{File.extname(dest_fn).downcase}"
       thumb_fn = File.join(File.dirname(dest_fn), tfn)
-      cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center \"#{dest_fn}\" \"#{thumb_fn}\""
-      `#{cmd}`
+      if File.exist?(dest_fn) == false &&  File.exist?(thumb_fn)
+         FileUtils.cp(src_fn, dest_fn)
+         cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center \"#{dest_fn}\" \"#{thumb_fn}\""
+         `#{cmd}`
+      end
 
       if sql != "" 
          sql += ","
@@ -66,7 +83,7 @@ files_sql="insert into submission_files(submission_id,filename) values "
 puts "Ingest #{univ}:  #{fn}, images: #{img_dir}\n\tDestination: #{dest_dir}, StartID: #{id}"
 puts "========================================================================================"
 xlsx = Roo::Excelx.new(fn)
-img_cnt = 0
+intervention_cnt = 0
 tgt_sheets = [ "B", "D", "E", "PR", "PS", "U", "multivolumes", "all", "EMU list"]
 xlsx.each_with_pagename do |name, sheet|
    if tgt_sheets.include?(name) == false 
@@ -88,21 +105,22 @@ xlsx.each_with_pagename do |name, sheet|
          upload_id="3cavaliers#{id}"
          lib = "#{row[:library]}, #{univ}"
          ingest_date = DateTime.now().strftime("%F %T")
-         sub = "(#{id},\"#{upload_id}\",\"#{sub_name}\",\"#{sub_email}\",\"#{row[:title]}\","
+         title = row[:title].gsub(/\"/, '\\"')
+         sub = "(#{id},\"#{upload_id}\",\"#{sub_name}\",\"#{sub_email}\",\"#{title}\","
          sub << "\"#{row[:author]}\",\"\",\"#{lib}\",\"#{row[:call_num]}\","
          sub << "\"#{row[:desc]}\",\"#{ingest_date}\",1)"
-         if img_cnt > 0 
+         if intervention_cnt > 0 
             submit_sql << ",\n"
          end
          submit_sql << sub
 
          # move images to destination and generate SQL
          img_sql = process_images(id, images, img_dir, dest_dir)
-         if img_cnt > 0 
+         if intervention_cnt > 0 
             files_sql += ",\n"
          end
          files_sql += img_sql
-         img_cnt+=1
+         intervention_cnt+=1
          id+=1
       end
    end
@@ -110,15 +128,12 @@ xlsx.each_with_pagename do |name, sheet|
 
 sql_out = "import_#{univ_fn}.sql"
 f = File.open(sql_out, 'w')
-puts "DONE! #{img_cnt} records generated, writing SQL to #{sql_out}"
+puts "DONE! #{intervention_cnt} records generated with #{$img_cnt} images, writing SQL to #{sql_out}"
 f.write(submit_sql)
 f.write(";\n")
 f.write(files_sql)
 f.write(";\n")
 puts "DONE!!"
-
-# problems (huge download; google drive not responding well to access)
-# william and mary
 
 ## UPDATES
 ## ALTER TABLE submissions MODIFY title TEXT NOT NULL;
@@ -134,8 +149,9 @@ puts "DONE!!"
 # XX virginia_tech (1269-1301)
 # XX roanoke (1302-1347)
 # XX VMI (1348-1502)
-# xx VUU (1503-1619)
-# EMU (1620-1714)
-# U Richmond (1715-1783)
+# XX VUU (1503-1619)
+# XX EMU (1620-1714)
+# XX U Richmond (1715-1783)
+# william and mary (1784-)
 
 ## ruby ingest.rb ~/Desktop/urichmond/richmond.xlsx "University of Richmond" ~/Desktop/urichmond/ ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2019/ 1715
