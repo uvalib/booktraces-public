@@ -21,10 +21,10 @@ def process_images(sub_id, images, src_dir, dest_dir)
          img_fn = "**/#{File.basename(i)}"
          hits = Dir.glob(File.join(src_dir, img_fn))
          if hits.length == 0 
-            puts "ERROR: #{img_fn} not found. Skipping"
+            abort "ERROR: #{img_fn} not found. Skipping"
             next
          elsif hits.length > 1 
-            puts "ERROR: Multiple hits for #{img_fn} found. Skipping"
+            abort "ERROR: Multiple hits for #{img_fn} found. Skipping"
             next
          else 
             src_fn = hits.first
@@ -39,12 +39,15 @@ def process_images(sub_id, images, src_dir, dest_dir)
       end
       
       # puts "CP #{src_fn} -> #{dest_fn}" 
+
       $img_cnt += 1
       base_fn = File.basename(dest_fn, File.extname(dest_fn))
       tfn = "#{base_fn}-150x150#{File.extname(dest_fn).downcase}"
       thumb_fn = File.join(File.dirname(dest_fn), tfn)
-      if File.exist?(dest_fn) == false &&  File.exist?(thumb_fn)
+      if File.exist?(dest_fn) == false
          FileUtils.cp(src_fn, dest_fn)
+      end
+      if File.exist?(thumb_fn) == false 
          cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center \"#{dest_fn}\" \"#{thumb_fn}\""
          `#{cmd}`
       end
@@ -96,9 +99,9 @@ xlsx.each_with_pagename do |name, sheet|
       image1: "Image_1", image2: "Image_2", image3: "Image_3",clean:true).each do |row|
       
       images = []
-      images << row[:image1] if !row[:image1].nil? && !row[:image1].empty?
-      images << row[:image2] if !row[:image2].nil? && !row[:image2].empty?
-      images << row[:image3] if !row[:image3].nil? && !row[:image3].empty?
+      images << row[:image1] if !row[:image1].nil? && !row[:image1].empty? && row[:image1].downcase != "not available"
+      images << row[:image2] if !row[:image2].nil? && !row[:image2].empty? && row[:image2].downcase != "not available"
+      images << row[:image3] if !row[:image3].nil? && !row[:image3].empty? && row[:image3].downcase != "not available"
       if !images.empty?
          puts "     #{row[:call_num]} has interventions"
          # generate submission insert
