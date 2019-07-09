@@ -7,6 +7,10 @@
         <div class="error">{{error}}</div>
       </template>
       <template v-else>
+         <div class="paging">
+            <button v-bind:class="{disabled: hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
+            <button v-bind:class="{disabled: hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
+         </div>
          <div class="submit-header">
             <h3><b>BOOK SUBMISSION:</b> {{details.title}}</h3>
             <div class="submit-time">
@@ -31,10 +35,6 @@
             <div @click="tagClicked" class="tag" v-for="(tag,idx) in details.tags" :key="idx">
                {{tag}}
             </div>
-         </div>
-         <div class="paging">
-            <button v-if="hasPrev" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
-            <button v-if="hasNext" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
          </div>
       </template>
    </div>
@@ -75,12 +75,16 @@ export default {
          return out
       },
       nextClicked() {
-         this.$router.push("/submissions/" + this.details.nextId)
-         this.$store.dispatch("getSubmissionDetail", this.details.nextId)
+         if (this.details.nextId > 0) {
+            this.$router.push("/submissions/" + this.details.nextId)
+            this.$store.dispatch("getSubmissionDetail", this.details.nextId)
+         }
       },
       prevClicked() {
-         this.$router.push("/submissions/" + this.details.previousId)
-         this.$store.dispatch("getSubmissionDetail", this.details.previousId)
+         if (this.details.previousId > 0) {
+            this.$router.push("/submissions/" + this.details.previousId)
+            this.$store.dispatch("getSubmissionDetail", this.details.previousId)
+         }
       }
    },
    created: function() {
@@ -156,10 +160,19 @@ div.tag {
 div.paging {
    font-size: 0.8em;
    text-align: right;
+   position: relative;
+   top: -10px;
+   right: -5px;
 }
 div.paging .pure-button {
    margin-left: 10px;
    background: #24890d;
+}
+div.paging .pure-button.disabled {
+   margin-left: 10px;
+   background: #24890d;
+   opacity: 0.5;
+   cursor: default;
 }
 div.tag:hover {
    cursor:pointer;
