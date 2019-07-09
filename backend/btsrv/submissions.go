@@ -32,11 +32,40 @@ type Submission struct {
 	Tags        []string  `json:"tags" db:"-"`
 	SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
 	Public      bool      `json:"published" db:"public"`
+	NextID      int       `json:"nextId"`
+	PreviousID  int       `json:"previousId"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to
 func (sub *Submission) TableName() string {
 	return "submissions"
+}
+
+// GetNextAndPreviousIDs will find the IDs of the next and previus sub and add them to the struct
+func (sub *Submission) GetNextAndPreviousIDs(db *dbx.DB) {
+	qs := fmt.Sprintf(`select id from submissions where public = 1 and id > %d limit 1`, sub.ID)
+	qn := db.NewQuery(qs)
+	var nextID []int
+	err := qn.Column(&nextID)
+	if err != nil {
+		log.Printf("Next ID request for %d failed: %s", sub.ID, err.Error())
+	} else {
+		if len(nextID) > 0 {
+			sub.NextID = nextID[0]
+		}
+	}
+
+	var prevID []int
+	qs = fmt.Sprintf(`select id from submissions where public = 1 and id < %d order by id desc limit 1`, sub.ID)
+	qp := db.NewQuery(qs)
+	err = qp.Column(&prevID)
+	if err != nil {
+		log.Printf("Previos ID request for %d failed: %s", sub.ID, err.Error())
+	} else {
+		if len(prevID) > 0 {
+			sub.PreviousID = prevID[0]
+		}
+	}
 }
 
 // WriteFiles commits submission files to DB
@@ -133,6 +162,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	}
 	sub.GetTags(svc.DB)
 	sub.GetFileURLs(svc.DB)
+	sub.GetNextAndPreviousIDs(svc.DB)
 	c.JSON(http.StatusOK, sub)
 }
 
@@ -145,7 +175,7 @@ func (svc *ServiceContext) GetRecents(c *gin.Context) {
 	}
 	var data []Recent
 	q := svc.DB.NewQuery(`select id,title,DATE_FORMAT(submitted_at,'%M %d, %Y') submitted from submissions 
-		where public=1 order by submitted_at desc limit 5`)
+		where public=1 order by id desc limit 5`)
 	err := q.All(&data)
 	if err != nil {
 		log.Printf("ERROR: Unable to get archives list: %s", err.Error())
@@ -186,7 +216,7 @@ func (svc *ServiceContext) GetThumbs(c *gin.Context) {
 
 	qs := fmt.Sprintf(`select s.id as sub_id,upload_id,submitted_at,filename from submissions s 
 			inner join submission_files f on f.submission_id = s.id where public = 1
-			group by s.id order by submitted_at desc limit %d,%d`, start, pageSize)
+			group by s.id order by s.id desc limit %d,%d`, start, pageSize)
 	q := svc.DB.NewQuery(qs)
 	rows, err := q.Rows()
 	if err != nil {

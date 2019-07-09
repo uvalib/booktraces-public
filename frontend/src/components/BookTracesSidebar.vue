@@ -4,10 +4,10 @@
       <div class="section">
          <p class="subtitle pad">Recent Submissions</p>
          <div class="recent" v-for="recent in recents" :key="recent.id">
-            <router-link :to="thumbURL(recent.id)">
+            <div @click="recentClicked(recent.id)" class="recent-link">
                <p class="title">{{recent.title}}</p>
                <p>{{recent.submittedAt}}</p>
-            </router-link>
+            </div>
          </div>
       </div>
       <div id="tfeed" class="section">
@@ -45,6 +45,10 @@ export default {
       }),
    },
     methods: {
+      recentClicked(id) {
+         this.$router.push("/submissions/" + id)
+         this.$store.dispatch("getSubmissionDetail", id)
+      },
       thumbURL(id) {
          return "/submissions/"+id
       },
@@ -68,7 +72,8 @@ export default {
       display:none;
    }
 }
-div.recent a:hover {
+div.recent .recent-link:hover {
+   cursor:pointer;
    color: #34991d !important;
 }
 div.section {

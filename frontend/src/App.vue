@@ -98,9 +98,12 @@ div.bkg {
    background-image: url(./assets/books-bkg.jpg);
    position: relative;
 }
+#app h1 {
+   margin: 0 0 5px 0;
+}
 #app div.content {
    position: relative;
-   padding: 2vw 5vw;
+   padding: 3vw 3vw 2vw 3vw;
    min-height: 600px;
    background: white;
    font-weight: 400;

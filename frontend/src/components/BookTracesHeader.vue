@@ -8,6 +8,7 @@
       <div v-if="!adminMode" class="pure-menu pure-menu-horizontal menubar">
          <ul class="pure-menu-list">
             <li @click="adminClicked" v-bind:class="{active: adminMode}" class="pure-menu-item admin">Admin</li>
+            <li class="pure-menu-item"><router-link to="/" exact>Home</router-link></li>
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
             <li class="pure-menu-item"><router-link to="/news">News</router-link></li>
@@ -31,6 +32,7 @@
          <div @click="toggleHMenu" class="hmenu-button"><i class="fas fa-bars"></i></div>
          <ul id="hmenu" class="hmenu-items hidden">
             <li @click="adminClicked" v-bind:class="{active: adminMode}" class="admin">Admin</li>
+            <li @click="toggleHMenu"><router-link to="/" exact>Home</router-link></li>
             <li @click="toggleHMenu"><router-link to="/about">About</router-link></li>
             <li @click="toggleHMenu"><router-link to="/press">Press</router-link></li>
             <li @click="toggleHMenu"><router-link to="/news">News</router-link></li>
@@ -148,9 +150,15 @@ span.search.small {
 .admin:hover {
    color:palevioletred;
    cursor: pointer;
+   opacity: 1;
+}
+.admin {
+   opacity: 0.5;
+   font-size: 0.85em;
 }
 .admin.active {
    color: #55d737;
+   opacity: 1;
 }
 div.bt-header {
    background-color: black;

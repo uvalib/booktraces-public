@@ -1,7 +1,6 @@
 <template>
    <div class="search content">
       <div class="bt-banner">
-         <router-link class="back" to="/"><i class="fas fa-arrow-left"></i>&nbsp;Back to Home</router-link>
          <h1>Book Traces</h1>
          <h3 v-if="searchType=='query'">Search Results for: {{query}}</h3>
          <h3 v-if="searchType=='archive'">Submissions from: {{archiveDate}}</h3>
