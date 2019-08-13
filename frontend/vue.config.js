@@ -6,17 +6,17 @@ module.exports = {
     public: process.env.BASE_URL,
     proxy: {
       '/api': {
-        target: process.env.SUBMIT_API, // or 'http://localhost:8095',
+        target: process.env.API_HOST, // or 'http://localhost:8095',
         changeOrigin: true,
         logLevel: 'debug'
       },
       '/authenticate': {
-        target: process.env.SUBMIT_API, // or 'http://localhost:8095',
+        target: process.env.API_HOST, // or 'http://localhost:8095',
         changeOrigin: true,
         logLevel: 'debug'
       },
       '/uploads': {
-        target: process.env.SUBMIT_API, // or 'http://localhost:8095',
+        target: process.env.API_HOST, // or 'http://localhost:8095',
         changeOrigin: true,
         logLevel: 'debug'
       }
