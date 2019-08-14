@@ -56,10 +56,10 @@ export default {
       hasError() {
          return this.$store.getters.hasError
       },
-      hasNext() {
+      hasPrev() {
          return this.details.nextId > 0
       },
-      hasPrev() {
+      hasNext() {
          return this.details.previousId > 0
       }
 
@@ -74,13 +74,13 @@ export default {
          let out = desc.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
          return out
       },
-      nextClicked() {
+      prevClicked() {
          if (this.details.nextId > 0) {
             this.$router.push("/submissions/" + this.details.nextId)
             this.$store.dispatch("getSubmissionDetail", this.details.nextId)
          }
       },
-      prevClicked() {
+      nextClicked() {
          if (this.details.previousId > 0) {
             this.$router.push("/submissions/" + this.details.previousId)
             this.$store.dispatch("getSubmissionDetail", this.details.previousId)
