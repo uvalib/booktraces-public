@@ -95,6 +95,7 @@
          <div class="thumbs">
             <div class="thumb" v-for="(url,idx) in details.files" :key="idx">
                <img class="thumb" :src="url"/>
+               <p @click="rotateClicked(url)" class="pure-button rotate">Rotate Right</p>
             </div>
          </div>
       </template>
@@ -169,6 +170,9 @@ export default {
             return false
          })
          this.editDetails.tags.splice(delIdx, 1)
+      },
+      rotateClicked(imgURL) {
+         this.$store.dispatch("admin/rotateImage", {submissionID: this.details.id, imgURL: imgURL})
       },
       addTagClicked() {
          this.showTagList = true
@@ -284,10 +288,12 @@ div.details .value {
 img.thumb {
    max-width: 250px;
    max-height: 250px;
+   display: block;
 }
 div.thumb {
    display: inline-block;
    margin: 5px 10px;
+   text-align: center;
 }
 .thumbs {
    margin-top: 20px;
@@ -361,5 +367,8 @@ span.tag {
 i.fas.fa-times-circle {
    color: firebrick;
    margin-left: 5px;
+}
+p.pure-button.rotate {
+   padding: 4px 20px;
 }
 </style>

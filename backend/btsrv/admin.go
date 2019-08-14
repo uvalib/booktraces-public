@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -62,6 +63,45 @@ func (svc *ServiceContext) PublishSubmission(c *gin.Context) {
 	}
 	log.Printf("Submission %s has been published", subID)
 	c.String(http.StatusOK, "ok")
+}
+
+// RotateImage rotatates the image specified by URL on the POST body to teh right by 90 degrees.
+// The thumbnail image is also rotated
+func (svc *ServiceContext) RotateImage(c *gin.Context) {
+	log.Printf("Rotate image requested")
+	subID := c.Param("id")
+	subPath := fmt.Sprintf("%s/submitted", svc.UploadDir)
+	imgPath := strings.Replace(c.Query("url"), "/uploads", subPath, -1)
+	log.Printf("Submission %s: rotate image %s", subID, imgPath)
+	if _, err := os.Stat(imgPath); err != nil {
+		log.Printf("File %s not found", imgPath)
+		c.String(http.StatusNotFound, fmt.Sprintf("%s not found", imgPath))
+		return
+	}
+
+	err := rotateImage(imgPath)
+	if err != nil {
+		log.Printf("Rotate %s failed: %s", imgPath, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	thumbPath := GetThumbFilename(imgPath)
+	err = rotateImage(thumbPath)
+	if err != nil {
+		log.Printf("Rotate THUMB %s failed: %s", thumbPath, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.String(http.StatusOK, "rotated")
+}
+
+func rotateImage(imgPath string) error {
+	args := []string{"-quiet", "-rotate", "90", imgPath, imgPath}
+	log.Printf("convert args: %+v", args)
+	cmd := exec.Command("convert", args...)
+	return cmd.Run()
 }
 
 // UnpublishSubmission makes a previoulsy public submission private

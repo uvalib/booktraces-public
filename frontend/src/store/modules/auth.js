@@ -105,6 +105,19 @@ const auth = {
       ctx.commit('gotoLastPage')
       ctx.dispatch("getSubmissions")
     },
+
+    rotateImage(ctx, data ) {
+      ctx.commit("setLoading", true, {root: true})
+      let url = `/api/admin/submissions/${data.submissionID}/rotate?url=${data.imgURL}`
+      axios.put(url,{withCredentials: true }).then((_response)  =>  {
+        console.log("Image rotated")
+        ctx.commit("setLoading", false, {root: true})
+      }).catch((error) => {
+        ctx.commit("setLoading", false, {root: true})
+        ctx.commit('setError', "Unable to get rotate image: "+error.response.data, {root: true}) 
+      })
+    },
+
     getSubmissions( ctx ) {
       ctx.commit("setLoading", true, {root: true})
       let url = "/api/admin/submissions?page="+ctx.state.page

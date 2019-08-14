@@ -54,6 +54,7 @@ func main() {
 			admin.PUT("/events/:id", svc.AuthMiddleware, svc.UpdateEvent)
 			admin.GET("/submissions", svc.AuthMiddleware, svc.GetSubmissions)
 			admin.DELETE("/submissions/:id", svc.AuthMiddleware, svc.DeleteSubmission)
+			admin.PUT("/submissions/:id/rotate", svc.AuthMiddleware, svc.RotateImage)
 			admin.POST("/submissions/:id/publish", svc.AuthMiddleware, svc.PublishSubmission)
 			admin.POST("/submissions/:id/unpublish", svc.AuthMiddleware, svc.UnpublishSubmission)
 			admin.POST("/submissions/:id", svc.AuthMiddleware, svc.UpdateSubmission)
