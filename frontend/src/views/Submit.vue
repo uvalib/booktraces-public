@@ -119,7 +119,7 @@ export default {
         this.$store.dispatch("public/removeUploadedFile",file.name)
       }
     },
-    sendingEvent (file, xhr, formData) {
+    sendingEvent (_file, _xhr, formData) {
       formData.append('uploadID', this.uploadID);
     },
     submitClicked(/*event*/) {
