@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/rs/xid"
 )
 

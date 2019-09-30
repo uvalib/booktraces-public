@@ -1,0 +1,2 @@
+#!/bin/bash
+cat updated_library_names.csv | awk -F, -v q='"' '{print q $NF q}' | sort | uniq

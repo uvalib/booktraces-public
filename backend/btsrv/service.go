@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+    _ "github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
