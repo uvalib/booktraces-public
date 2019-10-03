@@ -18,27 +18,42 @@ import (
 
 // Submission contains the data necessary for a user to make a book traces submission
 type Submission struct {
-	ID          int       `json:"id"`
-	UploadID    string    `json:"uploadId" binding:"required" db:"upload_id"`
-	Title       string    `json:"title" binding:"required"`
-	Author      string    `json:"author" binding:"required"`
-	Publication string    `json:"publication" db:"publication_info"`
-	Library     string    `json:"library" binding:"required"`
-	CallNumber  string    `json:"callNumber" db:"call_number"`
-	Description string    `json:"description"`
-	Files       []string  `json:"files" binding:"required" db:"-"`
-	Submitter   string    `json:"submitter" binding:"required" db:"submitter_name"`
-	Email       string    `json:"email" binding:"required" db:"submitter_email"`
-	Tags        []string  `json:"tags" db:"-"`
-	SubmittedAt time.Time `json:"submittedAt" db:"submitted_at"`
-	Public      bool      `json:"published" db:"public"`
-	NextID      int       `json:"nextId"`
-	PreviousID  int       `json:"previousId"`
+	ID              int       `json:"id"`
+	UploadID        string    `json:"uploadId" binding:"required" db:"upload_id"`
+	Title           string    `json:"title" binding:"required"`
+	Author          string    `json:"author" binding:"required"`
+	Publication     string    `json:"publication" db:"publication_info"`
+	Library         string    `json:"library"`
+	InstitutionID   int       `json:"institution_id" db:"institution_id" binding:"required"`
+	InstitutionName string    `json:"institution" db:"-" binding:"required"`
+	CallNumber      string    `json:"callNumber" db:"call_number"`
+	Description     string    `json:"description"`
+	Files           []string  `json:"files" binding:"required" db:"-"`
+	Submitter       string    `json:"submitter" binding:"required" db:"submitter_name"`
+	Email           string    `json:"email" binding:"required" db:"submitter_email"`
+	Tags            []string  `json:"tags" db:"-"`
+	SubmittedAt     time.Time `json:"submittedAt" db:"submitted_at"`
+	Public          bool      `json:"published" db:"public"`
+	NextID          int       `json:"nextId"`
+	PreviousID      int       `json:"previousId"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to
 func (sub *Submission) TableName() string {
 	return "submissions"
+}
+
+// GetInstitution retrieves the institution that is associated with this submission
+func (sub *Submission) GetInstitution(db *dbx.DB) {
+	q := db.NewQuery("select * from institutions where id={:id}")
+	q.Bind((dbx.Params{"id": sub.InstitutionID}))
+	var inst Institution
+	err := q.One(&inst)
+	if err != nil {
+		log.Printf("Unable to get institution for %d failed: %s", sub.ID, err.Error())
+		return
+	}
+	sub.InstitutionName = inst.Name
 }
 
 // GetNextAndPreviousIDs will find the IDs of the next and previus sub and add them to the struct
@@ -163,6 +178,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	sub.GetTags(svc.DB)
 	sub.GetFileURLs(svc.DB)
 	sub.GetNextAndPreviousIDs(svc.DB)
+	sub.GetInstitution(svc.DB)
 	c.JSON(http.StatusOK, sub)
 }
 
