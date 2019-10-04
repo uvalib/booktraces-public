@@ -1,0 +1,1 @@
+update submissions set institution_id = null;
