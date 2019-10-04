@@ -20,8 +20,17 @@
           <input id="publication" class="pure-u-1-1" type="text">
         </div>
         <div class="pure-u-1-1 gap">
-          <label for="library">Library where found<span class="required">*</span></label>
-          <input id="library" class="pure-u-1-1" type="text">
+          <label for="institution">Institution where found<span class="required">*</span></label>
+          <multiselect v-model="selectedInstitution" class="folders"  
+              placeholder="Select or create an institution"
+              :showLabels="false" 
+              :searchable="true"
+              :taggable="true"
+              track-by="id" label="name"
+              tagPlaceholder="Press enter to create a new institution"
+              @tag="addInstitution"
+              :options="institutions">
+          </multiselect>
         </div>
         <div class="pure-u-1-1 gap">
           <label for="call-number">Call Number</label>
@@ -78,16 +87,17 @@ import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 import axios from 'axios'
 import { mapState } from 'vuex'
-
+import Multiselect from 'vue-multiselect'
 export default {
   name: 'submit',
   components: {
-    vueDropzone: vue2Dropzone
+    vueDropzone: vue2Dropzone, Multiselect
   },
   data: function () {
     return {
       submitted: false,
       selectedTags: [],
+      selectedInstitution: null,
       dropzoneOptions: {
         url: '/api/upload',
         createImageThumbnails: true,
@@ -105,12 +115,28 @@ export default {
         uploadedFiles: state => state.public.uploadedFiles,
         uploadID: state => state.public.uploadID,
         tags: state => state.tags,
+        institutions: state => state.institutions,
     }),
   },
   created: function () {
     this.$store.dispatch('getTags')
+    this.$store.dispatch('getInstitutions')
   },
   methods: {
+    addInstitution(newInstitutionName) {
+        this.$store.dispatch("addInstitution", newInstitutionName).then( () => {
+          this.institutions.some( (i)=> {
+              if (i.name == newInstitutionName) {
+                this.selectedInstitution = i
+                return true
+              }
+              return false
+          })
+        }).catch((error) => {
+          // TODO something else maybe?
+          alert(error)
+        })
+    },
     fileAddedEvent (file) {
       this.$store.commit("public/addUploadedFile",file.name)
     },
@@ -132,7 +158,8 @@ export default {
         title: document.getElementById("title").value,
         author: document.getElementById("author").value,
         publication: document.getElementById("publication").value,
-        library: document.getElementById("library").value,
+        institution_id: this.selectedInstitution.id,
+        institution: this.selectedInstitution.name,
         callNumber: document.getElementById("call-number").value,
         description: document.getElementById("description").value,
         files: this.uploadedFiles,
@@ -153,6 +180,12 @@ export default {
 }
 </script>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style>
+.pure-form input[type=text].multiselect__input {
+  border: none;
+}
+</style>
 <style scoped>
 /* NOTE: Styles for DropZone must go in an un-scoped style section. App.vue has them */   
 .pure-button.submit {

@@ -21,7 +21,7 @@
             <div><label>Title: </label><span class="value">{{details.title}}</span></div>
             <div><label>Author: </label><span class="value">{{details.author}}</span></div>
             <div><label>Publication date:</label><span class="value">{{details.publication}}</span></div>
-            <div><label>Library: </label><span class="value">{{details.library}}</span></div>
+            <div><label>Institution: </label><span class="value">{{details.institution}}</span></div>
             <div><label>Call number: </label><span class="value">{{details.callNumber}}</span></div>
             <div><label>Submitted by: </label><span class="value">{{details.submitter}}</span></div>
             <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>

@@ -34,8 +34,8 @@ type Submission struct {
 	Tags            []string  `json:"tags" db:"-"`
 	SubmittedAt     time.Time `json:"submittedAt" db:"submitted_at"`
 	Public          bool      `json:"published" db:"public"`
-	NextID          int       `json:"nextId"`
-	PreviousID      int       `json:"previousId"`
+	NextID          int       `json:"nextId" db:"-"`
+	PreviousID      int       `json:"previousId" db:"-"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to

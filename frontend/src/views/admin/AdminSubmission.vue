@@ -1,17 +1,36 @@
 <template>
    <div class="admin-submission">
-      <h2>System Admin Panel<span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
+      <h2>
+         System Admin Panel
+         <span class="login">
+            <b>Logged in as:</b>
+            {{loginName}}
+         </span>
+      </h2>
       <template v-if="loading">
          <h1>Loading Details...</h1>
       </template>
       <template v-else>
          <div class="actions">
-            <router-link to="/admin"><i class="fas fa-arrow-left"></i>&nbsp;Back to Submissions</router-link>
+            <router-link to="/admin">
+               <i class="fas fa-arrow-left"></i>&nbsp;Back to Submissions
+            </router-link>
             <div v-if="!edit" class="buttons">
                <button @click="editClicked" class="admin pure-button edit pure-button-primary">Edit</button>
-               <button v-if="!details.published" @click="publishClicked" class="admin pure-button publish pure-button-primary">Publish</button>
-               <button v-else @click="unpublishClicked" class="admin pure-button unpublish pure-button-primary">Unpublish</button>
-               <button @click="deleteClicked" class="admin pure-button delete pure-button-primary">Delete</button>
+               <button
+                  v-if="!details.published"
+                  @click="publishClicked"
+                  class="admin pure-button publish pure-button-primary"
+               >Publish</button>
+               <button
+                  v-else
+                  @click="unpublishClicked"
+                  class="admin pure-button unpublish pure-button-primary"
+               >Unpublish</button>
+               <button
+                  @click="deleteClicked"
+                  class="admin pure-button delete pure-button-primary"
+               >Delete</button>
             </div>
             <div v-else class="buttons">
                <button @click="saveClicked" class="admin pure-button pure-button-primary">Save</button>
@@ -21,49 +40,100 @@
          <div class="error">{{error}}</div>
          <div v-if="!edit" class="details">
             <table>
-               <tr><td class="label">Visible to public:</td><td class="value">{{published}}</td></tr>
-               <tr><td class="label">Title:</td><td class="value">{{details.title}}</td></tr>
-               <tr><td class="label">Author:</td><td class="value">{{details.author}}</td></tr>
-               <tr><td class="label">Publication details:</td><td class="value">{{details.publication}}</td></tr>
-               <tr><td class="label">Library:</td><td class="value">{{details.library}}</td></tr>
-               <tr><td class="label">Call number:</td><td class="value">{{details.callNumber}}</td></tr>
-               <tr><td class="label">Submitted by:</td><td class="value">{{details.submitter}}</td></tr>
-               <tr><td class="label">Submitted on:</td><td class="value">{{submitDate}}</td></tr>
-               <tr><td class="label">Tags:</td><td class="value">{{submissionTagCSV}}</td></tr>
-               <tr><td class="label">Description:</td><td class="value">
-                  <span v-html="formatDescription(details.description)"></span>
-               </td></tr>
-            </table>
-         </div>
-         <div v-else class="edit details">
-            <table>
                <tr>
                   <td class="label">Visible to public:</td>
                   <td class="value">{{published}}</td>
                </tr>
                <tr>
                   <td class="label">Title:</td>
-                  <td class="value"><input id="title" type="text" v-model="editDetails.title"></td>
+                  <td class="value">{{details.title}}</td>
                </tr>
                <tr>
                   <td class="label">Author:</td>
-                  <td class="value"><input id="author" type="text" v-model="editDetails.author"></td>
+                  <td class="value">{{details.author}}</td>
                </tr>
                <tr>
                   <td class="label">Publication details:</td>
-                  <td class="value"><input id="publication" type="text" v-model="editDetails.publication"></td>
+                  <td class="value">{{details.publication}}</td>
                </tr>
                <tr>
-                  <td class="label">Library:</td>
-                  <td class="value"><input id="library" type="text" v-model="editDetails.library"></td>
+                  <td class="label">Institution:</td>
+                  <td class="value">{{details.institution}}</td>
                </tr>
                <tr>
                   <td class="label">Call number:</td>
-                  <td class="value"><input id="callNumber" type="text" v-model="editDetails.callNumber"></td>
+                  <td class="value">{{details.callNumber}}</td>
                </tr>
                <tr>
                   <td class="label">Submitted by:</td>
-                  <td class="value"><input id="submitter" type="text" v-model="editDetails.submitter"></td>
+                  <td class="value">{{details.submitter}}</td>
+               </tr>
+               <tr>
+                  <td class="label">Submitted on:</td>
+                  <td class="value">{{submitDate}}</td>
+               </tr>
+               <tr>
+                  <td class="label">Tags:</td>
+                  <td class="value">{{submissionTagCSV}}</td>
+               </tr>
+               <tr>
+                  <td class="label">Description:</td>
+                  <td class="value">
+                     <span v-html="formatDescription(details.description)"></span>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div v-else class="edit details  pure-form">
+            <table style="width:75%; margin: 0 auto;">
+               <tr>
+                  <td class="label">Visible to public:</td>
+                  <td class="value">{{published}}</td>
+               </tr>
+               <tr>
+                  <td class="label">Title:</td>
+                  <td class="value">
+                     <input id="title" type="text" v-model="editDetails.title" />
+                  </td>
+               </tr>
+               <tr>
+                  <td class="label">Author:</td>
+                  <td class="value">
+                     <input id="author" type="text" v-model="editDetails.author" />
+                  </td>
+               </tr>
+               <tr>
+                  <td class="label">Publication details:</td>
+                  <td class="value">
+                     <input id="publication" type="text" v-model="editDetails.publication" />
+                  </td>
+               </tr>
+               <tr>
+                  <td class="label">Institution:</td>
+                  <td class="value">
+                     <multiselect v-model="selectedInstitution" class="folders"  
+                        placeholder="Select or create an institution"
+                        :showLabels="false" 
+                        :searchable="true"
+                        :taggable="true"
+                        track-by="id" label="name"
+                        tagPlaceholder="Press enter to create a new institution"
+                        @tag="addInstitution"
+                        :options="institutions">
+                     </multiselect>
+                  </td>
+               </tr>
+               <tr>
+                  <td class="label">Call number:</td>
+                  <td class="value">
+                     <input id="callNumber" type="text" v-model="editDetails.callNumber" />
+                  </td>
+               </tr>
+               <tr>
+                  <td class="label">Submitted by:</td>
+                  <td class="value">
+                     <input id="submitter" type="text" v-model="editDetails.submitter" />
+                  </td>
                </tr>
                <tr>
                   <td class="label">Submitted on:</td>
@@ -75,26 +145,35 @@
                      <div v-if="showTagList" class="source-tags">
                         <p class="head">Available Tags</p>
                         <div class="list">
-                           <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">{{tag.name}}</p>
+                           <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">
+                              {{tag.name}}
+                           </p>
                         </div>
-                        <span @click="closeTagList" class="add-tag pure-button pure-button-primary">Done</span>
+                        <span @click="closeTagList" class="add-tag pure-button pure-button-primary">
+                           Done
+                        </span>
                      </div>
-                     <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">Add</span>
-                     <span class="tag" v-for="(tag,idx) in editDetails.tags" :key="idx" @click="removeTag">
-                        {{tag}} 
+                     <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">
+                        Add
+                     </span>
+                     <span class="tag" v-for="(tag,idx) in editDetails.tags"
+                        :key="idx" @click="removeTag">
+                        {{tag}}
                         <i class="fas fa-times-circle"></i>
-                     </span>   
+                     </span>
                   </td>
                </tr>
                <tr>
                   <td class="label">Description:</td>
-                  <td class="value"><textarea rows="5" id="description" v-model="editDetails.description"></textarea></td>
+                  <td class="value">
+                     <textarea rows="5" id="description" v-model="editDetails.description"></textarea>
+                  </td>
                </tr>
             </table>
          </div>
          <div class="thumbs">
             <div class="thumb" v-for="(url,idx) in details.files" :key="idx">
-               <img class="thumb" :src="url"/>
+               <img class="thumb" :src="url" />
                <p @click="rotateClicked(url)" class="pure-button rotate">Rotate Right</p>
             </div>
          </div>
@@ -103,16 +182,21 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
+import { mapState } from "vuex";
+import { mapGetters } from "vuex";
+import Multiselect from "vue-multiselect";
 export default {
    name: "admin-submission",
-   data: function () {
+   components: {
+      Multiselect
+   },
+   data: function() {
       return {
          edit: false,
          editDetails: null,
          showTagList: false,
-      }
+         selectedInstitution: null
+      };
    },
    computed: {
       ...mapState({
@@ -120,92 +204,138 @@ export default {
          loading: state => state.loading,
          error: state => state.error,
          tags: state => state.tags,
+         institutions: state => state.institutions
       }),
       ...mapGetters({
-         loginName: 'admin/loginName',
+         loginName: "admin/loginName"
       }),
       submitDate() {
-         return this.details.submittedAt.split("T")[0]
+         return this.details.submittedAt.split("T")[0];
       },
       hasError() {
-         return this.$store.getters.hasError
+         return this.$store.getters.hasError;
       },
       published() {
          if (this.details.published) {
-            return "YES"
+            return "YES";
          } else {
-            return "NO"
+            return "NO";
          }
       },
       submissionTagCSV() {
          if (this.details.tags) {
-            return this.details.tags.join(", ")
+            return this.details.tags.join(", ");
          }
-         return ""
+         return "";
       }
    },
    methods: {
-      formatDescription( desc ) {
-         let out = desc.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
-         return out
+      addInstitution(newInstitutionName) {
+         this.$store
+            .dispatch("addInstitution", newInstitutionName)
+            .then(() => {
+               this.institutions.some(i => {
+                  if (i.name == newInstitutionName) {
+                     this.selectedInstitution = i
+                     return true;
+                  }
+                  return false;
+               })
+            })
+            .catch(error => {
+               // TODO something else maybe?
+               alert(error)
+            });
+      },
+      formatDescription(desc) {
+         let out = desc
+            .replace(/\r|\r\n/gm, "\n")
+            .replace(/\n+/gm, "<br/><br/>");
+         return out;
       },
       addTag(event) {
-         let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
-         if ( this.editDetails.tags.includes(addTag)) {
-            return
+         let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
+         if (this.editDetails.tags.includes(addTag)) {
+            return;
          }
-         this.editDetails.tags.push(addTag)
+         this.editDetails.tags.push(addTag);
       },
       closeTagList() {
-         this.showTagList = false
+         this.showTagList = false;
       },
       removeTag(event) {
-         let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
-         var delIdx = -1
-         this.editDetails.tags.some( function(tag,idx) {
+         let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
+         var delIdx = -1;
+         this.editDetails.tags.some(function(tag, idx) {
             if (tag == delTag) {
-               delIdx = idx
+               delIdx = idx;
+               return true;
+            }
+            return false;
+         });
+         this.editDetails.tags.splice(delIdx, 1);
+      },
+      rotateClicked(imgURL) {
+         this.$store.dispatch("admin/rotateImage", {
+            submissionID: this.details.id,
+            imgURL: imgURL
+         });
+      },
+      addTagClicked() {
+         this.showTagList = true;
+      },
+      deleteClicked() {
+         let resp = confirm(
+            "Delete this submission? All data and unloaded files will be permanently lost. Are you sure?"
+         );
+         if (resp) {
+            this.$store.dispatch("admin/deleteSubmission", {
+               id: this.details.id,
+               backToIndex: true
+            });
+         }
+      },
+      editClicked() {
+         this.editDetails = Object.assign({}, this.details);
+         this.edit = true;
+         this.institutions.some(i => {
+            if (i.name == this.editDetails.institution) {
+               this.selectedInstitution = i
                return true
             }
             return false
          })
-         this.editDetails.tags.splice(delIdx, 1)
-      },
-      rotateClicked(imgURL) {
-         this.$store.dispatch("admin/rotateImage", {submissionID: this.details.id, imgURL: imgURL})
-      },
-      addTagClicked() {
-         this.showTagList = true
-      },
-      deleteClicked() {
-         let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
-         if (resp) {
-            this.$store.dispatch("admin/deleteSubmission", {id:this.details.id, backToIndex:true})
-         }
-      },
-      editClicked() {
-         this.editDetails = Object.assign({},this.details)
-         this.edit=true
       },
       saveClicked() {
-         this.$store.dispatch('admin/updateSubmission',this.editDetails).then((/*response*/) => {
-            this.edit=false
-            this.editDetails = null
-        })
+         this.editDetails.institution_id = this.selectedInstitution.id
+         this.editDetails.institution = this.selectedInstitution.name
+         this.$store
+            .dispatch("admin/updateSubmission", this.editDetails)
+            .then((/*response*/) => {
+               this.edit = false;
+               this.editDetails = null;
+            });
       },
       cancelClicked() {
-         this.edit=false
+         this.edit = false;
       },
       publishClicked() {
-         this.$store.dispatch("admin/updatePublicationStatus", {id:this.details.id, public: true})
+         this.$store.dispatch("admin/updatePublicationStatus", {
+            id: this.details.id,
+            public: true
+         });
       },
       unpublishClicked() {
-         this.$store.dispatch("admin/updatePublicationStatus", {id:this.details.id, public: false})
+         this.$store.dispatch("admin/updatePublicationStatus", {
+            id: this.details.id,
+            public: false
+         });
       }
    },
    created() {
       this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
-      this.$store.dispatch('getTags')
+      this.$store.dispatch("getTags")
+      this.$store.dispatch("getInstitutions")
    }
 };
 </script>
@@ -215,7 +345,7 @@ export default {
    position: absolute;
    left: -100px;
    top: -100px;
-   width:175px;
+   width: 175px;
    font-size: 0.9em;
    border: 1px solid #cccc;
    display: inline-block;
@@ -261,11 +391,11 @@ span.login b {
    margin-right: 5px;
 }
 h2 {
-  font-size: 1.5em;
-  font-weight: bold;
-  border-bottom: 1px dashed #666;
-  font-family: 'Special Elite', cursive;
-  padding-bottom: 5px;
+   font-size: 1.5em;
+   font-weight: bold;
+   border-bottom: 1px dashed #666;
+   font-family: "Special Elite", cursive;
+   padding-bottom: 5px;
 }
 div.admin-submission {
    padding: 15px 25px;
@@ -275,7 +405,7 @@ div.admin-submission {
    position: relative;
 }
 div.details {
-   margin-top:20px;
+   margin: 20px 25px 0 25px;
 }
 div.details div {
    margin-bottom: 3px;
@@ -322,15 +452,15 @@ div.buttons {
    top: 8px;
 }
 .error {
-  margin: 5px 0 10px 0;
-  color: firebrick;
-  font-style: italic;
+   margin: 5px 0 10px 0;
+   color: firebrick;
+   font-style: italic;
 }
 table {
-   width:100%;
+   width: 100%;
 }
 td {
-   padding: 2px 0
+   padding: 2px 0;
 }
 td.label {
    width: 150px;
@@ -341,14 +471,15 @@ td.label {
    vertical-align: text-top;
 }
 td input {
-   border:1px solid #ccc;
-   width: 90%;
-   outline:none;  
+   border: 1px solid #ccc;
+   width: 100%;
+   outline: none;
+   box-sizing: border-box;
 }
 td textarea {
    display: block;
    border: 1px solid #ccc;
-   width:  90%;
+   width: 90%;
 }
 span.add-tag.pure-button {
    margin-right: 10px;
@@ -358,7 +489,7 @@ span.add-tag.pure-button {
 span.tag {
    cursor: pointer;
    padding: 1px 4px 0px 12px;
-   display:inline-block;
+   display: inline-block;
    border: 1px solid #ccc;
    border-radius: 20px;
    margin-right: 5px;

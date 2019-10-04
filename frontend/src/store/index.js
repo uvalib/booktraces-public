@@ -5,6 +5,7 @@ import unauth from './modules/unauth'
 import events from './modules/events'
 import news from './modules/news'
 import axios from 'axios'
+import {version} from '../../package.json'
 
 Vue.use(Vuex)
 
@@ -23,10 +24,12 @@ export default new Vuex.Store({
   // Global state/mutations/actions: for stuff that is used across modules
   state: {
     tags: [],
+    institutions: [],
     error: null,
     loading: true,
     submissionDetail: null,
-    adminMode: false
+    adminMode: false,
+    appVersion: version
   },
   getters: {
     hasError: state => {
@@ -39,6 +42,12 @@ export default new Vuex.Store({
     },
     setTags (state, tags) {
       state.tags = tags
+    },
+    setInstitutions (state, institutions) {
+      state.institutions = institutions
+    },
+    addInstitution(state, newInst) {
+      state.institutions.push(newInst)
     },
     setError (state, error) {
       state.error = error
@@ -65,6 +74,20 @@ export default new Vuex.Store({
       }).catch((error) => {
         ctx.commit('setTags', []) 
         ctx.commit('setError', "Unable to get tags: "+error.response.data) 
+      })
+    },
+    getInstitutions( ctx ) {
+      axios.get("/api/institutions").then((response)  =>  {
+        ctx.commit('setInstitutions', response.data )
+      }).catch((error) => {
+        ctx.commit('setInstitutions', []) 
+        ctx.commit('setError', "Unable to get institutions: "+error.response.data) 
+      })
+    },
+    addInstitution(ctx, name) {
+      let url = `/api/institutions`
+      return axios.post(url, {name: name}).then((response) => {
+         ctx.commit('addInstitution', response.data)
       })
     },
     getSubmissionDetail( ctx, id ) {
