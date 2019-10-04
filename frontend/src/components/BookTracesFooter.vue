@@ -12,10 +12,13 @@
        <br>
        <a href="http://www.library.virginia.edu/site-search/">Site Search</a> | <a href="http://www.library.virginia.edu/hours/">Hours</a> | <a href="http://www.library.virginia.edu/map/">Map</a> | <a href="http://www.library.virginia.edu/policies/">Policies</a> | <a href="http://www.library.virginia.edu/press/">Press</a> | <a href="http://www.library.virginia.edu/jobs/">Jobs</a><br>
        <a href="http://www2.lib.virginia.edu/campaign/">Give to the Library</a>
-       <p class="copy">
-          <div>Version: {{version}}</div>
-          © {{ new Date().getFullYear() }} by the Rector and Visitors of the <a href="http://www.virginia.edu/">University of Virginia</a>
-       </p>
+       
+      <div class="copy">
+         <div>Version: {{version}}</div>
+         <span>© {{ new Date().getFullYear() }} by the Rector and Visitors of the
+            <a href="http://www.virginia.edu/">University of Virginia</a>
+         </span>
+       </div>
     </div>
     <div class="legal">
        <p class="gov"><a class="fdlp" href="http://guides.lib.virginia.edu/findinggovinfo"><span id="fdlp-badge"></span></a> This library is a Congressionally designated depository for <a href="http://guides.lib.virginia.edu/findinggovinfo">U.S. Government documents</a>. Public access to the Government documents is guaranteed by public law.</p>
@@ -55,7 +58,7 @@ footer {
      display: none;
    }
 }
-footer p.copy {
+footer .copy {
    margin-top:20px;
 }
 #app footer a {
