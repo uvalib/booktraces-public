@@ -12,6 +12,7 @@ type ServiceConfig struct {
 	DBName      string
 	DBUser      string
 	DBPass      string
+	DBPort      int
 	Port        int
 	UploadDir   string
 	DevAuthUser string
@@ -25,6 +26,7 @@ func (cfg *ServiceConfig) Load() {
 	flag.StringVar(&cfg.DBName, "dbname", "", "DB Name (required)")
 	flag.StringVar(&cfg.DBUser, "dbuser", "", "DB User (required)")
 	flag.StringVar(&cfg.DBPass, "dbpass", "", "DB Password (required)")
+	flag.IntVar(&cfg.DBPort, "dbport", 3306, "DB Port")
 
 	flag.StringVar(&cfg.DevAuthUser, "devuser", "", "Authorized computing id for dev")
 	flag.IntVar(&cfg.Port, "port", 8080, "Service port (default 8080)")

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
-    _ "github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // ServiceContext contains the data
@@ -25,7 +25,7 @@ func (svc *ServiceContext) Init(cfg *ServiceConfig) {
 	svc.DevAuthUser = cfg.DevAuthUser
 
 	log.Printf("Init DB connection to %s...", cfg.DBHost)
-	connectStr := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBName)
+	connectStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBPort, cfg.DBName)
 	db, err := dbx.Open("mysql", connectStr)
 	if err != nil {
 		log.Printf("FATAL: Unable to make connection: %s", err.Error())
