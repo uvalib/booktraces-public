@@ -110,7 +110,6 @@ const auth = {
       ctx.commit("setLoading", true, {root: true})
       let url = `/api/admin/submissions/${data.submissionID}/rotate?url=${data.imgURL}`
       axios.put(url,{withCredentials: true }).then((_response)  =>  {
-        console.log("Image rotated")
         ctx.commit("setLoading", false, {root: true})
       }).catch((error) => {
         ctx.commit("setLoading", false, {root: true})
