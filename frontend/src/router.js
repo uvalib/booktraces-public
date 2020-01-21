@@ -121,11 +121,11 @@ router.beforeEach((to, _from, next) => {
     store.commit("setAdminMode", true)
     let getters = store.getters
     if (getters["admin/isAuthenticated"] == false) {
-      let authUser = Vue.cookies.get("bt_admin_user")
+      let authUser = Vue.$cookies.get("bt_admin_user")
       if (authUser) {
         authUser.authenticated = true
         store.commit("admin/setUser", authUser)
-        Vue.cookies.remove("bt_admin_user")
+        Vue.$cookies.remove("bt_admin_user")
       } else {
         let authURL =  "/authenticate?url=" + to.fullPath
         window.location.href = authURL

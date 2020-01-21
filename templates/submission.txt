@@ -1,0 +1,7 @@
+_______________________________________________________________________
+Book Traces Submission Notification
+_______________________________________________________________________
+Title:  {{.Submission.Title}}
+Submitted By:  {{.Submission.Submitter}}  ({{.Submission.Email}})
+Book Traces URL: {{.BookTracesURL}}/admin/submissions/{{.Submission.ID}}
+_______________________________________________________________________

@@ -13,9 +13,11 @@ import (
 
 // ServiceContext contains the data
 type ServiceContext struct {
-	UploadDir   string
-	DevAuthUser string
-	DB          *dbx.DB
+	UploadDir     string
+	DevAuthUser   string
+	DB            *dbx.DB
+	BookTracesURL string
+	SMTP          SMTPConfig
 }
 
 // Init will initialize the service context based on the config parameters
@@ -23,6 +25,8 @@ func (svc *ServiceContext) Init(cfg *ServiceConfig) {
 	log.Printf("Initializing Service...")
 	svc.UploadDir = cfg.UploadDir
 	svc.DevAuthUser = cfg.DevAuthUser
+	svc.SMTP = cfg.SMTP
+	svc.BookTracesURL = cfg.BookTracesURL
 
 	log.Printf("Init DB connection to %s...", cfg.DBHost)
 	connectStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBPort, cfg.DBName)

@@ -19,6 +19,9 @@ web:
 	cd frontend/; yarn install; yarn build
 	rm -rf bin/public
 	mv frontend/dist bin/public
+	rm -rf bin/templates
+	mkdir -p bin/templates
+	cp ./templates/* bin/templates
 
 linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -a -installsuffix cgo -o bin/btsrv.linux backend/btsrv/*.go

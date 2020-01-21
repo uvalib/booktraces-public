@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/smtp"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -302,7 +305,52 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 	submission.WriteFiles(svc.DB, dateDirs)
 	submission.WriteTags(svc.DB)
 
+	sendSubmissionEmail(svc.BookTracesURL, svc.SMTP, submission)
+
 	c.JSON(http.StatusOK, submission)
+}
+
+func sendSubmissionEmail(btURL string, smtpCfg SMTPConfig, submission Submission) {
+	log.Printf("Sending submission notification email for submission %d", submission.ID)
+	var vars struct {
+		BookTracesURL string
+		Submission    Submission
+	}
+	vars.BookTracesURL = btURL
+	vars.Submission = submission
+	var renderedEmail bytes.Buffer
+	tpl := template.Must(template.New("submission.txt").ParseFiles("templates/submission.txt"))
+	err := tpl.Execute(&renderedEmail, vars)
+	if err != nil {
+		log.Printf("ERROR: Unable to render submission noty email: %s", err.Error())
+		return
+	}
+
+	log.Printf("Generate SMTP message")
+	// Per: https://stackoverflow.com/questions/36485857/sending-emails-with-name-email-from-go
+	// sending addresses like 'user name <email.com>' does not work with the default
+	// mail package. Leaving at just email address for now. Can revisit after meetings
+	/// about functionality.
+	// toAddr := mail.Address{Name: emailMap[reserveReq.Request.Library], Address: svc.CourseReserveEmail}
+	to := []string{smtpCfg.To}
+	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
+	subject := fmt.Sprintf("Subject: Book Traces Submisssion\n")
+	toHdr := fmt.Sprintf("To: %s\n", strings.Join(to, ","))
+	msg := []byte(subject + toHdr + mime + renderedEmail.String())
+
+	if smtpCfg.DevMode {
+		log.Printf("Email is in dev mode. Logging message instead of sending")
+		log.Printf("==================================================")
+		log.Printf("%s", msg)
+		log.Printf("==================================================")
+	} else {
+		log.Printf("Sending noty email to %s", strings.Join(to, ","))
+		err := smtp.SendMail(fmt.Sprintf("%s:%d", smtpCfg.Host, smtpCfg.Port), nil, "no-reply@virginia.edu", to, msg)
+		if err != nil {
+			log.Printf("ERROR: Unable to send receipt email: %s", err.Error())
+			return
+		}
+	}
 }
 
 // Generate 150x150x thumbnails for all images (.png and .jpg) in the srcDir
