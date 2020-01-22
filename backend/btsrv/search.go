@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -29,11 +30,24 @@ func (svc *ServiceContext) Search(c *gin.Context) {
 		getArchives(svc.DB, c, c.Query("a"))
 		return
 	}
+	if c.Query("i") != "" {
+		instID, _ := strconv.Atoi(c.Query("i"))
+		getByInstitution(svc.DB, c, instID)
+		return
+	}
 	if c.Query("t") != "" {
 		getTaggedSubmissions(svc.DB, c, c.Query("t"))
 		return
 	}
 	c.String(http.StatusBadRequest, "Invalid search type")
+}
+
+func getByInstitution(db *dbx.DB, c *gin.Context, institutionID int) {
+	log.Printf("Get submissions by institution [%d]", institutionID)
+	searchQ := fmt.Sprintf(`%s and institution_id={:i} group by s.id order by submitted_at`, getBaseQuery())
+	q := db.NewQuery(searchQ)
+	q.Bind(dbx.Params{"i": institutionID})
+	getHits(c, q)
 }
 
 func getArchives(db *dbx.DB, c *gin.Context, tgtYearMonth string) {
