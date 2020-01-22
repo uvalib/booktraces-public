@@ -16,6 +16,7 @@ const unauth = {
     searchResults: [],
     query: "",
     archiveDate: "",
+    targetInstitution: null,
     tgtTag: "",
     news: []
   },
@@ -37,6 +38,9 @@ const unauth = {
       if (state.archiveDate.length > 0) {
         return "archive"
       }
+      if ( state.targetInstitution != null ) {
+         return "institution"   
+      }
       if (state.query.length > 0) {
         return "query"
       }
@@ -52,18 +56,28 @@ const unauth = {
       state.searchResults =[]
       state.query = ""
       state.tgtTag = ""
+      state.targetInstitution = null
     },
     setTargetTag (state, t) {
       state.searchResults =[]
       state.query = ""
       state.archiveDate = ""
+      state.targetInstitution = null
       state.tgtTag = t
+    },
+    setTargetInstitution (state, inst) {
+      state.searchResults =[]
+      state.query = ""
+      state.archiveDate = ""
+      state.targetInstitution = inst
+      state.tgtTag = ""
     },
     updateSearchQuery(state, q) {
       state.query = q
       state.searchResults = []
       state.archiveDate = ""
       state.tgtTag = ""
+      state.targetInstitution = null
     },
     nextThumbsPage(state) {
       state.currPage++
@@ -120,6 +134,19 @@ const unauth = {
       ctx.commit('setLoading', true, {root: true}) 
       ctx.commit('showSearch', false) 
       axios.get("/api/search?q="+ctx.state.query).then((response)  =>  {
+        ctx.commit('setSearchResults', response.data )
+        ctx.commit('setLoading', false, {root: true}) 
+      }).catch((error) => {
+        ctx.commit('setError', "Unable to get search results: "+error.response.data, {root: true}) 
+        ctx.commit('setSearchResults', [] )
+        ctx.commit('setLoading', false, {root: true}) 
+      })
+    },
+    searchInstitutions( ctx, inst) {
+      ctx.commit('setLoading', true, {root: true}) 
+      ctx.commit('showSearch', false) 
+      ctx.commit('setTargetInstitution', inst)
+      axios.get("/api/search?i="+inst.id).then((response)  =>  {
         ctx.commit('setSearchResults', response.data )
         ctx.commit('setLoading', false, {root: true}) 
       }).catch((error) => {

@@ -4,6 +4,7 @@
          <h1>Book Traces</h1>
          <h3 v-if="searchType=='query'">Search Results for: {{query}}</h3>
          <h3 v-if="searchType=='archive'">Submissions from: {{archiveDate}}</h3>
+         <h3 v-if="searchType=='institution'">Submissions from: {{targetInstitution.name}}</h3>
          <h3 v-if="searchType=='tag'">Submissions tagged: {{tgtTag}}</h3>
       </div>
       <h4 v-if="loading===true">Loading...</h4>
@@ -21,6 +22,7 @@
                         <div class="pure-u-2-3 data">
                            <p><b>Title:</b> {{ hit.title }}</p>
                            <p><b>Submitted:</b> {{ hit.submittedOn }}</p>
+                           <p><b>Institution:</b> {{ hit.institution }}</p>
                            <p><b>Tags: </b>{{ formatTags(hit.tags) }}</p>
                            <div class="desc">
                               <label>Description:</label>
@@ -50,7 +52,8 @@ export default {
          loading: state => state.loading,
          query: state => state.public.query,
          archiveDate: state => state.public.archiveDate,
-         tgtTag: state => state.public.tgtTag
+         tgtTag: state => state.public.tgtTag,
+         targetInstitution: state => state.public.targetInstitution
       }),
       ...mapGetters({
          searchHitCount: 'public/searchHitCount',

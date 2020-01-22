@@ -79,6 +79,7 @@ export default {
    created() {
       this.$store.commit('public/clearThumbs' )
       this.$store.dispatch("public/getRecentThumbs")
+      this.$store.dispatch('getInstitutions')
    }
 };
 </script>

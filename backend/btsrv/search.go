@@ -18,6 +18,7 @@ type searchHit struct {
 	URL         string  `json:"url" db:"url"`
 	Description string  `json:"description" db:"description"`
 	SubmittedOn string  `json:"submittedOn" db:"submitted"`
+	Institution string  `json:"institution" db:"institution"`
 }
 
 // Search executes a full search over the submissions table
@@ -102,12 +103,13 @@ func getHits(c *gin.Context, q *dbx.Query) {
 }
 
 func getBaseQuery() string {
-	return `select s.id,s.title, 
+	return `select s.id,s.title,i.name as institution, 
 		group_concat(distinct t.name  separator ", ") as tags,
 		CONCAT('/uploads/', f.filename) as url,
 		description, DATE_FORMAT(submitted_at,'%M %Y') as submitted
 		from submissions s
 			inner join submission_files f on f.submission_id = s.id
+			inner join institutions i on i.id = s.institution_id
 			left outer  join submission_tags st on st.submission_id = s.id
 			left outer  join tags t on t.id = st.tag_id
 		where public=1 `
