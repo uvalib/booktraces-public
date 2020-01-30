@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getField, updateField } from 'vuex-map-fields'
 
 const unauth = {
   namespaced: true,
@@ -16,7 +17,7 @@ const unauth = {
     searchResults: [],
     query: "",
     archiveDate: "",
-    targetInstitution: null,
+    targetInstitution: "",
     tgtTag: "",
     news: []
   },
@@ -25,6 +26,7 @@ const unauth = {
   // and the getters themselves as the second param. Getter params are passed 
   // as a function. Access as a property like: this.$store.getters.NAME
   getters: {
+    getField,
     thumbsCount: state => {
       return state.thumbs.length
     },
@@ -45,31 +47,31 @@ const unauth = {
         return "query"
       }
       return "none"
-    }
+    },
   },
 
   // Synchronous updates to the state. Can be called directly in components like this:
   // this.$store.commit('mutation_name') or called from asynchronous actions
   mutations: {
+    updateField,
     setArchiveDate (state, date) {
       state.archiveDate = date
       state.searchResults =[]
       state.query = ""
       state.tgtTag = ""
-      state.targetInstitution = null
+      state.targetInstitution = ""
     },
     setTargetTag (state, t) {
       state.searchResults =[]
       state.query = ""
       state.archiveDate = ""
-      state.targetInstitution = null
+      state.targetInstitution = ""
       state.tgtTag = t
     },
-    setTargetInstitution (state, inst) {
+    initInstitutionSearch (state) {
       state.searchResults =[]
       state.query = ""
       state.archiveDate = ""
-      state.targetInstitution = inst
       state.tgtTag = ""
     },
     updateSearchQuery(state, q) {
@@ -77,7 +79,7 @@ const unauth = {
       state.searchResults = []
       state.archiveDate = ""
       state.tgtTag = ""
-      state.targetInstitution = null
+      state.targetInstitution = ""
     },
     nextThumbsPage(state) {
       state.currPage++
@@ -142,11 +144,11 @@ const unauth = {
         ctx.commit('setLoading', false, {root: true}) 
       })
     },
-    searchInstitutions( ctx, inst) {
+    searchInstitutions( ctx) {
       ctx.commit('setLoading', true, {root: true}) 
       ctx.commit('showSearch', false) 
-      ctx.commit('setTargetInstitution', inst)
-      axios.get("/api/search?i="+inst.id).then((response)  =>  {
+      ctx.commit('initInstitutionSearch')
+      axios.get("/api/search?i="+ctx.state.targetInstitution).then((response)  =>  {
         ctx.commit('setSearchResults', response.data )
         ctx.commit('setLoading', false, {root: true}) 
       }).catch((error) => {

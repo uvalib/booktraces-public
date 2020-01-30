@@ -4,7 +4,7 @@
          <h1>Book Traces</h1>
          <h3 v-if="searchType=='query'">Search Results for: {{query}}</h3>
          <h3 v-if="searchType=='archive'">Submissions from: {{archiveDate}}</h3>
-         <h3 v-if="searchType=='institution'">Submissions from: {{targetInstitution.name}}</h3>
+         <h3 v-if="searchType=='institution'">Submissions from: {{institutionName()}}</h3>
          <h3 v-if="searchType=='tag'">Submissions tagged: {{tgtTag}}</h3>
       </div>
       <h4 v-if="loading===true">Loading...</h4>
@@ -13,7 +13,10 @@
             <h4>Sorry, but nothing matched your search terms. Please try again with some different keywords.</h4>
          </div>
          <div v-else class="hits">
-            <p>Total Matches Found: {{searchHitCount}}</p>
+            <div class="controls">
+               <span>Total Matches Found: {{searchHitCount}}</span>
+               <InstitutionSearch style="margin-left: auto"/>
+            </div>
             <div class="hits">
                <div v-for="hit in hits" :key="hit.id">
                   <router-link class="hit" :to="submissionURL(hit.id)">
@@ -44,8 +47,12 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
+import InstitutionSearch from "@/components/InstitutionSearch"
 export default {
    name: "results",
+   components: {
+      InstitutionSearch
+   },
    computed: {
       ...mapState({
          hits: state => state.public.searchResults,
@@ -53,7 +60,8 @@ export default {
          query: state => state.public.query,
          archiveDate: state => state.public.archiveDate,
          tgtTag: state => state.public.tgtTag,
-         targetInstitution: state => state.public.targetInstitution
+         targetInstitution: state => state.public.targetInstitution,
+         institutions: state => state.institutions,
       }),
       ...mapGetters({
          searchHitCount: 'public/searchHitCount',
@@ -66,6 +74,13 @@ export default {
       }
    },
    methods: {
+      institutionName() {
+       let tgt = this.institutions.find( i => i.id == this.targetInstitution)
+       if (tgt) {
+          return tgt.name
+       }
+       return ""
+      },
       submissionURL(id) {
          return "/submissions/"+id
       },
@@ -141,5 +156,10 @@ div.data label {
 }
 div.data p.indent {
    margin-left: 25px;
+}
+.controls {
+   display:flex;
+   flex-flow: row wrap;
+   align-items: center;
 }
 </style>

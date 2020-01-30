@@ -38,7 +38,10 @@
       </div>
       <div class="recents">
          <h3>Recently Submitted Books</h3>
-         <p>Total Submission: {{total}}</p>
+         <div class="controls">
+            <span>Total Submission: {{total}}</span>
+             <InstitutionSearch style="margin-left:auto" />
+         </div>
          <div class="pure-g thumbs">
             <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in thumbs" :key="thumb.submissionID">
                <router-link :to="thumbURL(thumb.submissionID)"><img class="pure-img thumb" :src="thumb.url"/></router-link>
@@ -53,8 +56,12 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
+import InstitutionSearch from "@/components/InstitutionSearch"
 export default {
    name: "home",
+   components: {
+      InstitutionSearch
+   },
    computed: {
       ...mapState({
          total: state => state.public.totalSubmissions,
@@ -90,7 +97,7 @@ h3, h1 {
    margin-bottom: 5px;
 }
 h3 {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-weight: 500;
 }
 .pure-g.thumbs a {
@@ -115,5 +122,13 @@ div.info a.inline {
 }
 div.info a {
    margin-left: 20px;
+}
+.controls {
+   display:flex;
+   flex-flow: row wrap;
+   align-items: center;
+   border-bottom: 1px dashed #666;
+   padding-bottom: 10px;
+   margin-bottom: 10px;
 }
 </style>

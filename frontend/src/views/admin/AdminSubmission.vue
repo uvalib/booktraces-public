@@ -66,7 +66,7 @@
                </tr>
                <tr>
                   <td class="label">Submitted by:</td>
-                  <td class="value">{{details.submitter}}</td>
+                  <td class="value">{{details.submitter}} ( {{details.email}} )</td>
                </tr>
                <tr>
                   <td class="label">Submitted on:</td>
