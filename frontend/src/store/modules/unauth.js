@@ -40,7 +40,7 @@ const unauth = {
       if (state.archiveDate.length > 0) {
         return "archive"
       }
-      if ( state.targetInstitution != null ) {
+      if ( state.targetInstitution != "" ) {
          return "institution"   
       }
       if (state.query.length > 0) {
