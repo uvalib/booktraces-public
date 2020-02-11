@@ -15,7 +15,6 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get -y update && apt-get -y install yarn 
 
 WORKDIR /build
-WORKDIR /build
 COPY go.mod go.sum Makefile ./
 COPY backend ./backend
 COPY frontend ./frontend
@@ -57,11 +56,11 @@ CMD scripts/entry.sh
 
 # Move in necessary assets
 COPY package/scripts/entry.sh $APP_HOME/scripts/entry.sh
+COPY backend/db/migrations/*.sql $APP_HOME/db/
+COPY package/data/container_bash_profile /home/docker/.profile
 COPY --from=builder /build/bin/btsrv.linux $APP_HOME/bin/btsrv
 COPY --from=builder /build/bin/public $APP_HOME/bin/public
 COPY --from=builder /build/bin/templates $APP_HOME/bin/templates
-COPY backend/db/migrations/*.sql $APP_HOME/db/
-COPY package/data/container_bash_profile /home/docker/.profile
 
 # Add the build tag
 ARG BUILD_TAG
