@@ -1,7 +1,8 @@
 <template>
    <div class="content press">
       <h2>Press</h2>
-      <p class="lead"> 
+      <p><b>TEXT:</b></p>
+      <p> 
          <a href="http://www.mountholyokenews.com/news/2020/2/14/kristin-jensen-99-presents-book-traces-project" target="_blank">
          Kristin Jensen '99 Presents Book Traces Project
          </a>
@@ -9,31 +10,6 @@
          <br/>Mt. Holyoke News
          <br/>February 14, 2019<br/>
       </p>
-      <p><b>AUDIO:</b></p>
-      <p>
-         Interview with
-         <a href="http://ow.ly/SKOgU" target="_blank">
-            Alison Quantz for
-            <strong>With Good Reason, on NPR</strong>
-         </a>
-         <br>September 26, 2015
-      </p>
-      <p>
-         <a href="http://www.cbc.ca/spark/blog/2014/09/21/book-traces/" target="_blank">
-            Interview with Nora Young, for
-            <strong>Spark, on CBC Radio</strong>
-         </a>
-         <br>September 21, 2014
-      </p>
-      <p>
-         <a href="https://soundcloud.com/wtju/magic-in-the-margins-book-traces-with-andrew-stauffer"
-            target="_blank">
-            Interview with Elizabeth Richardson-Lorente, on
-            <strong>WTJU Soundboard</strong>
-         </a>
-         <br>November 13, 2014
-      </p>
-      <p><b>TEXT:</b></p>
       <p>
          <a href="https://www.news.virginia.edu/content/uva-library-opens-window-lost-love"
             target="_blank">
@@ -148,6 +124,30 @@
             <i>Amphora</i>
          </strong> 168
          <br>2014
+      </p>
+      <p><b>AUDIO:</b></p>
+      <p>
+         Interview with
+         <a href="http://ow.ly/SKOgU" target="_blank">
+            Alison Quantz for
+            <strong>With Good Reason, on NPR</strong>
+         </a>
+         <br>September 26, 2015
+      </p>
+      <p>
+         <a href="http://www.cbc.ca/spark/blog/2014/09/21/book-traces/" target="_blank">
+            Interview with Nora Young, for
+            <strong>Spark, on CBC Radio</strong>
+         </a>
+         <br>September 21, 2014
+      </p>
+      <p>
+         <a href="https://soundcloud.com/wtju/magic-in-the-margins-book-traces-with-andrew-stauffer"
+            target="_blank">
+            Interview with Elizabeth Richardson-Lorente, on
+            <strong>WTJU Soundboard</strong>
+         </a>
+         <br>November 13, 2014
       </p>
    </div>
 </template>
