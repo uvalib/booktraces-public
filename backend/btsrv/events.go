@@ -23,7 +23,7 @@ func (e *Event) TableName() string {
 
 // GetEvents returns a list of tags as JSON
 func (svc *ServiceContext) GetEvents(c *gin.Context) {
-	q := svc.DB.NewQuery("SELECT id, event_date, description FROM events")
+	q := svc.DB.NewQuery("SELECT id, event_date, description FROM events order by event_date desc")
 	var events []Event
 	err := q.All(&events)
 	if err != nil {

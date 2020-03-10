@@ -1,6 +1,14 @@
 <template>
    <div class="content press">
       <h2>Press</h2>
+      <p class="lead"> 
+         <a href="http://www.mountholyokenews.com/news/2020/2/14/kristin-jensen-99-presents-book-traces-project" target="_blank">
+         Kristin Jensen '99 Presents Book Traces Project
+         </a>
+         <br/>Katie Goss
+         <br/>Mt. Holyoke News
+         <br/>February 14, 2019<br/>
+      </p>
       <p><b>AUDIO:</b></p>
       <p>
          Interview with
@@ -152,4 +160,7 @@ export default {
 </script>
 
 <style scoped>
+.lead {
+   margin-bottom: 30px;
+}
 </style>

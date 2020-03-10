@@ -12,7 +12,7 @@
             </thead>
             <tr v-for="event in events" :key="event.id">
                <template v-if="editingEvent(event.id)">
-                  <td class="date"><input type="text" id="date" v-model="editDetails.date"></td>
+                  <td class="date"><input type="text" id="date" v-model="editDetails.date" placeholder="YYYY-MM-DD"></td>
                   <td><textarea id="description" v-model="editDetails.description"></textarea></td>
                   <td class="centered">
                      <i class="action cancel fas fa-times-circle" @click="cancelClicked"></i>

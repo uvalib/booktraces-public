@@ -8,7 +8,11 @@ const events = {
 
    mutations: {
       setEvents(state, events) {
-         state.list = events
+         state.list = state.list.splice(0,  state.list.length)
+         events.forEach( evt => {
+            evt.date = evt.date.split("T")[0]
+            state.list.push(evt )    
+         })
       },
       addEventPlaceholder(state) {
          state.list.unshift({ date: "", description: "" })

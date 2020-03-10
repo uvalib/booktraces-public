@@ -2,6 +2,8 @@ GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
+GOGET = $(GOCMD) get
+GOMOD = $(GOCMD) mod
 
 build: darwin web
 
@@ -27,5 +29,11 @@ linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -a -installsuffix cgo -o bin/btsrv.linux backend/btsrv/*.go
 
 clean:
-	$(GOCLEAN)
+	$(GOCLEAN) ./backend/btsrv/...
 	rm -rf bin
+
+dep:
+	cd frontend && yarn upgrade 
+	$(GOGET) -u ./backend/btsrv/...
+	$(GOMOD) tidy
+	$(GOMOD) verify
