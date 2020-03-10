@@ -17,3 +17,4 @@ backend/db/import/*.sql
 backend/db/import/done/*
 backend/db/import/*.csv
 *.xlsx
+*.sh
