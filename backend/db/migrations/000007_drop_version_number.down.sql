@@ -1,0 +1,1 @@
+ALTER TABLE transcriptions ADD SMALLINT NOT NULL default 1,

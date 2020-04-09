@@ -1,152 +1,78 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"net/smtp"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"strconv"
-	"strings"
-	"text/template"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
-// Submission contains the data necessary for a user to make a book traces submission
+// SubmittedFile contains the DB model for a submitted file and its transcription
+type SubmittedFile struct {
+	ID             int             `json:"id" db:"id"`
+	URL            string          `json:"url" db:"-"`
+	Filename       string          `json:"-" db:"filename"`
+	Transcriptions []Transcription `json:"transcriptions" db:"-"`
+}
+
+// Transcription is the data for a transcribed image
+type Transcription struct {
+	ID               int       `json:"id" db:"id"`
+	Transcriber      string    `json:"transcriber" db:"transcriber_name"`
+	TranscriberEmail string    `json:"transcriber_email" db:"transcriber_email"`
+	Transcrption     string    `json:"transcription" db:"transcription"`
+	TranscribedAt    time.Time `json:"transcribed_at" db:"submitted_at"`
+	Approved         bool      `json:"approved" db:"approved"`
+}
+
+// TableName sets the name of the table in the DB that this struct binds to
+func (sub *Transcription) TableName() string {
+	return "transcriptions"
+}
+
+// SubmissionDetails contains full details of a sibmission
+type SubmissionDetails struct {
+	Submission
+	InstitutionName string          `json:"institution" db:"-"`
+	Files           []SubmittedFile `json:"files" db:"-"`
+	Tags            []string        `json:"tags" db:"-"`
+	NextID          int             `json:"nextId" db:"-"`
+	PreviousID      int             `json:"previousId" db:"-"`
+}
+
+// ClientSubmission contains the data necessary for a user to make a book traces submission
+type ClientSubmission struct {
+	Submission
+	InstitutionName string   `json:"institution" db:"-" binding:"required"`
+	Files           []string `json:"files" binding:"required" db:"-"`
+	Tags            []string `json:"tags" db:"-"`
+}
+
+// Submission is the DB model for a submission. Many of the fields are reused in the ClientSubmission
 type Submission struct {
-	ID              int       `json:"id"`
-	UploadID        string    `json:"uploadId" binding:"required" db:"upload_id"`
-	Title           string    `json:"title" binding:"required"`
-	Author          string    `json:"author" binding:"required"`
-	Publication     string    `json:"publication" db:"publication_info"`
-	Library         string    `json:"library"`
-	InstitutionID   int       `json:"institution_id" db:"institution_id" binding:"required"`
-	InstitutionName string    `json:"institution" db:"-" binding:"required"`
-	CallNumber      string    `json:"callNumber" db:"call_number"`
-	Description     string    `json:"description"`
-	Files           []string  `json:"files" binding:"required" db:"-"`
-	Submitter       string    `json:"submitter" binding:"required" db:"submitter_name"`
-	Email           string    `json:"email" binding:"required" db:"submitter_email"`
-	Tags            []string  `json:"tags" db:"-"`
-	SubmittedAt     time.Time `json:"submittedAt" db:"submitted_at"`
-	Public          bool      `json:"published" db:"public"`
-	NextID          int       `json:"nextId" db:"-"`
-	PreviousID      int       `json:"previousId" db:"-"`
+	ID            int       `json:"id"`
+	UploadID      string    `json:"uploadId" binding:"required" db:"upload_id"`
+	Title         string    `json:"title" binding:"required"`
+	Author        string    `json:"author" binding:"required"`
+	Publication   string    `json:"publication" db:"publication_info"`
+	Library       string    `json:"library"`
+	InstitutionID int       `json:"institution_id" db:"institution_id" binding:"required"`
+	CallNumber    string    `json:"callNumber" db:"call_number"`
+	Description   string    `json:"description"`
+	Submitter     string    `json:"submitter" binding:"required" db:"submitter_name"`
+	Email         string    `json:"email" binding:"required" db:"submitter_email"`
+	SubmittedAt   time.Time `json:"submittedAt" db:"submitted_at"`
+	Public        bool      `json:"published" db:"public"`
 }
 
 // TableName sets the name of the table in the DB that this struct binds to
 func (sub *Submission) TableName() string {
 	return "submissions"
-}
-
-// GetInstitution retrieves the institution that is associated with this submission
-func (sub *Submission) GetInstitution(db *dbx.DB) {
-	q := db.NewQuery("select * from institutions where id={:id}")
-	q.Bind((dbx.Params{"id": sub.InstitutionID}))
-	var inst Institution
-	err := q.One(&inst)
-	if err != nil {
-		log.Printf("Unable to get institution for %d failed: %s", sub.ID, err.Error())
-		return
-	}
-	sub.InstitutionName = inst.Name
-}
-
-// GetNextAndPreviousIDs will find the IDs of the next and previus sub and add them to the struct
-func (sub *Submission) GetNextAndPreviousIDs(db *dbx.DB) {
-	qs := fmt.Sprintf(`select id from submissions where public = 1 and id > %d limit 1`, sub.ID)
-	qn := db.NewQuery(qs)
-	var nextID []int
-	err := qn.Column(&nextID)
-	if err != nil {
-		log.Printf("Next ID request for %d failed: %s", sub.ID, err.Error())
-	} else {
-		if len(nextID) > 0 {
-			sub.NextID = nextID[0]
-		}
-	}
-
-	var prevID []int
-	qs = fmt.Sprintf(`select id from submissions where public = 1 and id < %d order by id desc limit 1`, sub.ID)
-	qp := db.NewQuery(qs)
-	err = qp.Column(&prevID)
-	if err != nil {
-		log.Printf("Previos ID request for %d failed: %s", sub.ID, err.Error())
-	} else {
-		if len(prevID) > 0 {
-			sub.PreviousID = prevID[0]
-		}
-	}
-}
-
-// WriteFiles commits submission files to DB
-func (sub *Submission) WriteFiles(db *dbx.DB, dateDirs string) {
-	log.Printf("Attach files to submission")
-	for _, fn := range sub.Files {
-		_, err := db.Insert("submission_files", dbx.Params{
-			"submission_id": sub.ID,
-			"filename":      fmt.Sprintf("%s/%s/%s", dateDirs, sub.UploadID, fn),
-		}).Execute()
-		if err != nil {
-			log.Printf("WARN: Unable to attach %s to submission %d", fn, sub.ID)
-		}
-	}
-}
-
-// WriteTags commits submission tags to DB
-func (sub *Submission) WriteTags(db *dbx.DB) {
-	log.Printf("Attach tags to submission")
-	for _, tagIDStr := range sub.Tags {
-		tagID, _ := strconv.Atoi(tagIDStr)
-		_, err := db.Insert("submission_tags", dbx.Params{
-			"submission_id": sub.ID,
-			"tag_id":        tagID,
-		}).Execute()
-		if err != nil {
-			log.Printf("WARN: Unable to attach tag %d to submission %d", tagID, sub.ID)
-		}
-	}
-}
-
-// GetTags retrieves the list of tags associated with this submission
-func (sub *Submission) GetTags(db *dbx.DB) {
-	q := db.NewQuery("select t.name as name from tags t inner join submission_tags st on st.tag_id = t.id where submission_id={:id}")
-	q.Bind((dbx.Params{"id": sub.ID}))
-	rows, err := q.Rows()
-	if err != nil {
-		log.Printf("WARNING: Unable to retrieve tags for submission[%d]: %s", sub.ID, err.Error())
-		return
-	}
-	for rows.Next() {
-		var t struct{ Name string }
-		rows.ScanStruct(&t)
-		sub.Tags = append(sub.Tags, t.Name)
-	}
-}
-
-// GetFileURLs retrieves the list of URLS for files associated with this submission
-func (sub *Submission) GetFileURLs(db *dbx.DB) {
-	log.Printf("Getting file URLS for submission %d", sub.ID)
-	q := db.NewQuery("select filename from submission_files where submission_id={:id}")
-	q.Bind((dbx.Params{"id": sub.ID}))
-	rows, err := q.Rows()
-	if err != nil {
-		log.Printf("WARNING: Unable to retrieve files for submission[%d]: %s", sub.ID, err.Error())
-		return
-	}
-
-	for rows.Next() {
-		var f struct{ Filename string }
-		rows.ScanStruct(&f)
-		sub.Files = append(sub.Files, fmt.Sprintf("/uploads/%s", f.Filename))
-	}
 }
 
 // GetArchivesList will get a sorted list of archives dates
@@ -171,17 +97,90 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	tgtID := c.Param("id")
 	q := svc.DB.NewQuery("select * from submissions where id={:id}")
 	q.Bind((dbx.Params{"id": tgtID}))
-	var sub Submission
+	var sub SubmissionDetails
 	err := q.One(&sub)
 	if err != nil {
 		log.Printf("ERROR: Unable to get details for submission %s:%s", tgtID, err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	sub.GetTags(svc.DB)
-	sub.GetFileURLs(svc.DB)
-	sub.GetNextAndPreviousIDs(svc.DB)
-	sub.GetInstitution(svc.DB)
+
+	log.Printf("Get institution for submission %s", tgtID)
+	q = svc.DB.NewQuery("select * from institutions where id={:id}")
+	q.Bind((dbx.Params{"id": sub.InstitutionID}))
+	var inst Institution
+	err = q.One(&inst)
+	if err != nil {
+		log.Printf("Unable to get institution for %d failed: %s", sub.ID, err.Error())
+	} else {
+		sub.InstitutionName = inst.Name
+	}
+
+	log.Printf("Get next/previous submissions %s", tgtID)
+	qs := fmt.Sprintf(`select id from submissions where public = 1 and id > %d limit 1`, sub.ID)
+	qn := svc.DB.NewQuery(qs)
+	var nextID []int
+	err = qn.Column(&nextID)
+	if err != nil {
+		log.Printf("Next ID request for %d failed: %s", sub.ID, err.Error())
+	} else {
+		if len(nextID) > 0 {
+			sub.NextID = nextID[0]
+		}
+	}
+
+	var prevID []int
+	qs = fmt.Sprintf(`select id from submissions where public = 1 and id < %d order by id desc limit 1`, sub.ID)
+	qp := svc.DB.NewQuery(qs)
+	err = qp.Column(&prevID)
+	if err != nil {
+		log.Printf("Previos ID request for %d failed: %s", sub.ID, err.Error())
+	} else {
+		if len(prevID) > 0 {
+			sub.PreviousID = prevID[0]
+		}
+	}
+
+	log.Printf("Get tags for submission %d", sub.ID)
+	sub.Tags = make([]string, 0)
+	q = svc.DB.NewQuery("select t.name as name from tags t inner join submission_tags st on st.tag_id = t.id where submission_id={:id}")
+	q.Bind((dbx.Params{"id": sub.ID}))
+	rows, err := q.Rows()
+	if err != nil {
+		log.Printf("WARNING: Unable to retrieve tags for submission[%d]: %s", sub.ID, err.Error())
+	} else {
+		for rows.Next() {
+			var t struct{ Name string }
+			rows.ScanStruct(&t)
+			sub.Tags = append(sub.Tags, t.Name)
+		}
+	}
+
+	log.Printf("Get file URLS for submission %d", sub.ID)
+	q = svc.DB.NewQuery("select id,filename from submission_files where submission_id={:id}")
+	q.Bind((dbx.Params{"id": sub.ID}))
+	rows, err = q.Rows()
+	if err != nil {
+		log.Printf("WARNING: Unable to retrieve files for submission[%d]: %s", sub.ID, err.Error())
+	} else {
+		for rows.Next() {
+			var f SubmittedFile
+			rows.ScanStruct(&f)
+			f.URL = fmt.Sprintf("/uploads/%s", f.Filename)
+
+			var transcriptions []Transcription
+			tq := svc.DB.NewQuery("select * from transcriptions where submission_file_id={:fid} order by approved desc,submitted_at desc")
+			tq.Bind(dbx.Params{"fid": f.ID})
+			terr := tq.All(&transcriptions)
+			if terr != nil {
+				log.Printf("ERROR: unable to get transcriptions for file %d", f.ID)
+				f.Transcriptions = make([]Transcription, 0)
+			} else {
+				f.Transcriptions = transcriptions
+			}
+			sub.Files = append(sub.Files, f)
+		}
+	}
 	c.JSON(http.StatusOK, sub)
 }
 
@@ -251,7 +250,7 @@ func (svc *ServiceContext) GetThumbs(c *gin.Context) {
 			Submitted string `db:"submitted_at"`
 		}
 		rows.ScanStruct(&fi)
-		url := fmt.Sprintf("/uploads/%s", GetThumbFilename(fi.Filename))
+		url := fmt.Sprintf("/uploads/%s", getThumbFilename(fi.Filename))
 		out.Thumbs = append(out.Thumbs, Thumb{SubmissionID: fi.SubID, URL: url})
 	}
 
@@ -260,7 +259,7 @@ func (svc *ServiceContext) GetThumbs(c *gin.Context) {
 
 // SubmitForm accepts a user submission
 func (svc *ServiceContext) SubmitForm(c *gin.Context) {
-	var submission Submission
+	var submission ClientSubmission
 	err := c.ShouldBindJSON(&submission)
 	if err != nil {
 		log.Printf("ERROR: Submission failed - %s", err.Error())
@@ -302,90 +301,35 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		return
 	}
 
-	submission.WriteFiles(svc.DB, dateDirs)
-	submission.WriteTags(svc.DB)
+	log.Printf("Attach files to submission")
+	for _, fn := range submission.Files {
+		_, err := svc.DB.Insert("submission_files", dbx.Params{
+			"submission_id": submission.ID,
+			"filename":      fmt.Sprintf("%s/%s/%s", dateDirs, submission.UploadID, fn),
+		}).Execute()
+		if err != nil {
+			log.Printf("WARN: Unable to attach %s to submission %d", fn, submission.ID)
+		}
+	}
+
+	writeTags(svc.DB, submission.ID, submission.Tags)
 
 	sendSubmissionEmail(svc.BookTracesURL, svc.SMTP, submission)
 
 	c.JSON(http.StatusOK, submission)
 }
 
-func sendSubmissionEmail(btURL string, smtpCfg SMTPConfig, submission Submission) {
-	log.Printf("Sending submission notification email for submission %d", submission.ID)
-	var vars struct {
-		BookTracesURL string
-		Submission    Submission
-	}
-	vars.BookTracesURL = btURL
-	vars.Submission = submission
-	var renderedEmail bytes.Buffer
-	tpl := template.Must(template.New("submission.txt").ParseFiles("templates/submission.txt"))
-	err := tpl.Execute(&renderedEmail, vars)
-	if err != nil {
-		log.Printf("ERROR: Unable to render submission noty email: %s", err.Error())
-		return
-	}
-
-	log.Printf("Generate SMTP message")
-	// Per: https://stackoverflow.com/questions/36485857/sending-emails-with-name-email-from-go
-	// sending addresses like 'user name <email.com>' does not work with the default
-	// mail package. Leaving at just email address for now. Can revisit after meetings
-	/// about functionality.
-	// toAddr := mail.Address{Name: emailMap[reserveReq.Request.Library], Address: svc.CourseReserveEmail}
-	to := []string{smtpCfg.To}
-	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	subject := fmt.Sprintf("Subject: Book Traces Submisssion\n")
-	toHdr := fmt.Sprintf("To: %s\n", strings.Join(to, ","))
-	msg := []byte(subject + toHdr + mime + renderedEmail.String())
-
-	if smtpCfg.DevMode {
-		log.Printf("Email is in dev mode. Logging message instead of sending")
-		log.Printf("==================================================")
-		log.Printf("%s", msg)
-		log.Printf("==================================================")
-	} else {
-		log.Printf("Sending noty email to %s", strings.Join(to, ","))
-		err := smtp.SendMail(fmt.Sprintf("%s:%d", smtpCfg.Host, smtpCfg.Port), nil, "no-reply@virginia.edu", to, msg)
+// WriteTags commits submission tags to DB
+func writeTags(db *dbx.DB, submissionID int, tags []string) {
+	log.Printf("Attach tags to submission")
+	for _, tagIDStr := range tags {
+		tagID, _ := strconv.Atoi(tagIDStr)
+		_, err := db.Insert("submission_tags", dbx.Params{
+			"submission_id": submissionID,
+			"tag_id":        tagID,
+		}).Execute()
 		if err != nil {
-			log.Printf("ERROR: Unable to send receipt email: %s", err.Error())
-			return
+			log.Printf("WARN: Unable to attach tag %d to submission %d", tagID, submissionID)
 		}
 	}
-}
-
-// Generate 150x150x thumbnails for all images (.png and .jpg) in the srcDir
-func generateThumbnails(srcDir string) error {
-	log.Printf("Generate 150x150 thumbnail for all images in %s", srcDir)
-	files, err := ioutil.ReadDir(srcDir)
-	if err != nil {
-		return err
-	}
-
-	for _, imgFile := range files {
-		if imgFile.IsDir() {
-			continue
-		}
-		origFn := fmt.Sprintf("%s/%s", srcDir, imgFile.Name())
-		os.Chmod(origFn, 0666)
-		thumbFn := GetThumbFilename(origFn)
-		log.Printf("Generate thumbnail file %s...", thumbFn)
-		args := []string{"-quiet", "-resize", "150x150^", "-extent", "150x150", "-gravity", "center", origFn, thumbFn}
-		log.Printf("convert args: %+v", args)
-		cmd := exec.Command("convert", args...)
-		err := cmd.Run()
-		if err != nil {
-			return err
-		}
-		os.Chmod(thumbFn, 0666)
-		log.Printf("Thunbnail %s generated", thumbFn)
-	}
-	return nil
-}
-
-// GetThumbFilename takes a filename or path to a file and converts it to a 150x150 thumb
-func GetThumbFilename(origFn string) string {
-	ext := filepath.Ext(origFn)
-	// NOTE: the old WP site makes all derivatives extensions lowercase regardless of original.
-	// Make it the same here. This also controls the naming of the thumbs generated by this service.
-	return fmt.Sprintf("%s-150x150%s", strings.TrimSuffix(origFn, ext), strings.ToLower(ext))
 }

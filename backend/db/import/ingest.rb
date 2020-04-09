@@ -131,7 +131,7 @@ xlsx.each_with_pagename do |name, sheet|
    end
    puts "Process #{name}"
    rows = []
-   if univ_id.to_i != 75
+   if univ_id.to_i != 77
       rows = sheet.parse(title: 'Title', author: "Author" , library: "Location-Building", 
          call_num: "Call Number", desc: "Notes", image_bc: "Image_barcode",
          interventions: "Interventions",
@@ -144,7 +144,7 @@ xlsx.each_with_pagename do |name, sheet|
    
    rows.each do |row|
       images = []
-      if univ_id.to_i != 75
+      if univ_id.to_i != 77
          images << row[:image_bc] if !row[:image_bc].nil? && !row[:image_bc].empty? && !row[:image_bc].include?("Unable")
       end
       images << row[:image1] if !row[:image1].nil? && !row[:image1].empty? && !row[:image1].include?("Unable")
@@ -168,9 +168,6 @@ xlsx.each_with_pagename do |name, sheet|
 
          # move images to destination and generate SQL
          img_sql = process_images(id, images, img_dir, process_images, dest_dir)
-         if intervention_cnt > 0 
-            files_sql += ",\n"
-         end
          if img_sql.empty? 
             puts "ERROR: No images found for interventions on #{row[:call_num]}"
             skips+= 1
@@ -183,6 +180,9 @@ xlsx.each_with_pagename do |name, sheet|
             end
             submit_sql << sub
 
+            if intervention_cnt > 0 
+               files_sql += ",\n"
+            end
             files_sql += img_sql
 
             intervention_cnt+=1
@@ -206,7 +206,7 @@ f.write(";\n")
 puts "DONE!!"
 
 
-# ruby ingest.rb ~/Desktop/bt_ingest_2020/brynmawr/bryn_mawr.xlsx  74 2461 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
-# ruby ingest.rb ~/Desktop/bt_ingest_2020/uconn/uconn.xlsx  44 2627 1  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
-# ruby ingest.rb ~/Desktop/bt_ingest_2020/brandeis/brandeis.xlsx  75 2849 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
+# ruby ingest.rb ~/Desktop/bt_ingest_2020/brynmawr/bryn_mawr.xlsx  73 2461 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
+# ruby ingest.rb ~/Desktop/bt_ingest_2020/uconn/uconn.xlsx  44 2627 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
+# ruby ingest.rb ~/Desktop/bt_ingest_2020/brandeis/brandeis.xlsx  77 2849 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
 

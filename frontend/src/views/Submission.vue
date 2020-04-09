@@ -27,8 +27,8 @@
             <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>
          </div>
          <div class="thumbs">
-            <div class="thumb" v-for="(url,idx) in details.files" :key="idx">
-               <a :href="url" target="_blank"><img class="thumb" :src="url"/></a>
+            <div class="thumb" v-for="(file,idx) in details.files" :key="idx">
+               <a :href="file.url" target="_blank"><img class="thumb" :src="file.url"/></a>
             </div>
          </div>
          <div class="tags">

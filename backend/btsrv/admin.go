@@ -86,7 +86,7 @@ func (svc *ServiceContext) RotateImage(c *gin.Context) {
 		return
 	}
 
-	thumbPath := GetThumbFilename(imgPath)
+	thumbPath := getThumbFilename(imgPath)
 	err = rotateImage(thumbPath)
 	if err != nil {
 		log.Printf("Rotate THUMB %s failed: %s", thumbPath, err.Error())
@@ -122,7 +122,7 @@ func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 
 // UpdateSubmission updates the details (aside from publish status) of a submission
 func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
-	var submission Submission
+	var submission ClientSubmission
 	err := c.ShouldBindJSON(&submission)
 	if err != nil {
 		log.Printf("ERROR: Submission update failed - %s", err.Error())
@@ -141,7 +141,8 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 	dq := svc.DB.NewQuery("delete from submission_tags where submission_id={:id}")
 	dq.Bind(dbx.Params{"id": submission.ID})
 	dq.Execute()
-	submission.WriteTags(svc.DB)
+
+	writeTags(svc.DB, submission.ID, submission.Tags)
 
 	c.String(http.StatusOK, "ok")
 }

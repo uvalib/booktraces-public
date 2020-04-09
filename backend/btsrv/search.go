@@ -96,7 +96,7 @@ func getHits(c *gin.Context, q *dbx.Query) {
 	}
 	for idx := range hits {
 		hit := &hits[idx]
-		thumb := GetThumbFilename(hit.URL)
+		thumb := getThumbFilename(hit.URL)
 		hit.URL = thumb
 	}
 	c.JSON(http.StatusOK, hits)
