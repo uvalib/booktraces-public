@@ -7,7 +7,8 @@
         <div class="error">{{error}}</div>
       </template>
       <template v-else>
-         <div class="paging">
+          <VueEasyLightbox :visible="visible" :imgs="imageURLs" :index="imageIndex" @hide="closeLightBox"/>
+          <div class="paging">
             <button v-bind:class="{disabled: hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
             <button v-bind:class="{disabled: hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
          </div>
@@ -27,8 +28,16 @@
             <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>
          </div>
          <div class="thumbs">
-            <div class="thumb" v-for="(file,idx) in details.files" :key="idx">
-               <a :href="file.url" target="_blank"><img class="thumb" :src="file.url"/></a>
+            <div class="thumb" v-for="(url,idx) in imageURLs" :key="idx">
+               <div class="image-wrap">
+                  <img @click="selectImage(idx)" class="thumb" :src="url"/>
+                  <div class="toolbar">
+                     <a :href="url" target="_blank" class="ctls pure-button pure-button-primary"><i class="fas fa-external-link-alt"></i></a>
+                     <span @click="selectImage(idx)" class="ctls pure-button pure-button-primary"><i class="fas fa-search-plus"></i></span>
+                     <span class="ctls pure-button pure-button-primary">Transcribe</span>
+                  </div>
+               </div>
+
             </div>
          </div>
          <div class="tags">
@@ -42,8 +51,19 @@
 
 <script>
 import { mapState } from 'vuex'
+import VueEasyLightbox from 'vue-easy-lightbox'
+
 export default {
    name: "submission",
+   components: {
+      VueEasyLightbox
+   },
+   data: function () {
+      return {
+         imageIndex: 0,
+         visible: false,
+      }
+   },
    computed: {
       ...mapState({
          details: state => state.submissionDetail,
@@ -61,10 +81,29 @@ export default {
       },
       hasNext() {
          return this.details.previousId > 0
+      },
+      imageURLs() {
+         let out = []
+         if ( this.details ) {
+            let baseURL = window.location.href
+            let idx = baseURL.indexOf("/submi")
+            baseURL = baseURL.substring(0, idx)
+            this.details.files.forEach( f => {
+               out.push(baseURL+f.url)    
+            })
+         }
+         return out
       }
-
    },
    methods: {
+      closeLightBox() {
+         this.imageIndex = 0
+          this.visible = false
+      },
+      selectImage(idx) {
+         this.imageIndex = idx
+         this.visible = true
+      },
       tagClicked(event) {
          let t = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
          this.$store.dispatch("public/getTaggedSubmissions", t)
@@ -131,11 +170,12 @@ div.details label {
 img.thumb {
    max-width: 250px;
    max-height: 250px;
+   cursor:pointer;
 }
 div.thumb {
-   /* float: left; */
-   display: inline-block;
-   margin: 5px 10px;
+   margin: 0 0 15px 0;
+   padding-bottom: 15px;
+   border-bottom: 1px solid #ccc;
 }
 .thumbs {
    margin-top: 20px;
@@ -182,5 +222,12 @@ div.tag:hover {
   margin: 5px 0 10px 0;
   color: firebrick;
   font-style: italic;
+}
+.toolbar {
+   margin-top: 5px;
+}
+.toolbar .ctls {
+   margin-right: 5px;
+   color: white !important;
 }
 </style>
