@@ -28,16 +28,20 @@
             <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>
          </div>
          <div class="thumbs">
-            <div class="thumb" v-for="(url,idx) in imageURLs" :key="idx">
-               <div class="image-wrap">
-                  <img @click="selectImage(idx)" class="thumb" :src="url"/>
-                  <div class="toolbar">
-                     <a :href="url" target="_blank" class="ctls pure-button pure-button-primary"><i class="fas fa-external-link-alt"></i></a>
-                     <span @click="selectImage(idx)" class="ctls pure-button pure-button-primary"><i class="fas fa-search-plus"></i></span>
-                     <span class="ctls pure-button pure-button-primary">Transcribe</span>
-                  </div>
+            <div class="thumb" v-for="(file,idx) in details.files" :key="idx">
+               <img @click="selectImage(idx)" class="thumb" :src="file.url"/>
+               <div class="toolbar">
+                  <span @click="selectImage(idx)" class="ctls pure-button pure-button-primary"><i class="fas fa-search-plus"></i></span>
+                  <span class="ctls pure-button pure-button-primary" :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
                </div>
-
+               <div class="transcription">
+                  <template v-if="hasPendingTranscription(file)">
+                     Transcription under review. Please check back in a few days.
+                  </template>
+                  <template v-else>
+                     {{transcription(file)}}
+                  </template>
+               </div>
             </div>
          </div>
          <div class="tags">
@@ -96,6 +100,19 @@ export default {
       }
    },
    methods: {
+      hasTranscription(file) {
+         return file.transcriptions.length > 0 && file.transcriptions[0].approved
+      },
+      hasPendingTranscription(file) {
+         return file.transcriptions.length > 0 && file.transcriptions[0].approved == false
+      },
+      transcription(file) {
+         let t = file.transcriptions.find( t=> t.approved == true)   
+         if ( t!=null) {
+            return t.text
+         }  
+         return "" 
+      },
       closeLightBox() {
          this.imageIndex = 0
           this.visible = false
@@ -171,11 +188,19 @@ img.thumb {
    max-width: 250px;
    max-height: 250px;
    cursor:pointer;
+   margin-right: 15px;
+   display: inline-block;
 }
 div.thumb {
    margin: 0 0 15px 0;
    padding-bottom: 15px;
    border-bottom: 1px solid #ccc;
+   display: flex;
+   flex-flow: row wrap;
+}
+div.thumb:first-of-type {
+   border-top: 1px solid #ccc;
+   padding-top: 15px;
 }
 .thumbs {
    margin-top: 20px;
@@ -224,10 +249,22 @@ div.tag:hover {
   font-style: italic;
 }
 .toolbar {
-   margin-top: 5px;
+   margin: 0 15px 10px 0;
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-start;
 }
 .toolbar .ctls {
-   margin-right: 5px;
+   margin: 5px 0;
    color: white !important;
+}
+.toolbar .ctls.pure-button.pure-button-primary.disbled {
+   opacity: 0.5;
+   cursor: default;
+   background: #aaa;
+}
+.transcription {
+   flex-grow: 1;  
+   margin: 5px 0;
 }
 </style>

@@ -25,7 +25,7 @@ type Transcription struct {
 	ID               int       `json:"id" db:"id"`
 	Transcriber      string    `json:"transcriber" db:"transcriber_name"`
 	TranscriberEmail string    `json:"transcriber_email" db:"transcriber_email"`
-	Transcrption     string    `json:"transcription" db:"transcription"`
+	Text             string    `json:"text" db:"transcription"`
 	TranscribedAt    time.Time `json:"transcribed_at" db:"submitted_at"`
 	Approved         bool      `json:"approved" db:"approved"`
 }
@@ -169,7 +169,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 			f.URL = fmt.Sprintf("/uploads/%s", f.Filename)
 
 			var transcriptions []Transcription
-			tq := svc.DB.NewQuery("select * from transcriptions where submission_file_id={:fid} order by approved desc,submitted_at desc")
+			tq := svc.DB.NewQuery("select * from transcriptions where submission_file_id={:fid} order by submitted_at desc")
 			tq.Bind(dbx.Params{"fid": f.ID})
 			terr := tq.All(&transcriptions)
 			if terr != nil {
