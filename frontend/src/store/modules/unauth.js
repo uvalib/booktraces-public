@@ -19,7 +19,8 @@ const unauth = {
     archiveDate: "",
     targetInstitution: "",
     tgtTag: "",
-    news: []
+    news: [],
+    transcribeFile: null
   },
 
   // state getter functions. All are functions that take state as the first param 
@@ -27,6 +28,9 @@ const unauth = {
   // as a function. Access as a property like: this.$store.getters.NAME
   getters: {
     getField,
+    isTranscribing: state => {
+       return state.transcribeFile != null
+    },
     thumbsCount: state => {
       return state.thumbs.length
     },
@@ -54,6 +58,12 @@ const unauth = {
   // this.$store.commit('mutation_name') or called from asynchronous actions
   mutations: {
     updateField,
+    transcribeFile(state, file) {
+      state.transcribeFile = file
+    },
+    cancelTranscribe(state) {
+      state.transcribeFile = null   
+    },
     setArchiveDate (state, date) {
       state.archiveDate = date
       state.searchResults =[]

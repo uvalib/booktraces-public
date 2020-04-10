@@ -27,12 +27,14 @@
             <div><label>Submitted by: </label><span class="value">{{details.submitter}}</span></div>
             <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>
          </div>
-         <div class="thumbs">
+         <Transcribe v-if="isTranscribing" />
+         <div v-else class="thumbs">
             <div class="thumb" v-for="(file,idx) in details.files" :key="idx">
                <img @click="selectImage(idx)" class="thumb" :src="file.url"/>
                <div class="toolbar">
                   <span @click="selectImage(idx)" class="ctls pure-button pure-button-primary"><i class="fas fa-search-plus"></i></span>
-                  <span class="ctls pure-button pure-button-primary" :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
+                  <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary" 
+                     :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
                </div>
                <div class="transcription">
                   <template v-if="hasPendingTranscription(file)">
@@ -55,12 +57,14 @@
 
 <script>
 import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import VueEasyLightbox from 'vue-easy-lightbox'
+import Transcribe from "@/components/Transcribe"
 
 export default {
    name: "submission",
    components: {
-      VueEasyLightbox
+      VueEasyLightbox, Transcribe
    },
    data: function () {
       return {
@@ -69,10 +73,14 @@ export default {
       }
    },
    computed: {
+      ...mapGetters({
+         isTranscribing: "public/isTranscribing"
+      }),
       ...mapState({
          details: state => state.submissionDetail,
          loading: state => state.loading,
          error: state => state.error,
+         transcribing: state => state.public.transcribing,
       }),
       submitDate() {
          return this.details.submittedAt.split("T")[0]
@@ -100,6 +108,11 @@ export default {
       }
    },
    methods: {
+      transcribeClicked(file) {
+         if (this.hasPendingTranscription(file) == false) {
+            this.$store.commit("public/transcribeFile", file)
+         }
+      },
       hasTranscription(file) {
          return file.transcriptions.length > 0 && file.transcriptions[0].approved
       },
