@@ -74,13 +74,12 @@ export default {
    },
    computed: {
       ...mapGetters({
-         isTranscribing: "public/isTranscribing"
+         isTranscribing: "transcribe/isTranscribing"
       }),
       ...mapState({
          details: state => state.submissionDetail,
          loading: state => state.loading,
          error: state => state.error,
-         transcribing: state => state.public.transcribing,
       }),
       submitDate() {
          return this.details.submittedAt.split("T")[0]
@@ -110,7 +109,7 @@ export default {
    methods: {
       transcribeClicked(file) {
          if (this.hasPendingTranscription(file) == false) {
-            this.$store.commit("public/transcribeFile", file)
+            this.$store.commit("transcribe/setFile", file)
          }
       },
       hasTranscription(file) {

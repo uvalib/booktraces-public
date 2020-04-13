@@ -23,6 +23,7 @@ type SubmittedFile struct {
 // Transcription is the data for a transcribed image
 type Transcription struct {
 	ID               int       `json:"id" db:"id"`
+	FileID           int       `json:"-" db:"submission_file_id"`
 	Transcriber      string    `json:"transcriber" db:"transcriber_name"`
 	TranscriberEmail string    `json:"transcriber_email" db:"transcriber_email"`
 	Text             string    `json:"text" db:"transcription"`
@@ -184,6 +185,47 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, sub)
 }
 
+// SubmitTranscription accepts a transcription from the client and stores in the the DB as non-approved
+func (svc *ServiceContext) SubmitTranscription(c *gin.Context) {
+	var params struct {
+		SubmissionID  int    `json:"submissionID"`
+		FileID        int    `json:"fileID"`
+		Transcription string `json:"transcription"`
+		Transcriber   string `json:"name"`
+		Email         string `json:"email"`
+	}
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		log.Printf("ERROR: Invalid transciption submission - %s", err.Error())
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	q := svc.DB.NewQuery("select * from submissions where id={:id}")
+	q.Bind((dbx.Params{"id": params.SubmissionID}))
+	var sub SubmissionDetails
+	err = q.One(&sub)
+	if err != nil {
+		log.Printf("ERROR: Unable to get details for submission %d:%s", params.SubmissionID, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	log.Printf("%s (%s) has submitted a transcription for file %d", params.Email, params.Transcriber, params.FileID)
+	model := Transcription{FileID: params.FileID, Transcriber: params.Transcriber,
+		TranscriberEmail: params.Email, Text: params.Transcription, TranscribedAt: time.Now()}
+	err = svc.DB.Model(&model).Insert()
+	if err != nil {
+		log.Printf("ERROR: unable to add transcription: %s", err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	svc.sendTranscriptionEmail(sub.ID, sub.Title, model)
+
+	c.String(http.StatusOK, "ok")
+}
+
 // GetRecents gets some details on the 5 most recent submissions
 func (svc *ServiceContext) GetRecents(c *gin.Context) {
 	type Recent struct {
@@ -314,7 +356,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 
 	writeTags(svc.DB, submission.ID, submission.Tags)
 
-	sendSubmissionEmail(svc.BookTracesURL, svc.SMTP, submission)
+	svc.sendSubmissionEmail(submission)
 
 	c.JSON(http.StatusOK, submission)
 }

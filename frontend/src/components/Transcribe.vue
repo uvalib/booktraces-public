@@ -1,16 +1,28 @@
 <template>
    <div class="transcribe">
-      <div class="pure-form data">
+      <div class="pure-form transcription">
          <div class="image">
             <pinch-zoom v-bind:limitZoom="200">
                <img :src="transcribeFile.url">
             </pinch-zoom>
          </div>
-         <textarea v-model="transcription"></textarea>
+         <textarea rows="5" v-model="transcription"></textarea>
       </div>
+      <div class="pure-form">
+         <div class="pure-u-1-1 gap">
+          <label for="submitter">Transcribed By<span class="required">(required)</span></label>
+          <input v-model="name"  class="pure-u-1-1" type="text">
+        </div>
+        <div class="pure-u-1-1 gap">
+          <label for="email">Email Address<span class="required">(required)</span></label>
+          <input v-model="email" class="pure-u-1-1" type="email">
+          <p class="note">We will keep your email address private and will only use if if we need to contact you about your transcription.</p>
+        </div>
+      </div>
+      <p class="error">{{transcribeError}}</p>
       <div class="controls">
          <span @click="cancelClicked" class="cancel pure-button pure-button-primary">Cancel</span>
-         <span @click="submitClicked" class="pure-button pure-button-primary">Submit</span>
+         <span @click="submitClicked" :class="{disabled: submitting}" class="pure-button pure-button-primary">Submit</span>
       </div>
    </div>
 </template>
@@ -21,39 +33,57 @@ import { mapState } from 'vuex'
 export default {
    computed: {
       ...mapState({
-         details: state => state.submissionDetail,
-         loading: state => state.loading,
-         error: state => state.error,
-         transcribeFile: state => state.public.transcribeFile
+         submitting: state => state.transcribe.submitting,
+         transcribeFile: state => state.transcribe.file,
+         transcribeError: state => state.transcribe.error,
       }),
    },
    data: function () {
       return {
-         transcription: ""
+         transcription: "",
+         name: "",
+         email: "",
       }
    },
    methods: {
       cancelClicked() {
-         this.$store.commit("public/cancelTranscribe", false)
+         this.$store.commit("transcribe/cancel")
       },
       submitClicked() {
-         this.$store.commit("public/cancelTranscribe", false)
+         this.$store.dispatch("transcribe/submit", {transcription: this.transcription,
+            name: this.name, email: this.email})
       }
    }
 }
 </script>
 
 <style scoped>
-div.data {
+.error {
+   font-style: italic;
+   color: firebrick;
+}
+div.transcription {
    display: flex;
    flex-flow: row wrap;
 }
-div.data textarea {
-   flex-grow: 1;
-   margin-left:10px;
+@media only screen and (min-width: 768px) {
+   .image {
+      max-width: 50%;
+   }
+   div.transcription textarea {
+      flex-grow: 1;
+      margin:0 0 0 10px;
+   }
 }
-.image {
-   max-width: 50%;
+ 
+@media only screen and (max-width: 768px) {
+   .image {
+      max-width: 100%;
+   }
+   div.transcription textarea {
+      flex-grow: 1;
+      margin: 10px 0 0 0;
+   }
 }
 .transcribe {
    padding: 15px;
@@ -67,7 +97,25 @@ div.data textarea {
 .controls .pure-button.pure-button-primary {
    margin-left: 10px;
 }
+.controls .pure-button.pure-button-primary.disabled {
+   cursor: default;
+   opacity: 0.2;
+}
 .controls .pure-button.pure-button-primary.cancel  {
    background-color: #999;
+}
+.gap {
+   margin-top: 10px;
+}
+.required {
+   font-size: 0.8em;
+   font-weight: 100;
+   margin-left: 10px;
+}
+p.note {
+   padding:0;
+   margin:2px 15px;
+   font-size: 0.8em;
+   font-weight: 100;
 }
 </style>

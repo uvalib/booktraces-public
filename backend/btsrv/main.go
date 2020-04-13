@@ -43,6 +43,7 @@ func main() {
 		api.GET("/recents", svc.GetRecents)
 		api.GET("/archives", svc.GetArchivesList)
 		api.GET("/submissions/:id", svc.GetSubmissionDetail)
+		api.POST("/transcription", svc.SubmitTranscription)
 		api.POST("/submit", svc.SubmitForm)
 		api.POST("/upload", svc.UploadFile)
 		api.DELETE("/upload/:file", svc.DeleteUploadedFile)

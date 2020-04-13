@@ -1,0 +1,9 @@
+_______________________________________________________________________
+Book Traces Transcription Notification
+_______________________________________________________________________
+Title:  {{.Title}}
+Submitted By:  {{.Transcription.Transcriber}}  ({{.Transcription.TranscriberEmail}})
+Book Traces URL: {{.BookTracesURL}}/admin/submissions/{{.SubmissionID}}
+Transcription:
+{{.Transcription.Text}}
+_______________________________________________________________________
