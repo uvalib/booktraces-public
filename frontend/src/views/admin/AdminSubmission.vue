@@ -172,9 +172,33 @@
             </table>
          </div>
          <div class="thumbs">
-            <div class="thumb" v-for="(url,idx) in details.files" :key="idx">
-               <img class="thumb" :src="url" />
-               <p @click="rotateClicked(url)" class="pure-button rotate">Rotate Right</p>
+            <div class="thumb" v-for="(f,idx) in details.files" :key="idx">
+               <div class="img-wrap">
+                  <img class="thumb" :src="f.url" />
+                  <p @click="rotateClicked(f.url)" class="pure-button rotate">Rotate Right</p>
+               </div>
+               <div class="transcriptions">
+                  <div class="transcription-title">
+                     <span class="head">Transcriptions</span>
+                     <span class="none" v-if="f.transcriptions.length == 0">None</span>
+                     <span class="paging">
+                        <i  @click="priorTran(f)" class="paging fas fa-chevron-left" :class="{disabled: transcriptionIdx == 0}"></i>
+                        <span>{{transcriptionIdx+1}} of {{f.transcriptions.length}}</span>
+                        <i @click="nextTran(f)" class="paging fas fa-chevron-right" :class="{disabled: transcriptionIdx == f.transcriptions.length-1}"></i>
+                     </span>
+                  </div>
+                  <div class="transcription-info">
+                     <div>
+                        <label>Date:</label>
+                        <span class="data">{{getTranscribeDate(f)}}</span>
+                     </div>
+                     <div>
+                        <label>Submitter:</label>
+                        <span class="data">{{getTranscriber(f)}}</span>
+                     </div>
+                     <pre class="transcription">{{f.transcriptions[transcriptionIdx].text}}</pre>
+                  </div>
+               </div>
             </div>
          </div>
       </template>
@@ -195,7 +219,8 @@ export default {
          edit: false,
          editDetails: null,
          showTagList: false,
-         selectedInstitution: null
+         selectedInstitution: null,
+         transcriptionIdx: 0
       };
    },
    computed: {
@@ -230,6 +255,26 @@ export default {
       }
    },
    methods: {
+      getTranscribeDate(f) {
+         let t = f.transcriptions[this.transcriptionIdx]
+         return t.transcribed_at.split("T")[0]
+      },
+      getTranscriber(f) {
+         let t = f.transcriptions[this.transcriptionIdx]
+         return `${t.transcriber_email} (${t.transcriber})`
+      },
+      nextTran(f) {
+         if (this.transcriptionIdx == f.transcriptions.length -1) {
+            return
+         }
+         this.transcriptionIdx++
+      },
+      priorTran(_f) {
+         if (this.transcriptionIdx == 0) {
+            return
+         }
+         this.transcriptionIdx--
+      },
       addInstitution(newInstitutionName) {
          this.$store
             .dispatch("addInstitution", newInstitutionName)
@@ -421,9 +466,10 @@ img.thumb {
    display: block;
 }
 div.thumb {
-   display: inline-block;
+   display: block;
    margin: 5px 10px;
-   text-align: center;
+   display: flex;
+   flex-flow: row wrap;
 }
 .thumbs {
    margin-top: 20px;
@@ -501,5 +547,41 @@ i.fas.fa-times-circle {
 }
 p.pure-button.rotate {
    padding: 4px 20px;
+   margin: 5px 0 0 0;
+   width: 100%;
+}
+div.transcriptions {
+   flex-grow: 1;
+   margin-left: 10px;
+   border: 1px solid #ccc;
+}
+div.transcription-title{
+   margin:0 0 10px 0;
+   padding: 4px 8px;
+   border-bottom: 1px solid #ccc;
+   display: flex;
+   flex-flow: row nowrap;
+}
+div.transcription-title .head {
+   font-size: 1.15em;
+   font-weight: bold;
+}
+.transcription-info {
+   margin: 10px;
+}
+.transcription-info label {
+   font-weight: bold; 
+   margin-right: 10px;
+}
+i.paging {
+   margin: 0 10px;
+   cursor: pointer;
+}
+i.paging.disabled {
+   opacity: 0.2;
+   cursor: default;
+}
+.paging {
+   margin-left: auto;
 }
 </style>

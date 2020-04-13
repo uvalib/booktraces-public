@@ -40,9 +40,7 @@
                   <template v-if="hasPendingTranscription(file)">
                      Transcription under review. Please check back in a few days.
                   </template>
-                  <template v-else>
-                     {{transcription(file)}}
-                  </template>
+                  <pre v-else>{{transcription(file)}}</pre>
                </div>
             </div>
          </div>
@@ -197,8 +195,8 @@ div.details label {
    margin-right: 5px;
 }
 img.thumb {
-   max-width: 250px;
-   max-height: 250px;
+   max-width: 350px;
+   max-height: 350px;
    cursor:pointer;
    margin-right: 15px;
    display: inline-block;
@@ -275,8 +273,23 @@ div.tag:hover {
    cursor: default;
    background: #aaa;
 }
-.transcription {
-   flex-grow: 1;  
-   margin: 5px 0;
+div.transcription {
+   width: 100%;
+   box-sizing: border-box;
+   margin: 15px 0;
+   word-break: break-word;
+   -webkit-hyphens: auto;
+   -moz-hyphens: auto;
+   hyphens: auto;
+}
+div.transcription pre {
+   width:100%;
+   font-size: 0.9em;
+   font-family: sans-serif;
+   white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 </style>
