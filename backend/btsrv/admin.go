@@ -14,6 +14,49 @@ import (
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
+// DeleteTranscription deletes a transcription from the system
+func (svc *ServiceContext) DeleteTranscription(c *gin.Context) {
+	sID := c.Param("id")
+	tID := c.Param("tid")
+	log.Printf("Delete transcription %s from submission %s", tID, sID)
+
+	q := svc.DB.NewQuery("delete from transcriptions where id={:id}")
+	q.Bind(dbx.Params{"id": tID})
+	_, err := q.Execute()
+	if err != nil {
+		log.Printf("ERROR: Unabe to delete transcription %s: %s", tID, err.Error())
+	}
+
+	sub, err := svc.lookupSubmission(sID)
+	if err != nil {
+		log.Printf("ERROR: unable to get submission %s after transcription %s approval: %s", sID, tID, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	c.JSON(http.StatusOK, sub)
+}
+
+// ApproveTranscription approves a transcription and make it visible to the public
+func (svc *ServiceContext) ApproveTranscription(c *gin.Context) {
+	sID := c.Param("id")
+	tID := c.Param("tid")
+	log.Printf("Approve transcription %s from submission %s", tID, sID)
+	q := svc.DB.NewQuery("update transcriptions set approved=1 where id={:id}")
+	q.Bind(dbx.Params{"id": tID})
+	_, err := q.Execute()
+	if err != nil {
+		log.Printf("ERROR: Unabe to approve transcription %s: %s", tID, err.Error())
+	}
+
+	sub, err := svc.lookupSubmission(sID)
+	if err != nil {
+		log.Printf("ERROR: unable to get submission %s after transcription %s approval: %s", sID, tID, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	c.JSON(http.StatusOK, sub)
+}
+
 // DeleteSubmission deletes all aspected of a submission from the system
 func (svc *ServiceContext) DeleteSubmission(c *gin.Context) {
 	subID := c.Param("id")

@@ -197,6 +197,14 @@
                         <span class="data">{{getTranscriber(f)}}</span>
                      </div>
                      <pre class="transcription">{{f.transcriptions[transcriptionIdx].text}}</pre>
+                     <div class="actions">
+                        <span class="status">{{getTranscribeStatus(f)}}</span>
+                        <span class="buttons">
+                           <span @click="deleteTranscription(f)" class="pure-button trans">Delete</span>
+                           <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)" 
+                              class="pure-button trans">Approve</span>
+                        </span>
+                     </div>
                   </div>
                </div>
             </div>
@@ -255,6 +263,24 @@ export default {
       }
    },
    methods: {
+      approveTranscription(f) {
+         let t = f.transcriptions[this.transcriptionIdx]
+         this.$store.dispatch("transcribe/approve", t.id)
+      },
+      deleteTranscription(f) {
+         let resp = confirm("Are you sure you want to delete this transcrption?")
+         if (resp) {
+            let t = f.transcriptions[this.transcriptionIdx]
+            this.$store.dispatch("transcribe/delete", t.id)
+         }
+      },
+      getTranscribeStatus(f) {
+         let t = f.transcriptions[this.transcriptionIdx]
+         if (t.approved) {
+            return "Approved"
+         }
+         return "Pending"
+      },
       getTranscribeDate(f) {
          let t = f.transcriptions[this.transcriptionIdx]
          return t.transcribed_at.split("T")[0]
@@ -469,7 +495,7 @@ div.thumb {
    display: block;
    margin: 5px 10px;
    display: flex;
-   flex-flow: row wrap;
+   flex-flow: row nowrap;
 }
 .thumbs {
    margin-top: 20px;
@@ -554,6 +580,7 @@ div.transcriptions {
    flex-grow: 1;
    margin-left: 10px;
    border: 1px solid #ccc;
+   position: relative;
 }
 div.transcription-title{
    margin:0 0 10px 0;
@@ -568,6 +595,27 @@ div.transcription-title .head {
 }
 .transcription-info {
    margin: 10px;
+   padding-bottom: 50px;
+}
+.transcription-info .actions {
+   padding: 5px 5px 5px 10px;
+   border-top: 1px solid #ccc;
+   display: flex;
+   flex-flow: row nowrap;
+   position: absolute;
+   bottom:0;
+   left:0;
+   right:0;
+   align-items: center;;
+}
+.transcription-info .buttons {
+   margin-left: auto;
+}
+.transcription-info .buttons {
+   margin-left: auto;
+}
+.transcription-info .buttons .trans {
+   margin-left: 10px;
 }
 .transcription-info label {
    font-weight: bold; 
@@ -583,5 +631,13 @@ i.paging.disabled {
 }
 .paging {
    margin-left: auto;
+}
+pre {
+   font-size: 0.9em;
+   font-family: sans-serif;
+   white-space: pre-wrap;       /* Since CSS 2.1 */
+   white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+   white-space: -pre-wrap;      /* Opera 4-6 */
+   white-space: -o-pre-wrap;    /* Opera 7 */
 }
 </style>

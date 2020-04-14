@@ -96,14 +96,22 @@ func (svc *ServiceContext) GetArchivesList(c *gin.Context) {
 // GetSubmissionDetail gets full details of a submission
 func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	tgtID := c.Param("id")
-	q := svc.DB.NewQuery("select * from submissions where id={:id}")
-	q.Bind((dbx.Params{"id": tgtID}))
-	var sub SubmissionDetails
-	err := q.One(&sub)
+	detail, err := svc.lookupSubmission(tgtID)
 	if err != nil {
-		log.Printf("ERROR: Unable to get details for submission %s:%s", tgtID, err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
+	}
+	c.JSON(http.StatusOK, detail)
+}
+
+func (svc *ServiceContext) lookupSubmission(tgtID string) (*SubmissionDetails, error) {
+	q := svc.DB.NewQuery("select * from submissions where id={:id}")
+	q.Bind((dbx.Params{"id": tgtID}))
+	sub := &SubmissionDetails{}
+	err := q.One(sub)
+	if err != nil {
+		log.Printf("ERROR: Unable to get details for submission %s:%s", tgtID, err.Error())
+		return nil, err
 	}
 
 	log.Printf("Get institution for submission %s", tgtID)
@@ -112,7 +120,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	var inst Institution
 	err = q.One(&inst)
 	if err != nil {
-		log.Printf("Unable to get institution for %d failed: %s", sub.ID, err.Error())
+		log.Printf("WARN: Unable to get institution for %d failed: %s", sub.ID, err.Error())
 	} else {
 		sub.InstitutionName = inst.Name
 	}
@@ -123,7 +131,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	var nextID []int
 	err = qn.Column(&nextID)
 	if err != nil {
-		log.Printf("Next ID request for %d failed: %s", sub.ID, err.Error())
+		log.Printf("WARN: Next ID request for %d failed: %s", sub.ID, err.Error())
 	} else {
 		if len(nextID) > 0 {
 			sub.NextID = nextID[0]
@@ -135,7 +143,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 	qp := svc.DB.NewQuery(qs)
 	err = qp.Column(&prevID)
 	if err != nil {
-		log.Printf("Previos ID request for %d failed: %s", sub.ID, err.Error())
+		log.Printf("WARN: Previous ID request for %d failed: %s", sub.ID, err.Error())
 	} else {
 		if len(prevID) > 0 {
 			sub.PreviousID = prevID[0]
@@ -174,7 +182,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 			tq.Bind(dbx.Params{"fid": f.ID})
 			terr := tq.All(&transcriptions)
 			if terr != nil {
-				log.Printf("ERROR: unable to get transcriptions for file %d", f.ID)
+				log.Printf("WARN: unable to get transcriptions for file %d", f.ID)
 				f.Transcriptions = make([]Transcription, 0)
 			} else {
 				f.Transcriptions = transcriptions
@@ -182,7 +190,7 @@ func (svc *ServiceContext) GetSubmissionDetail(c *gin.Context) {
 			sub.Files = append(sub.Files, f)
 		}
 	}
-	c.JSON(http.StatusOK, sub)
+	return sub, nil
 }
 
 // SubmitTranscription accepts a transcription from the client and stores in the the DB as non-approved

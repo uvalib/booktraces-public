@@ -37,6 +37,28 @@ const transcribe = {
    },
 
    actions: {
+      approve(ctx, id) {
+         let subID = ctx.rootState.submissionDetail.id
+         ctx.commit("setSubmitting", true)
+         axios.post(`/api/admin/submissions/${subID}/transcription/${id}/approve`).then((response) => {
+            ctx.commit("setSubmitting", false) 
+            ctx.commit("setSubmissionDetail", response.data, {root: true})
+         }).catch ( err => {
+            ctx.commit("setError", err.response.data, {root: true})
+            ctx.commit("setSubmitting", false) 
+         })
+      },
+      delete(ctx, id) {
+         let subID = ctx.rootState.submissionDetail.id
+         ctx.commit("setSubmitting", true)
+         axios.delete(`/api/admin/submissions/${subID}/transcription/${id}`).then((response) => {
+            ctx.commit("setSubmitting", false) 
+            ctx.commit("setSubmissionDetail", response.data, {root: true})
+         }).catch ( err => {
+            ctx.commit("setError", err.response.data, {root: true})
+            ctx.commit("setSubmitting", false) 
+         })
+      },
       submit(ctx, data) {
          ctx.commit("setTranscribeError", "")
          if (ctx.state.file == null) {

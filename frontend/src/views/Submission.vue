@@ -7,7 +7,6 @@
         <div class="error">{{error}}</div>
       </template>
       <template v-else>
-          <VueEasyLightbox :visible="visible" :imgs="imageURLs" :index="imageIndex" @hide="closeLightBox"/>
           <div class="paging">
             <button v-bind:class="{disabled: hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
             <button v-bind:class="{disabled: hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
@@ -30,9 +29,10 @@
          <Transcribe v-if="isTranscribing" />
          <div v-else class="thumbs">
             <div class="thumb" v-for="(file,idx) in details.files" :key="idx">
-               <img @click="selectImage(idx)" class="thumb" :src="file.url"/>
-               <div class="toolbar">
-                  <span @click="selectImage(idx)" class="ctls pure-button pure-button-primary"><i class="fas fa-search-plus"></i></span>
+               <div class="zoom-wrap">
+                  <pinch-zoom v-bind:limitZoom="200">
+                     <img class="thumb" :src="file.url"/>
+                  </pinch-zoom>
                   <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary" 
                      :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
                </div>
@@ -56,19 +56,12 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
-import VueEasyLightbox from 'vue-easy-lightbox'
 import Transcribe from "@/components/Transcribe"
 
 export default {
    name: "submission",
    components: {
-      VueEasyLightbox, Transcribe
-   },
-   data: function () {
-      return {
-         imageIndex: 0,
-         visible: false,
-      }
+       Transcribe
    },
    computed: {
       ...mapGetters({
@@ -91,18 +84,6 @@ export default {
       hasNext() {
          return this.details.previousId > 0
       },
-      imageURLs() {
-         let out = []
-         if ( this.details ) {
-            let baseURL = window.location.href
-            let idx = baseURL.indexOf("/submi")
-            baseURL = baseURL.substring(0, idx)
-            this.details.files.forEach( f => {
-               out.push(baseURL+f.url)    
-            })
-         }
-         return out
-      }
    },
    methods: {
       transcribeClicked(file) {
@@ -122,14 +103,6 @@ export default {
             return t.text
          }  
          return "" 
-      },
-      closeLightBox() {
-         this.imageIndex = 0
-          this.visible = false
-      },
-      selectImage(idx) {
-         this.imageIndex = idx
-         this.visible = true
       },
       tagClicked(event) {
          let t = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
@@ -194,19 +167,16 @@ div.details label {
    font-weight: bold;
    margin-right: 5px;
 }
-img.thumb {
-   max-width: 350px;
-   max-height: 350px;
-   cursor:pointer;
+.zoom-wrap {
+   max-width: 400px;
    margin-right: 15px;
-   display: inline-block;
 }
 div.thumb {
    margin: 0 0 15px 0;
    padding-bottom: 15px;
    border-bottom: 1px solid #ccc;
    display: flex;
-   flex-flow: row wrap;
+   flex-flow: column;
 }
 div.thumb:first-of-type {
    border-top: 1px solid #ccc;
@@ -258,15 +228,10 @@ div.tag:hover {
   color: firebrick;
   font-style: italic;
 }
-.toolbar {
-   margin: 0 15px 10px 0;
-   display: flex;
-   flex-direction: column;
-   justify-content: flex-start;
-}
-.toolbar .ctls {
+.ctls {
    margin: 5px 0;
    color: white !important;
+   width:100%;
 }
 .toolbar .ctls.pure-button.pure-button-primary.disbled {
    opacity: 0.5;
@@ -287,9 +252,9 @@ div.transcription pre {
    font-size: 0.9em;
    font-family: sans-serif;
    white-space: pre-wrap;       /* Since CSS 2.1 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+   white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+   white-space: -pre-wrap;      /* Opera 4-6 */
+   white-space: -o-pre-wrap;    /* Opera 7 */
+   word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 </style>
