@@ -171,6 +171,10 @@ div.details label {
    max-width: 400px;
    margin-right: 15px;
 }
+.zoom-wrap .ctls.pure-button.pure-button-primary.disbled {
+   opacity: 0.2;
+   cursor: default;
+}
 div.thumb {
    margin: 0 0 15px 0;
    padding-bottom: 15px;

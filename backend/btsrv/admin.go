@@ -41,9 +41,23 @@ func (svc *ServiceContext) ApproveTranscription(c *gin.Context) {
 	sID := c.Param("id")
 	tID := c.Param("tid")
 	log.Printf("Approve transcription %s from submission %s", tID, sID)
-	q := svc.DB.NewQuery("update transcriptions set approved=1 where id={:id}")
+
+	// Get the submission file that the transcription to be approved is for
+	var subID int
+	q := svc.DB.NewQuery("select submission_file_id from transcriptions where id={:id}")
 	q.Bind(dbx.Params{"id": tID})
-	_, err := q.Execute()
+	err := q.Row(&subID)
+	if err == nil {
+		// set any other transcription that points to this file to non-approved. this to ensure only
+		// one transcription can be approved at a time
+		q = svc.DB.NewQuery("update transcriptions set approved=0 where submission_file_id={:id}")
+		q.Bind(dbx.Params{"id": subID})
+		q.Execute()
+	}
+
+	q = svc.DB.NewQuery("update transcriptions set approved=1 where id={:id}")
+	q.Bind(dbx.Params{"id": tID})
+	_, err = q.Execute()
 	if err != nil {
 		log.Printf("ERROR: Unabe to approve transcription %s: %s", tID, err.Error())
 	}

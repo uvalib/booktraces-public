@@ -180,14 +180,14 @@
                <div class="transcriptions">
                   <div class="transcription-title">
                      <span class="head">Transcriptions</span>
-                     <span class="none" v-if="f.transcriptions.length == 0">None</span>
-                     <span class="paging">
+                     <span class="paging" v-if="f.transcriptions.length == 0">None</span>
+                     <span v-else class="paging">
                         <i  @click="priorTran(f)" class="paging fas fa-chevron-left" :class="{disabled: transcriptionIdx == 0}"></i>
                         <span>{{transcriptionIdx+1}} of {{f.transcriptions.length}}</span>
                         <i @click="nextTran(f)" class="paging fas fa-chevron-right" :class="{disabled: transcriptionIdx == f.transcriptions.length-1}"></i>
                      </span>
                   </div>
-                  <div class="transcription-info">
+                  <div class="transcription-info" v-if="f.transcriptions.length > 0">
                      <div>
                         <label>Date:</label>
                         <span class="data">{{getTranscribeDate(f)}}</span>
@@ -272,9 +272,11 @@ export default {
          if (resp) {
             let t = f.transcriptions[this.transcriptionIdx]
             this.$store.dispatch("transcribe/delete", t.id)
+            this.transcriptionIdx = 0
          }
       },
       getTranscribeStatus(f) {
+         if (f.transcriptions.length == 0) return ""
          let t = f.transcriptions[this.transcriptionIdx]
          if (t.approved) {
             return "Approved"
@@ -282,10 +284,12 @@ export default {
          return "Pending"
       },
       getTranscribeDate(f) {
+         if (f.transcriptions.length == 0) return ""
          let t = f.transcriptions[this.transcriptionIdx]
          return t.transcribed_at.split("T")[0]
       },
       getTranscriber(f) {
+         if (f.transcriptions.length == 0) return ""
          let t = f.transcriptions[this.transcriptionIdx]
          return `${t.transcriber_email} (${t.transcriber})`
       },
