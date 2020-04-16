@@ -36,11 +36,14 @@
                   <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary" 
                      :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
                </div>
-               <div class="transcription">
-                  <template v-if="hasPendingTranscription(file)">
-                     Transcription under review. Please check back in a few days.
-                  </template>
-                  <pre v-else>{{transcription(file)}}</pre>
+               <div class="transcription-wrap">
+                  <div class="head">Transcription</div>
+                  <div class="transcription">
+                     <div class="pending" v-if="hasPendingTranscription(file)">
+                        Transcription under review.<br/>Please check back in a few days.
+                     </div>
+                     <pre v-else>{{transcription(file)}}</pre>
+                  </div>
                </div>
             </div>
          </div>
@@ -167,20 +170,40 @@ div.details label {
    font-weight: bold;
    margin-right: 5px;
 }
-.zoom-wrap {
-   max-width: 400px;
-   margin-right: 15px;
-}
-.zoom-wrap .ctls.pure-button.pure-button-primary.disbled {
-   opacity: 0.2;
-   cursor: default;
-}
 div.thumb {
    margin: 0 0 15px 0;
    padding-bottom: 15px;
    border-bottom: 1px solid #ccc;
    display: flex;
-   flex-flow: column;
+   flex-flow: row wrap;
+   align-content: flex-start;
+}
+@media only screen and (min-width: 768px) {
+   .zoom-wrap {
+      flex-basis: 45%;
+      margin-right: 15px;
+   }
+   div.transcription-wrap {
+      flex-basis: 50%;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .zoom-wrap {
+      flex-basis: 95%;
+      margin-bottom: 15px;
+   }
+   div.transcription-wrap {
+      flex-basis: 95%;
+   }
+}
+div.transcription-wrap {
+   box-sizing: border-box;
+   margin: 0;
+   border:1px solid #ccc;
+}
+.zoom-wrap .ctls.pure-button.pure-button-primary.disbled {
+   opacity: 0.2;
+   cursor: default;
 }
 div.thumb:first-of-type {
    border-top: 1px solid #ccc;
@@ -242,19 +265,20 @@ div.tag:hover {
    cursor: default;
    background: #aaa;
 }
-div.transcription {
-   width: 100%;
-   box-sizing: border-box;
-   margin: 15px 0;
-   word-break: break-word;
-   -webkit-hyphens: auto;
-   -moz-hyphens: auto;
-   hyphens: auto;
+.pending {
+   font-size: 1.3em;
+   text-align: center;
+   margin: 15% auto;
+}
+.transcription-wrap .head {
+   font-size: 1.25em;
+   background: #dadada;
+   padding: 4px 8px;
+}
+.transcription-wrap .transcription {
+   padding: 5px 10px;
 }
 div.transcription pre {
-   width:100%;
-   font-size: 0.9em;
-   font-family: sans-serif;
    white-space: pre-wrap;       /* Since CSS 2.1 */
    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
    white-space: -pre-wrap;      /* Opera 4-6 */
