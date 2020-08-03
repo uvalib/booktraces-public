@@ -174,7 +174,7 @@
          <div class="thumbs">
             <div class="thumb" v-for="(f,idx) in details.files" :key="idx">
                <div class="img-wrap">
-                  <img class="thumb" :src="f.url" />
+                  <img class="thumb" :src="`${f.url}?v=${Math.floor(Math.random() * 1000)}`" />
                   <p @click="rotateClicked(f.url)" class="pure-button rotate">Rotate Right</p>
                </div>
                <div class="transcriptions">
@@ -201,6 +201,7 @@
                         <span class="status">{{getTranscribeStatus(f)}}</span>
                         <span class="buttons">
                            <span @click="deleteTranscription(f)" class="pure-button trans">Delete</span>
+                           <span @click="editTranscription(f)" class="pure-button trans">Edit</span>
                            <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)" 
                               class="pure-button trans">Approve</span>
                         </span>
@@ -266,6 +267,9 @@ export default {
       approveTranscription(f) {
          let t = f.transcriptions[this.transcriptionIdx]
          this.$store.dispatch("transcribe/approve", t.id)
+      },
+      editTranscription(_f) {
+            // NO-OP
       },
       deleteTranscription(f) {
          let resp = confirm("Are you sure you want to delete this transcrption?")
