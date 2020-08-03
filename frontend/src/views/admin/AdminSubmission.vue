@@ -196,16 +196,28 @@
                         <label>Submitter:</label>
                         <span class="data">{{getTranscriber(f)}}</span>
                      </div>
-                     <pre class="transcription">{{f.transcriptions[transcriptionIdx].text}}</pre>
-                     <div class="actions">
-                        <span class="status">{{getTranscribeStatus(f)}}</span>
-                        <span class="buttons">
-                           <span @click="deleteTranscription(f)" class="pure-button trans">Delete</span>
-                           <span @click="editTranscription(f)" class="pure-button trans">Edit</span>
-                           <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)" 
-                              class="pure-button trans">Approve</span>
-                        </span>
-                     </div>
+                     <template v-if="editTrans">
+                        <textarea class="edit-trans" rows="3" v-model="workingTrans"></textarea>
+                        <div v-if="error" class="error">{{error}}</div>
+                        <div class="actions">
+                           <span class="buttons">
+                              <span @click="cancelEdit" class="pure-button trans">Cancel</span>
+                              <span @click="submitEdit(f)" class="pure-button trans">Submit</span>
+                           </span>
+                        </div>
+                     </template>
+                     <template v-else>
+                        <pre class="transcription">{{f.transcriptions[transcriptionIdx].text}}</pre>
+                        <div class="actions">
+                           <span class="status">{{getTranscribeStatus(f)}}</span>
+                           <span class="buttons">
+                              <span @click="deleteTranscription(f)" class="pure-button trans">Delete</span>
+                              <span @click="editTranscription(f)" class="pure-button trans">Edit</span>
+                              <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)" 
+                                 class="pure-button trans">Approve</span>
+                           </span>
+                        </div>
+                     </template>
                   </div>
                </div>
             </div>
@@ -225,6 +237,8 @@ export default {
    },
    data: function() {
       return {
+         editTrans: false,
+         workingTrans: "",
          edit: false,
          editDetails: null,
          showTagList: false,
@@ -264,12 +278,28 @@ export default {
       }
    },
    methods: {
+      cancelEdit() {
+         this.editTrans = false
+         this.workingTrans = ""
+      },
+      async submitEdit(f) {
+         let data = {submissionID: this.details.id, 
+            fileID: f.id,
+            transcriptionID: f.transcriptions[this.transcriptionIdx].id, 
+            transcription: this.workingTrans}
+         await this.$store.dispatch("transcribe/update", data)  
+         if (this.error == "" || this.error == null) {
+            this.editTrans = false
+            this.workingTrans = "" 
+         }
+      },
       approveTranscription(f) {
          let t = f.transcriptions[this.transcriptionIdx]
          this.$store.dispatch("transcribe/approve", t.id)
       },
-      editTranscription(_f) {
-            // NO-OP
+      editTranscription(f) {
+         this.editTrans = true
+         this.workingTrans = f.transcriptions[this.transcriptionIdx].text
       },
       deleteTranscription(f) {
          let resp = confirm("Are you sure you want to delete this transcrption?")
@@ -420,6 +450,11 @@ export default {
 </script>
 
 <style scoped>
+.edit-trans {
+   box-sizing: border-box;
+   width: 100%;
+   border-color: #ccc;
+}
 .source-tags {
    position: absolute;
    left: -100px;

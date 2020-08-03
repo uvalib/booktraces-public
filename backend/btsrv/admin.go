@@ -14,6 +14,31 @@ import (
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
 
+// UpdateTranscription updates transcription text
+func (svc *ServiceContext) UpdateTranscription(c *gin.Context) {
+	var req struct {
+		Transcription string
+	}
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		log.Printf("ERROR: invalid transcription request - %s", err.Error())
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	sID := c.Param("id")
+	tID := c.Param("tid")
+	log.Printf("Update transcription %s for submission %s", tID, sID)
+	q := svc.DB.NewQuery("update transcriptions set transcription={:t} where id={:id}")
+	q.Bind(dbx.Params{"id": tID})
+	q.Bind(dbx.Params{"t": req.Transcription})
+	_, err = q.Execute()
+	if err != nil {
+		log.Printf("ERROR: unable to update transcription %s: %s", tID, err.Error())
+	}
+	c.String(http.StatusOK, "ok")
+}
+
 // DeleteTranscription deletes a transcription from the system
 func (svc *ServiceContext) DeleteTranscription(c *gin.Context) {
 	sID := c.Param("id")

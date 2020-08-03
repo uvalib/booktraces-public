@@ -48,6 +48,20 @@ const transcribe = {
             ctx.commit("setSubmitting", false) 
          })
       },
+      async update(ctx, data) {
+         let subID = data.submissionID
+         let transID = data.transcriptionID
+         let txt = data.transcription
+         ctx.commit("setSubmitting", true)
+         try {
+            await axios.put(`/api/admin/submissions/${subID}/transcription/${transID}`, {transcription: txt})
+            ctx.commit("setSubmitting", false) 
+            ctx.commit("updateTranscription", data, {root: true})
+         } catch ( err ) {
+            ctx.commit("setError", err.response.data, {root: true})
+            ctx.commit("setSubmitting", false) 
+         }
+      },
       delete(ctx, id) {
          let subID = ctx.rootState.submissionDetail.id
          ctx.commit("setSubmitting", true)

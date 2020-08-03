@@ -64,6 +64,7 @@ func main() {
 			admin.POST("/submissions/:id", svc.AuthMiddleware, svc.UpdateSubmission)
 			admin.POST("/submissions/:id/transcription/:tid/approve", svc.ApproveTranscription)
 			admin.DELETE("/submissions/:id/transcription/:tid", svc.DeleteTranscription)
+			admin.PUT("/submissions/:id/transcription/:tid", svc.UpdateTranscription)
 		}
 	}
 

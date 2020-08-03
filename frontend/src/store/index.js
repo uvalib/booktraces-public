@@ -59,6 +59,15 @@ export default new Vuex.Store({
             state.submissionDetail.files[idx].transcriptions.push( pend )    
          }
       },
+      updateTranscription(state, data) {
+         let f = state.submissionDetail.files.find( f=> f.id == data.fileID)
+         if ( f ) {
+            let t = f.transcriptions.find( t => t.id == data.transcriptionID )
+            if ( t ) {
+               t.text = data.transcription
+            }
+         }
+      },
       setCurrSubPublished(state, pub) {
          if (state.submissionDetail) {
             state.submissionDetail.published = pub
