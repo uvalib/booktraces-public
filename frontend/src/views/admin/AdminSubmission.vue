@@ -173,8 +173,10 @@
          </div>
          <div class="thumbs">
             <div class="thumb" v-for="(f,idx) in details.files" :key="idx">
-               <div class="img-wrap">
-                  <img class="thumb" :src="`${f.url}?v=${Math.floor(Math.random() * 1000)}`" />
+               <div class="zoom-wrap">
+                  <pinch-zoom v-bind:limitZoom="200">
+                     <img class="thumb" :src="`${f.url}?v=${Math.floor(Math.random() * 1000)}`" />
+                  </pinch-zoom>
                   <p @click="rotateClicked(f.url)" class="pure-button rotate">Rotate Right</p>
                </div>
                <div class="transcriptions">
@@ -538,7 +540,7 @@ div.thumb {
    display: block;
    margin: 5px 10px;
    display: flex;
-   flex-flow: row nowrap;
+   flex-flow: row wrap;
 }
 .thumbs {
    margin-top: 20px;
@@ -620,7 +622,6 @@ p.pure-button.rotate {
    width: 100%;
 }
 div.transcriptions {
-   flex-grow: 1;
    margin-left: 10px;
    border: 1px solid #ccc;
    position: relative;
@@ -682,5 +683,26 @@ pre {
    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
    white-space: -pre-wrap;      /* Opera 4-6 */
    white-space: -o-pre-wrap;    /* Opera 7 */
+}@media only screen and (min-width: 768px) {
+   .zoom-wrap {
+      flex-basis: 45%;
+      max-width: 45%;
+      margin-right: 15px;
+   }
+   div.transcriptions {
+      flex-basis: 50%;
+      max-width: 50%;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .zoom-wrap {
+      flex-basis: 95%;
+      max-width: 95%;
+      margin-bottom: 15px;
+   }
+   div.transcriptions {
+      flex-basis: 95%;
+      max-width: 95%;
+   }
 }
 </style>
