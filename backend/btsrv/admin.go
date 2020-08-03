@@ -155,7 +155,7 @@ func (svc *ServiceContext) RotateImage(c *gin.Context) {
 }
 
 func rotateImage(imgPath string) error {
-	args := []string{"-quiet", "-rotate", "90", imgPath, imgPath}
+	args := []string{"-rotate", "90", imgPath, imgPath}
 	log.Printf("convert args: %+v", args)
 	cmd := exec.Command("convert", args...)
 	return cmd.Run()
