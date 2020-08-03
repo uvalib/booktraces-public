@@ -153,6 +153,15 @@ export default {
          this.$store.commit("setError", "At least one tag is required") 
          return
       }
+      let thumbs = document.getElementsByClassName('dz-success dz-image-preview')
+      if (thumbs.length == 0) {
+         this.$store.commit("setError", "At least one image is required") 
+         return
+      }
+      if ( !this.selectedInstitution ) {
+         this.$store.commit("setError", "Institution where found is required") 
+         return  
+      }
       let form = {
         uploadID: this.uploadID,
         title: document.getElementById("title").value,
