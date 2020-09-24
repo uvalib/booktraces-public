@@ -67,7 +67,7 @@ export default {
          this.dragging = true
          this.currX = event.screenX
          this.currY = event.screenY
-         console.log(`MOUSE: ${event.screenX}, ${event.screenY}`)
+         //console.log(`MOUSE: ${event.screenX}, ${event.screenY}`)
       },
       mouseUp() {
          this.dragging = false
@@ -78,8 +78,8 @@ export default {
             event.stopPropagation()
             let delX = event.screenX - this.currX
             let delY = event.screenY - this.currY
-            console.log(`CURR: ${this.rotate} deg - ${this.currX}, ${this.currY}`)
-            console.log(`MOUSE: ${event.screenX}, ${event.screenY}`)
+            //console.log(`CURR: ${this.rotate} deg - ${this.currX}, ${this.currY}`)
+            //console.log(`MOUSE: ${event.screenX}, ${event.screenY}`)
 
             if ( this.rotate == 90 || this.rotate == -270) {
                delY = this.currX - event.screenX
@@ -96,7 +96,7 @@ export default {
             this.translateY += delY
             this.currX = event.screenX
             this.currY = event.screenY
-            console.log(`DEL: ${delX}, ${delY}`)
+            //console.log(`DEL: ${delX}, ${delY}`)
 
          }
       },
