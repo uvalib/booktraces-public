@@ -2,9 +2,7 @@
    <div class="transcribe">
       <div class="pure-form transcription">
          <div class="image">
-            <pinch-zoom v-bind:limitZoom="200">
-               <img :src="transcribeFile.url">
-            </pinch-zoom>
+            <UVAViewer :url="transcribeFile.url" :height="400"/>
          </div>
          <textarea rows="5" v-model="transcription"></textarea>
       </div>
@@ -29,8 +27,11 @@
 
 <script>
 import { mapState } from 'vuex'
-
+import UVAViewer from "@/components/UVAViewer"
 export default {
+   components: {
+      UVAViewer
+   },
    computed: {
       ...mapState({
          submitting: state => state.transcribe.submitting,
@@ -43,6 +44,9 @@ export default {
          transcription: "",
          name: "",
          email: "",
+         zoomProp: {
+            zoomControlScale: 10
+         }
       }
    },
    methods: {
@@ -64,26 +68,11 @@ export default {
 }
 div.transcription {
    display: flex;
-   flex-flow: row wrap;
+   flex-direction: column;
 }
-@media only screen and (min-width: 768px) {
-   .image {
-      max-width: 50%;
-   }
-   div.transcription textarea {
-      flex-grow: 1;
-      margin:0 0 0 10px;
-   }
-}
- 
-@media only screen and (max-width: 768px) {
-   .image {
-      max-width: 100%;
-   }
-   div.transcription textarea {
-      flex-grow: 1;
-      margin: 10px 0 0 0;
-   }
+.transcription .image {
+   overflow: hidden;
+   margin-bottom: 10px;
 }
 .transcribe {
    padding: 15px;
