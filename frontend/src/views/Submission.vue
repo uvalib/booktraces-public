@@ -7,7 +7,7 @@
         <div class="error">{{error}}</div>
       </template>
       <template v-else>
-          <div class="paging">
+          <div class="paging" v-if="!isTranscribing">
             <button v-bind:class="{disabled: hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
             <button v-bind:class="{disabled: hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
          </div>
@@ -33,7 +33,7 @@
                   <pinch-zoom v-bind:limitZoom="200">
                      <img class="thumb" :src="file.url"/>
                   </pinch-zoom>
-                  <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary" 
+                  <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary"
                      :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
                </div>
                <div class="transcription-wrap">
@@ -101,11 +101,11 @@ export default {
          return file.transcriptions.length > 0 && file.transcriptions[0].approved == false
       },
       transcription(file) {
-         let t = file.transcriptions.find( t=> t.approved == true)   
+         let t = file.transcriptions.find( t=> t.approved == true)
          if ( t!=null) {
             return t.text
-         }  
-         return "" 
+         }
+         return ""
       },
       tagClicked(event) {
          let t = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')

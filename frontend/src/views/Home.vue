@@ -7,21 +7,21 @@
          <h3>Find unique copies of 19th- and early 20th-century books on library shelves</h3>
          <p><router-link to="/submit"><button class="submit pure-button pure-button-primary">SUBMIT A BOOK</button></router-link></p>
          <p>
-            Thousands of <b>old library books</b> bear fascinating traces of the past. 
-            <b>Readers wrote in their books, and left pictures, letters, flowers, locks of hair, and other 
-            things between their pages.</b> We need your help identifying them in the stacks of academic 
-            libraries.  Together we can find out more about what books were and how they were used by 
-            their original owners, while also proving the value of maintaining rich print collections in our 
+            Thousands of <b>old library books</b> bear fascinating traces of the past.
+            <b>Readers wrote in their books, and left pictures, letters, flowers, locks of hair, and other
+            things between their pages.</b> We need your help identifying them in the stacks of academic
+            libraries.  Together we can find out more about what books were and how they were used by
+            their original owners, while also proving the value of maintaining rich print collections in our
             libraries.
          </p>
          <p>
-            CURRENTLY COLLECTING IMAGES and CITATIONS of MARKED COPIES OF <b>LIBRARY  
-            BOOKS PUBLISHED BEFORE 1923.</b>  We are focusing on CIRCULATING AND RESEARCH COLLECTIONS 
+            CURRENTLY COLLECTING IMAGES and CITATIONS of MARKED COPIES OF <b>LIBRARY
+            BOOKS PUBLISHED BEFORE 1923.</b>  We are focusing on CIRCULATING AND RESEARCH COLLECTIONS
             (<b>not</b> rare books or special collections).  <b>Join the search!</b>
          </p>
          <p>
             We’ve received a new Grant from the
-            <a href="https://news.library.virginia.edu/2019/04/29/book-traces-awarded-a-110000-planning-grant-from-the-andrew-w-mellon-foundation/" 
+            <a href="https://news.library.virginia.edu/2019/04/29/book-traces-awarded-a-110000-planning-grant-from-the-andrew-w-mellon-foundation/"
               class="inline" target="_blank">Mellon Foundation</a> for 2019-2020!
          </p>
          <p>
@@ -87,6 +87,7 @@ export default {
       this.$store.commit('public/clearThumbs' )
       this.$store.dispatch("public/getRecentThumbs")
       this.$store.dispatch('getInstitutions')
+      this.$store.commit("transcribe/cancel")
    }
 };
 </script>
