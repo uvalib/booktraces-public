@@ -22,7 +22,6 @@ const pedagogy = {
             doc.createdAt = doc.createdAt.split("T")[0]
             state.list.push( doc )
          })
-         console.log(state.list)
       },
       deleteDocument(state, key) {
          let idx = state.list.findIndex( d => d.key == key)
@@ -39,7 +38,6 @@ const pedagogy = {
 
    actions: {
       getList(ctx) {
-         console.log("GET LIST")
          ctx.commit("setLoading", true, {root: true})
          ctx.commit("clearList")
          axios.get(`/api/admin/pedagogy`).then((response) => {
