@@ -49,8 +49,8 @@ export default {
    div.text {
       padding: 10px;
    }
-   div.text >>> p {
-      margin: 0 0;
-   }
+}
+::v-deep p,  ::v-deep ul{
+   margin: 0 0;
 }
 </style>
