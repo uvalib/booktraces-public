@@ -32,7 +32,6 @@ export default {
       if (!docKey) {
          docKey = "index"
       }
-      alert("GET "+docKey)
       await this.$store.dispatch('pedagogy/get', docKey)
    },
 };
