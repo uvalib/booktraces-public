@@ -5,6 +5,7 @@ import About from './views/About.vue'
 import Press from './views/Press.vue'
 import Events from './views/Events.vue'
 import News from './views/News.vue'
+import Pedagogy from './views/Pedagogy.vue'
 import FAQ from './views/FAQ.vue'
 import Submit from './views/Submit.vue'
 import SearchResults from './views/SearchResults.vue'
@@ -14,6 +15,7 @@ import Forbidden from './views/Forbidden.vue'
 import AdminHome from './views/admin/AdminHome.vue'
 import AdminEvents from './views/admin/AdminEvents.vue'
 import AdminNews from './views/admin/AdminNews.vue'
+import AdminPedagogy from './views/admin/AdminPedagogy.vue'
 import AdminSubmission from './views/admin/AdminSubmission.vue'
 import store from './store'
 
@@ -42,6 +44,11 @@ const router = new Router({
       path: '/news',
       name: 'news',
       component: News
+    },
+    {
+      path: '/pedagogy/:id?',
+      name: 'pedagogy',
+      component: Pedagogy
     },
     {
       path: '/events',
@@ -103,6 +110,12 @@ const router = new Router({
       path: '/admin/news',
       name: 'admin-news',
       component: AdminNews,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/pedagogy',
+      name: 'admin-pedagogy',
+      component: AdminPedagogy,
       meta: { requiresAuth: true }
     },
     {

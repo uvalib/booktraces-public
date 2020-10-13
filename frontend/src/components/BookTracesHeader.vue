@@ -12,6 +12,7 @@
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
             <li class="pure-menu-item"><router-link to="/news">News</router-link></li>
+            <li class="pure-menu-item"><router-link to="/pedagogy">Pedagogy</router-link></li>
             <li class="pure-menu-item"><router-link to="/events">Events</router-link></li>
             <li class="pure-menu-item"><router-link to="/faq">FAQ</router-link></li>
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
@@ -26,6 +27,7 @@
             <li class="pure-menu-item"><router-link to="/admin/submissions">Submissions</router-link></li>
             <li class="pure-menu-item"><router-link to="/admin/events">Events</router-link></li>
             <li class="pure-menu-item"><router-link to="/admin/news">News</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/pedagogy">Pedagogy</router-link></li>
          </ul>
       </div>
       <div  v-if="!adminMode" class="hmenu">
@@ -36,6 +38,7 @@
             <li @click="toggleHMenu"><router-link to="/about">About</router-link></li>
             <li @click="toggleHMenu"><router-link to="/press">Press</router-link></li>
             <li @click="toggleHMenu"><router-link to="/news">News</router-link></li>
+            <li @click="toggleHMenu"><router-link to="/pedagogy">Pedagogy</router-link></li>
             <li @click="toggleHMenu"><router-link to="/events">Events</router-link></li>
             <li @click="toggleHMenu"><router-link to="/faq">FAQ</router-link></li>
             <li @click="toggleHMenu"><router-link to="/submit">Submit a Book</router-link></li>
@@ -110,10 +113,10 @@ span.search.small {
    padding: 4px 0;
 }
 .hmenu li a:hover {
-   color: #55d737 !important; 
+   color: #55d737 !important;
 }
 .hmenu li .router-link-active {
-   color: #55d737 !important; 
+   color: #55d737 !important;
 }
 @media only screen and (max-width: 768px) {
    div.pure-menu.pure-menu-horizontal.menubar {
@@ -141,10 +144,10 @@ span.search.small {
    font-size: 1.25em;
 }
 .fas.selected {
-   color: #55d737;  
+   color: #55d737;
 }
 .search:hover {
-   color: #55d737;  
+   color: #55d737;
    cursor: pointer;
 }
 .admin:hover {
@@ -165,7 +168,7 @@ div.bt-header {
    color: white;
    padding:15px;
    position: relative;
-   font-family: 'Special Elite', cursive;
+   font-family: 'Special Elite', serif;
 }
 #app div.bt-header a {
   color: white;

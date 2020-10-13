@@ -36,8 +36,8 @@ export default {
 h3 {
    margin: 0;
    position: relative;
-   padding: 4px 10px;
-   background: #568;
+   padding: 5px 10px;
+   background: #666;
    color: white;
 }
 div.text {
@@ -51,6 +51,6 @@ span.date {
    right: 10px;
    top: 6px;
    font-weight: 100;
-   font-size: 0.8em; 
+   font-size: 0.8em;
 }
 </style>

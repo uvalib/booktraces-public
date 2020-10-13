@@ -3,6 +3,9 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+import BTSpinner from "@/components/BTSpinner"
+Vue.component('BTSpinner', BTSpinner)
+
 import PinchZoom from 'vue-pinch-zoom'
 Vue.component('pinch-zoom', PinchZoom)
 

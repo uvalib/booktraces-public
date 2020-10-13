@@ -15,35 +15,35 @@ def process_images(sub_id, images, src_dir, process, dest_dir)
    images.each do |i|
       puts "  IMG: [#{i}] REL #{rel_path} - Process: #{process}"
 
-      
+
       # Look for source image in correct matching location
-      src_fn = File.join(src_dir, i) 
-      if File.exist?(src_fn) == false 
+      src_fn = File.join(src_dir, i)
+      if File.exist?(src_fn) == false
          # Not found; just look for the filename anywhere in the source tree
          img_fn = "**/#{File.basename(i)}"
          hits = Dir.glob(File.join(src_dir, img_fn))
-         if hits.length == 0 
+         if hits.length == 0
             $err_cnt += 1
             puts "ERROR: #{img_fn} not found. Skipping"
             next
-         elsif hits.length > 1 
+         elsif hits.length > 1
             $err_cnt += 1
             puts "ERROR: Multiple hits for #{img_fn} found. Skipping"
             next
-         else 
+         else
             src_fn = hits.first
          end
       end
-      
+
       if process == true
-         # make sure dest dir exists and copy src file 
+         # make sure dest dir exists and copy src file
          dest_fn = File.join(dest_dir, i)
          dest_path = File.dirname dest_fn
          if Dir.exist?(dest_path) == false
             FileUtils.mkdir_p(dest_path)
          end
-         
-         # puts "CP #{src_fn} -> #{dest_fn}" 
+
+         # puts "CP #{src_fn} -> #{dest_fn}"
 
          $img_cnt += 1
          base_fn = File.basename(dest_fn, File.extname(dest_fn))
@@ -52,7 +52,7 @@ def process_images(sub_id, images, src_dir, process, dest_dir)
          if File.exist?(dest_fn) == false
             FileUtils.cp(src_fn, dest_fn)
          end
-         if File.exist?(thumb_fn) == false 
+         if File.exist?(thumb_fn) == false
             cmd = "convert -quiet -resize 150x150^ -extent 150x150 -gravity center \"#{dest_fn}\" \"#{thumb_fn}\""
             `#{cmd}`
          end
@@ -60,7 +60,7 @@ def process_images(sub_id, images, src_dir, process, dest_dir)
          $img_cnt += 1
       end
 
-      if sql != "" 
+      if sql != ""
          sql += ",\n"
       end
       fn = File.join(rel_path, i)
@@ -71,15 +71,19 @@ def process_images(sub_id, images, src_dir, process, dest_dir)
 
  ##
  ## MAIN ##
- ##   ruby ingest.rb mary_baldwin_bt.xlsx "Mary Baldwin" ~/Desktop/mary_baldwin_img ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2019/ 1054
+ ## TO INGEST: run this command
+ ##   ruby ingest.rb FILENAME.xlsx  77(INSTITUTION_ID) 2849(START) 0(PROCESS IMAGES)  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020
+ ## it will generate an insert sql file, and move all processed images to the DEST_DIR
+ ## ZIP the images folder and send it to the dev/production server in the right spot (dockerprod1/bootraces_submissions)
+ ## run the update SQL
  ##
 fn = ARGV[0]
 univ_id = ARGV[1]
 start_id = ARGV[2]
-dest_dir = ARGV[4]
 process_images = ARGV[3]
+dest_dir = ARGV[4]
 if process_images == "1" || process_images == "true"
-   process_images = true 
+   process_images = true
 else
    process_images = false
 end
@@ -92,7 +96,7 @@ puts("  University ID #{univ_id}")
 
 ingest_base = File.dirname(fn)
 img_dir = File.join(ingest_base, "B_Images")
-if !File.exist?(fn) 
+if !File.exist?(fn)
    abort "#{fn} not found"
 end
 if !Dir.exist?(img_dir)
@@ -102,13 +106,13 @@ univ_fn = File.basename(fn).split(".")[0]
 puts "  Ingest base name: #{univ_fn}"
 puts "  Ingest: #{fn}\n  Images: #{img_dir}"
 puts "  Process Images? #{process_images}"
-abort "dest_dir is required" if process_images && dest_dir.nil? 
+abort "dest_dir is required" if process_images && dest_dir.nil?
 
 if !Dir.exist?(dest_dir)
    abort "Image Destination directory #{dest_dir} not found"
 end
 dest_dir = File.join(dest_dir, "partners", univ_fn)
-puts "  Images Dest Dir: #{dest_dir}"  
+puts "  Images Dest Dir: #{dest_dir}"
 
 sub_name = "Book Traces: Partner Library Survey"
 sub_email = "khj5c@virginia.edu"
@@ -126,22 +130,22 @@ tgt_sheets = [ "all one table"]
 id = start_id.to_i
 skips = 0
 xlsx.each_with_pagename do |name, sheet|
-   if tgt_sheets.include?(name) == false 
+   if tgt_sheets.include?(name) == false
       next
    end
    puts "Process #{name}"
    rows = []
    if univ_id.to_i != 77
-      rows = sheet.parse(title: 'Title', author: "Author" , library: "Location-Building", 
+      rows = sheet.parse(title: 'Title', author: "Author" , library: "Location-Building",
          call_num: "Call Number", desc: "Notes", image_bc: "Image_barcode",
          interventions: "Interventions",
          image1: "Image_1", image2: "Image_2", image3: "Image_3", clean:true)
    else
-      rows = sheet.parse(title: 'Title', author: "Author" , library: "Location-Building", 
+      rows = sheet.parse(title: 'Title', author: "Author" , library: "Location-Building",
          call_num: "Call number concatenate", desc: "Notes", interventions: "Interventions",
          image1: "Image_1", image2: "Image_2", image3: "Image_3", clean:true)
    end
-   
+
    rows.each do |row|
       images = []
       if univ_id.to_i != 77
@@ -158,7 +162,7 @@ xlsx.each_with_pagename do |name, sheet|
          ingest_date = DateTime.now().strftime("%F %T")
          title = row[:title]
          if title.index('/') == title.length-1
-            title = title[0..-2].strip 
+            title = title[0..-2].strip
          end
          title = title.gsub(/\"/, '\\"')
          desc = row[:desc]
@@ -168,19 +172,19 @@ xlsx.each_with_pagename do |name, sheet|
 
          # move images to destination and generate SQL
          img_sql = process_images(id, images, img_dir, process_images, dest_dir)
-         if img_sql.empty? 
+         if img_sql.empty?
             puts "ERROR: No images found for interventions on #{row[:call_num]}"
             skips+= 1
          else
             sub = "(#{id},\"#{upload_id}\",\"#{sub_name}\",\"#{sub_email}\",\"#{title}\","
             sub << "\"#{row[:author]}\",\"\",\"#{lib}\",\"#{row[:call_num]}\","
             sub << "\"#{desc}\",\"#{ingest_date}\",1,#{univ_id})"
-            if intervention_cnt > 0 
+            if intervention_cnt > 0
                submit_sql << ",\n"
             end
             submit_sql << sub
 
-            if intervention_cnt > 0 
+            if intervention_cnt > 0
                files_sql += ",\n"
             end
             files_sql += img_sql
@@ -194,7 +198,7 @@ xlsx.each_with_pagename do |name, sheet|
 
 sql_out = "import_#{univ_fn}.sql"
 puts "DONE! #{intervention_cnt} (#{skips} skipped) records generated with #{$img_cnt} images and #{$err_cnt} image errors, writing SQL to #{sql_out}"
-if File.exist?(sql_out) 
+if File.exist?(sql_out)
    puts "  * Removing #{sql_out}"
    File.delete(sql_out)
 end
@@ -206,7 +210,7 @@ f.write(";\n")
 puts "DONE!!"
 
 
-# ruby ingest.rb ~/Desktop/bt_ingest_2020/brynmawr/bryn_mawr.xlsx  73 2461 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
-# ruby ingest.rb ~/Desktop/bt_ingest_2020/uconn/uconn.xlsx  44 2627 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
-# ruby ingest.rb ~/Desktop/bt_ingest_2020/brandeis/brandeis.xlsx  77 2849 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020 
+# ruby ingest.rb ~/Desktop/bt_ingest_2020/brynmawr/bryn_mawr.xlsx  73 2461 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020
+# ruby ingest.rb ~/Desktop/bt_ingest_2020/uconn/uconn.xlsx  44 2627 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020
+# ruby ingest.rb ~/Desktop/bt_ingest_2020/brandeis/brandeis.xlsx  77 2849 0  ~/dev/booktraces-dev/booktraces-public/submissions/submitted/2020
 

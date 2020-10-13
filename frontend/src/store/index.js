@@ -4,6 +4,7 @@ import auth from './modules/auth'
 import unauth from './modules/unauth'
 import events from './modules/events'
 import news from './modules/news'
+import pedagogy from './modules/pedagogy'
 import transcribe from './modules/transcribe'
 import axios from 'axios'
 import { version } from '../../package.json'
@@ -56,7 +57,7 @@ export default new Vuex.Store({
          let idx = state.submissionDetail.files.findIndex( f =>f.id = fileID )
          if (idx > -1 ) {
             let pend = {text: "pending", approved: false}
-            state.submissionDetail.files[idx].transcriptions.push( pend )    
+            state.submissionDetail.files[idx].transcriptions.push( pend )
          }
       },
       updateTranscription(state, data) {
@@ -115,6 +116,7 @@ export default new Vuex.Store({
       admin: auth,
       events: events,
       news: news,
+      pedagogy: pedagogy,
       transcribe: transcribe,
    }
 })
