@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS  pedagogy (
    UNIQUE KEY (access_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT into pedagogy (access_key, title, content) VALUES ("index", "Book Traces Pedagogy", "<h1>Placeholder Index Content</h1>");
+INSERT into pedagogy (access_key, title, content) VALUES ("index", "Book Traces Pedagogy", "<h3>Coming Soon!</h3>");
 
 COMMIT;
