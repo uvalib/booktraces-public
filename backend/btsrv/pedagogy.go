@@ -85,7 +85,7 @@ func (svc *ServiceContext) UpdatePedagogy(c *gin.Context) {
 	}
 	now := time.Now()
 	doc.UpdatedAt = &now
-	err = svc.DB.Model(&doc).Exclude("ID, CreatedAt").Update()
+	err = svc.DB.Model(&doc).Exclude("CreatedAt").Update()
 	if err != nil {
 		log.Printf("ERROR: Unable to update pedagogy document %s: %s ", key, err.Error())
 		c.String(http.StatusInternalServerError, err.Error())

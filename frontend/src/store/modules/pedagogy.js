@@ -34,6 +34,9 @@ const pedagogy = {
          state.list.splice(idx, 1)
          state.list.push(doc)
       },
+      addDocument(state, doc) {
+         state.list.push(doc)
+      }
    },
 
    actions: {
@@ -50,7 +53,7 @@ const pedagogy = {
       },
       get(ctx, key) {
          ctx.commit("setLoading", true, {root: true})
-         axios.get(`/api/pedagogy/${key}`).then((response) => {
+         return axios.get(`/api/pedagogy/${key}`).then((response) => {
             ctx.commit('setDocument', response.data)
          }).catch((_error) => {
             ctx.commit('setDocument', null)
@@ -73,6 +76,16 @@ const pedagogy = {
          let old = ctx.state.list.find( d => d.id == doc.id)
          return axios.put(`/api/admin/pedagogy/${old.key}`, doc).then((response) => {
             ctx.commit('updateDocument', response.data)
+         }).catch((error) => {
+            ctx.commit("setError", error, {root: true})
+         }).finally( ()=>{
+            ctx.commit("setLoading", false, {root: true})
+         })
+      },
+      addDocument(ctx, doc) {
+         ctx.commit("setLoading", true, {root: true})
+         return axios.post(`/api/admin/pedagogy`, doc).then((response) => {
+            ctx.commit('addDocument', response.data)
          }).catch((error) => {
             ctx.commit("setError", error, {root: true})
          }).finally( ()=>{

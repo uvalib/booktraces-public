@@ -2,7 +2,10 @@
    <div class="admin">
       <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
-         <h3>Pedagogy</h3>
+         <h3>
+            <span>Pedagogy</span>
+             <span v-if="!edit" @click="addClick" class="add pure-button pure-button-primary">Add Document</span>
+         </h3>
          <div class="error">{{error}}</div>
          <div class="edit pure-form" v-if="edit">
             <div>
@@ -11,7 +14,7 @@
                <input v-else readonly class="title" type="text" v-model="working.key">
             </div>
             <div><label>Title</label><input class="title" type="text" v-model="working.title"></div>
-            <vue-editor v-model="working.content"></vue-editor>
+            <vue-editor v-model="working.content"  :editor-toolbar="customToolbar" />
             <div class="controls">
                <span @click="cancelEditClick" class="btn pure-button pure-button-secondary">Cancel</span>
                <span @click="submitEditClick" class="btn pure-button pure-button-primary">Submit</span>
@@ -50,7 +53,23 @@ export default {
             key: "",
             title: "",
             content: ""
-         }
+         },
+         customToolbar: [
+            [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+            ["bold", "italic", "underline"],
+            ["blockquote"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [
+               { align: "" },
+               { align: "center" },
+               { align: "right" },
+               { align: "justify" }
+            ],
+            [{ indent: "-1" }, { indent: "+1" }],
+            [{ color: [] }, { background: [] }],
+            ["link"],
+
+         ]
       }
    },
    components: {
@@ -71,7 +90,11 @@ export default {
          this.edit = false
       },
       async submitEditClick() {
-         await this.$store.dispatch("pedagogy/updateDocument", this.working)
+         if ( this.working.id == 0) {
+            await this.$store.dispatch("pedagogy/addDocument", this.working)
+         } else {
+            await this.$store.dispatch("pedagogy/updateDocument", this.working)
+         }
          this.edit = false
       },
       documentClicked(doc) {
@@ -88,6 +111,13 @@ export default {
             this.$store.dispatch("pedagogy/deleteDocument", doc.key)
          }
       },
+      addClick() {
+         this.edit = true
+         this.working.id = 0
+         this.working.key = "new_doc"
+         this.working.title = ""
+         this.working.content = ""
+      }
    },
    created() {
       this.$store.commit("pedagogy/clearList")
@@ -110,6 +140,15 @@ div.admin {
       font-family: 'Special Elite' serif;
       padding-bottom: 5px;
       margin-bottom: 15px;
+   }
+
+   h3 {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;;
+      .add {
+         font-size: 0.7em;
+      }
    }
 
    span.login {

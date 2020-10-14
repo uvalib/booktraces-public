@@ -53,4 +53,13 @@ export default {
 ::v-deep p,  ::v-deep ul{
    margin: 0 0;
 }
+::v-deep div.text  a {
+   color: #24890d !important;
+   font-weight: 500 !important;
+   text-decoration: none !important;
+   cursor: pointer !important;
+}
+::v-deep div.text  a:hover {
+   text-decoration: underline !important;
+}
 </style>
