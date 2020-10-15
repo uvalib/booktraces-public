@@ -14,6 +14,9 @@
                <input v-else readonly class="title" type="text" v-model="working.key">
             </div>
             <div><label>Title</label><input class="title" type="text" v-model="working.title"></div>
+            <div class="note">
+               <b>NOTE:</b> to add a link to a pedagogy document, add this to the document: $DOC[key:label]
+               where key is the ket of the target document and lable is the text you would like to be displayed as the link.</div>
             <vue-editor v-model="working.content"  :editor-toolbar="customToolbar" />
             <div class="controls">
                <span @click="cancelEditClick" class="btn pure-button pure-button-secondary">Cancel</span>
@@ -171,6 +174,12 @@ div.admin {
          cursor: pointer;
          background: #f3f3f3;
       }
+   }
+   .note {
+      margin: 20px 0;
+      background-color: lightgoldenrodyellow;
+      padding: 15px;
+      border: 1px solid palegoldenrod;
    }
    .edit {
       input {

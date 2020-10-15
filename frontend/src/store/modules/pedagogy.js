@@ -12,6 +12,19 @@ const pedagogy = {
 
    mutations: {
       setDocument(state, doc) {
+         let content = doc.content
+         let idx = content.indexOf("$DOC[")
+         while (idx > -1) {
+            let idx2 = content.indexOf("]", idx)
+            if (idx2 == -1) {
+               break
+            }
+            let data = content.substring(idx+5,idx2).split(":")
+            let url = `<a href="/pedagogy/${data[0]}">${data[1]}</a>`
+            content = content.substring(0,idx) + url + content.substring(idx2+1)
+            idx = content.indexOf("$DOC[")
+         }
+         doc.content = content
          state.document = doc
       },
       clearList(state) {
