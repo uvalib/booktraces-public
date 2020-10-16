@@ -36,7 +36,6 @@ export default {
         $route() {
            // this is needed to load details when a grouped image thumb has been clicked; new content
            // needs to be loaded, but the page remains the same (create not called)
-           console.log("route changed")
            this.getDocument()
         }
    },
