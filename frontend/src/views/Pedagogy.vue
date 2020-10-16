@@ -1,11 +1,16 @@
 <template>
    <div class="content pedagogy">
-      <h2>Pedagogy</h2>
+      <h2>
+         <span>Pedagogy</span>
+         <span v-if="loading==false && document.key != 'index'" class="back-link">
+            <router-link to="/pedagogy"><i class="fas fa-arrow-left"></i>Back</router-link>
+         </span>
+      </h2>
       <BTSpinner v-if="loading==true" message="Loading pedagogy content..." />
       <div v-else class="pedagogy-content">
          <template v-if="document">
             <h3 v-if="document.key != 'index'">{{document.title}}</h3>
-            <div class="text" v-html="document.content"></div>
+            <div @click="docClicked" class="text" v-html="document.content"></div>
          </template>
          <div class="not-found" v-else>
             <h4>Page Not Found!</h4>
@@ -27,18 +32,51 @@ export default {
          loading: state => state.loading
       })
    },
-   mounted: async function () {
-      let docKey = this.$route.params.id
-      if (!docKey) {
-         docKey = "index"
+   watch: {
+        $route() {
+           // this is needed to load details when a grouped image thumb has been clicked; new content
+           // needs to be loaded, but the page remains the same (create not called)
+           console.log("route changed")
+           this.getDocument()
+        }
+   },
+   methods: {
+      async getDocument() {
+         let docKey = this.$route.params.id
+         if (!docKey) {
+            docKey = "index"
+         }
+         await this.$store.dispatch('pedagogy/get', docKey)
+      },
+      docClicked(event) {
+         if (event.target.className == 'pedagogy-link') {
+            let docID = event.target.dataset.link
+            if (docID) {
+               this.$router.push(`/pedagogy/${docID}`)
+            }
+         }
       }
-      await this.$store.dispatch('pedagogy/get', docKey)
+   },
+   mounted() {
+      this.getDocument()
    },
 };
 </script>
 
 <style lang="scss" scoped>
 .content.pedagogy {
+   h2 {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between ;
+      align-content: center;
+      .back-link {
+         font-size: 0.6em;;
+      }
+      span {
+         display: inline-block;
+      }
+   }
    h3 {
       margin: 0;
       position: relative;
@@ -58,6 +96,15 @@ export default {
    font-weight: 500 !important;
    text-decoration: none !important;
    cursor: pointer !important;
+}
+::v-deep div.text  .pedagogy-link {
+   color: #24890d !important;
+   font-weight: 500 !important;
+   text-decoration: none !important;
+   cursor: pointer !important;
+   &:hover {
+      text-decoration: underline !important;
+   }
 }
 ::v-deep div.text  a:hover {
    text-decoration: underline !important;

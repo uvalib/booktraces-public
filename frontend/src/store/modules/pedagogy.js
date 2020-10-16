@@ -20,7 +20,7 @@ const pedagogy = {
                break
             }
             let data = content.substring(idx+5,idx2).split(":")
-            let url = `<a href="/pedagogy/${data[0]}">${data[1]}</a>`
+            let url = `<span class="pedagogy-link" data-link="${data[0]}">${data[1]}</span>`
             content = content.substring(0,idx) + url + content.substring(idx2+1)
             idx = content.indexOf("$DOC[")
          }

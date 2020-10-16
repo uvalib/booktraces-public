@@ -177,9 +177,9 @@ div.admin {
    }
    .note {
       margin: 20px 0;
-      background-color: lightgoldenrodyellow;
+      background-color: white;
       padding: 15px;
-      border: 1px solid palegoldenrod;
+      border: 2px solid cornflowerblue;
    }
    .edit {
       input {
