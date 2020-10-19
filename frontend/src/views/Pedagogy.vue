@@ -8,7 +8,7 @@
       </h2>
       <BTSpinner v-if="loading==true" message="Loading pedagogy content..." />
       <div v-else class="pedagogy-content">
-         <template v-if="document">
+         <template v-if="document != null">
             <h3 v-if="document.key != 'index'">{{document.title}}</h3>
             <div @click="docClicked" class="text" v-html="document.content"></div>
          </template>
@@ -107,5 +107,31 @@ export default {
 }
 ::v-deep div.text  a:hover {
    text-decoration: underline !important;
+}
+::v-deep .ql-align-center {
+   text-align: center;
+}
+::v-deep .ql-align-right {
+   text-align: right;
+}
+::v-deep blockquote {
+  border-left: 6px solid #ccc;
+  margin: 0;
+  padding-left: 25px;
+}
+::v-deep .ql-indent-1 {
+   margin-left: 20px;
+}
+::v-deep .ql-indent-2 {
+   margin-left: 40px;
+}
+::v-deep .ql-indent-3 {
+   margin-left: 60px;
+}
+::v-deep .ql-indent-4 {
+   margin-left: 80px;
+}
+::v-deep .ql-indent-5 {
+   margin-left: 100px;
 }
 </style>

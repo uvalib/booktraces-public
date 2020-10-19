@@ -19,8 +19,12 @@ const pedagogy = {
             if (idx2 == -1) {
                break
             }
-            let data = content.substring(idx+5,idx2).split(":")
-            let url = `<span class="pedagogy-link" data-link="${data[0]}">${data[1]}</span>`
+            let substr = content.substring(idx+5,idx2)
+            let data = substr.split("::")
+            let label = data[1]
+            var fakeDoc = new DOMParser().parseFromString(label, 'text/html');
+            let cleanLabel =  fakeDoc.body.textContent || "";
+            let url = `<span class="pedagogy-link" data-link="${data[0]}">${cleanLabel}</span>`
             content = content.substring(0,idx) + url + content.substring(idx2+1)
             idx = content.indexOf("$DOC[")
          }

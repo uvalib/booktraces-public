@@ -15,7 +15,7 @@
             </div>
             <div><label>Title</label><input class="title" type="text" v-model="working.title"></div>
             <div class="note">
-               <b>NOTE:</b> to add a link to a pedagogy document, add this to the document: $DOC[key:label]
+               <b>NOTE:</b> to add a link to a pedagogy document, add this to the document: $DOC[key::label]
                where key is the ket of the target document and lable is the text you would like to be displayed as the link.</div>
             <vue-editor v-model="working.content"  :editor-toolbar="customToolbar" />
             <div class="controls">
