@@ -111,9 +111,9 @@
                <tr>
                   <td class="label">Institution:</td>
                   <td class="value">
-                     <multiselect v-model="selectedInstitution" class="folders"  
+                     <multiselect v-model="selectedInstitution" class="folders"
                         placeholder="Select or create an institution"
-                        :showLabels="false" 
+                        :showLabels="false"
                         :searchable="true"
                         :taggable="true"
                         track-by="id" label="name"
@@ -171,7 +171,7 @@
                </tr>
             </table>
          </div>
-         <div class="thumbs">
+         <div class="thumbs" v-if="edit == false">
             <div class="thumb" v-for="(f,idx) in details.files" :key="idx">
                <div class="zoom-wrap">
                   <pinch-zoom v-bind:limitZoom="200">
@@ -215,7 +215,7 @@
                            <span class="buttons">
                               <span @click="deleteTranscription(f)" class="pure-button trans">Delete</span>
                               <span @click="editTranscription(f)" class="pure-button trans">Edit</span>
-                              <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)" 
+                              <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)"
                                  class="pure-button trans">Approve</span>
                            </span>
                         </div>
@@ -285,14 +285,14 @@ export default {
          this.workingTrans = ""
       },
       async submitEdit(f) {
-         let data = {submissionID: this.details.id, 
+         let data = {submissionID: this.details.id,
             fileID: f.id,
-            transcriptionID: f.transcriptions[this.transcriptionIdx].id, 
+            transcriptionID: f.transcriptions[this.transcriptionIdx].id,
             transcription: this.workingTrans}
-         await this.$store.dispatch("transcribe/update", data)  
+         await this.$store.dispatch("transcribe/update", data)
          if (this.error == "" || this.error == null) {
             this.editTrans = false
-            this.workingTrans = "" 
+            this.workingTrans = ""
          }
       },
       approveTranscription(f) {
@@ -662,7 +662,7 @@ div.transcription-title .head {
    margin-left: 10px;
 }
 .transcription-info label {
-   font-weight: bold; 
+   font-weight: bold;
    margin-right: 10px;
 }
 i.paging {

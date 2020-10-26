@@ -204,7 +204,7 @@ func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 
 // UpdateSubmission updates the details (aside from publish status) of a submission
 func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
-	var submission ClientSubmission
+	var submission AdminSubmission
 	err := c.ShouldBindJSON(&submission)
 	if err != nil {
 		log.Printf("ERROR: Submission update failed - %s", err.Error())

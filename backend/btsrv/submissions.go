@@ -54,6 +54,13 @@ type ClientSubmission struct {
 	Tags            []string `json:"tags" db:"-"`
 }
 
+// AdminSubmission contains the data necessary for an admin submission update
+type AdminSubmission struct {
+	Submission
+	InstitutionName string   `json:"institution" db:"-" binding:"required"`
+	Tags            []string `json:"tags" db:"-"`
+}
+
 // Submission is the DB model for a submission. Many of the fields are reused in the ClientSubmission
 type Submission struct {
 	ID            int       `json:"id"`
@@ -242,7 +249,7 @@ func (svc *ServiceContext) GetRecents(c *gin.Context) {
 		SubmittedAt string `json:"submittedAt" db:"submitted"`
 	}
 	var data []Recent
-	q := svc.DB.NewQuery(`select id,title,DATE_FORMAT(submitted_at,'%M %d, %Y') submitted from submissions 
+	q := svc.DB.NewQuery(`select id,title,DATE_FORMAT(submitted_at,'%M %d, %Y') submitted from submissions
 		where public=1 order by id desc limit 5`)
 	err := q.All(&data)
 	if err != nil {
@@ -282,7 +289,7 @@ func (svc *ServiceContext) GetThumbs(c *gin.Context) {
 	tq := svc.DB.NewQuery("select count(*) as total from submissions where public=1")
 	tq.One(&out)
 
-	qs := fmt.Sprintf(`select s.id as sub_id,upload_id,submitted_at,filename from submissions s 
+	qs := fmt.Sprintf(`select s.id as sub_id,upload_id,submitted_at,filename from submissions s
 			inner join submission_files f on f.submission_id = s.id where public = 1
 			group by s.id order by s.id desc limit %d,%d`, start, pageSize)
 	q := svc.DB.NewQuery(qs)
