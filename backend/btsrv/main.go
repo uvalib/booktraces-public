@@ -23,7 +23,7 @@ func main() {
 	svc := ServiceContext{}
 	svc.Init(&cfg)
 
-	log.Printf("Setup routes...")
+	log.Printf("INFO: setup routes...")
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
 	router := gin.Default()
@@ -78,7 +78,7 @@ func main() {
 	router.Use(static.Serve("/", static.LocalFile("./public", true)))
 
 	imgDir := fmt.Sprintf("%s/%s", cfg.UploadDir, "submitted")
-	log.Printf("Mount %s as /uploads", imgDir)
+	log.Printf("INFO: mount %s as /uploads", imgDir)
 	router.Use(static.Serve("/uploads", static.LocalFile(imgDir, true)))
 
 	// add a catchall route that renders the index page.
@@ -89,6 +89,6 @@ func main() {
 	})
 
 	portStr := fmt.Sprintf(":%d", cfg.Port)
-	log.Printf("Start service v%s on port %s", version, portStr)
+	log.Printf("INFO: start service v%s on port %s", version, portStr)
 	log.Fatal(router.Run(portStr))
 }

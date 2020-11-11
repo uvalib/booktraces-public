@@ -39,7 +39,7 @@ func (svc *ServiceContext) GetNews(c *gin.Context) {
 // DeleteNews removes the specified news
 func (svc *ServiceContext) DeleteNews(c *gin.Context) {
 	newsID := c.Param("id")
-	log.Printf("Delete news item %s", newsID)
+	log.Printf("INFO: delete news item %s", newsID)
 	q := svc.DB.NewQuery("delete from news where id={:id}")
 	q.Bind(dbx.Params{"id": newsID})
 	_, err := q.Execute()
@@ -55,7 +55,7 @@ func (svc *ServiceContext) DeleteNews(c *gin.Context) {
 func (svc *ServiceContext) UpdateNews(c *gin.Context) {
 	newsIDStr := c.Param("id")
 	newsID, _ := strconv.Atoi(newsIDStr)
-	log.Printf("Update news item %d", newsID)
+	log.Printf("INFO: update news item %d", newsID)
 
 	var news News
 	err := c.ShouldBindJSON(&news)
@@ -76,7 +76,7 @@ func (svc *ServiceContext) UpdateNews(c *gin.Context) {
 
 // AddNews adds a new news
 func (svc *ServiceContext) AddNews(c *gin.Context) {
-	log.Printf("Add new news")
+	log.Printf("INFO: add new news")
 	var news News
 	err := c.BindJSON(&news)
 	if err != nil {
@@ -84,7 +84,7 @@ func (svc *ServiceContext) AddNews(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	log.Printf("GOT %+v", news)
+	log.Printf("INFO: got %+v", news)
 
 	news.ID = 0
 	news.CreatedAt = time.Now()
@@ -94,6 +94,6 @@ func (svc *ServiceContext) AddNews(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Printf("Added %+v", news)
+	log.Printf("INFO: added %+v", news)
 	c.JSON(http.StatusOK, news)
 }

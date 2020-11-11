@@ -36,7 +36,7 @@ func (svc *ServiceContext) GetEvents(c *gin.Context) {
 // DeleteEvent removes the specified event
 func (svc *ServiceContext) DeleteEvent(c *gin.Context) {
 	eventID := c.Param("id")
-	log.Printf("Delete event %s", eventID)
+	log.Printf("INFO: delete event %s", eventID)
 	q := svc.DB.NewQuery("delete from events where id={:id}")
 	q.Bind(dbx.Params{"id": eventID})
 	_, err := q.Execute()
@@ -51,7 +51,7 @@ func (svc *ServiceContext) DeleteEvent(c *gin.Context) {
 // UpdateEvent updates the date or description of the specified event
 func (svc *ServiceContext) UpdateEvent(c *gin.Context) {
 	eventID, _ := strconv.Atoi(c.Param("id"))
-	log.Printf("Update event %d", eventID)
+	log.Printf("INFO: update event %d", eventID)
 
 	var event Event
 	err := c.ShouldBindJSON(&event)
@@ -72,7 +72,7 @@ func (svc *ServiceContext) UpdateEvent(c *gin.Context) {
 
 // AddEvent adds a new event
 func (svc *ServiceContext) AddEvent(c *gin.Context) {
-	log.Printf("Add new event")
+	log.Printf("INFO: add new event")
 	var event Event
 	err := c.ShouldBindJSON(&event)
 	if err != nil {

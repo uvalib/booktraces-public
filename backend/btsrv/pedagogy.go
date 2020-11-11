@@ -22,7 +22,7 @@ type Pedagogy struct {
 
 // GetPedagogyDocuments gets a list of pedagogy documents for the admin interface
 func (svc *ServiceContext) GetPedagogyDocuments(c *gin.Context) {
-	log.Printf("Get all pedagogy documents")
+	log.Printf("INFO: get all pedagogy documents")
 	var docs []Pedagogy
 	q := svc.DB.NewQuery(`select * from pedagogy order by title asc`)
 	err := q.All(&docs)
@@ -53,7 +53,7 @@ func (svc *ServiceContext) GetPedagogy(c *gin.Context) {
 // DeletePedagogy will remove a pedagogy document from the system - except the protected INDEX
 func (svc *ServiceContext) DeletePedagogy(c *gin.Context) {
 	key := c.Param("id")
-	log.Printf("Delete pedagogy  %s", key)
+	log.Printf("INFO: delete pedagogy  %s", key)
 	if key == "index" {
 		log.Printf("ERROR: unable to index pedagogy")
 		c.String(http.StatusBadRequest, "cannot delete index")
@@ -74,7 +74,7 @@ func (svc *ServiceContext) DeletePedagogy(c *gin.Context) {
 // UpdatePedagogy will update the title/content of a pedagogy document
 func (svc *ServiceContext) UpdatePedagogy(c *gin.Context) {
 	key := c.Param("id")
-	log.Printf("Update pedagogy %s", key)
+	log.Printf("INFO: update pedagogy %s", key)
 
 	var doc Pedagogy
 	err := c.ShouldBindJSON(&doc)
@@ -96,7 +96,7 @@ func (svc *ServiceContext) UpdatePedagogy(c *gin.Context) {
 
 // AddPedagogy creates a new pedagogy document
 func (svc *ServiceContext) AddPedagogy(c *gin.Context) {
-	log.Printf("Add new pedagogy document")
+	log.Printf("INFO: add new pedagogy document")
 	var doc Pedagogy
 	err := c.BindJSON(&doc)
 	if err != nil {

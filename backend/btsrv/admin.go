@@ -28,7 +28,7 @@ func (svc *ServiceContext) UpdateTranscription(c *gin.Context) {
 
 	sID := c.Param("id")
 	tID := c.Param("tid")
-	log.Printf("Update transcription %s for submission %s", tID, sID)
+	log.Printf("INFO: update transcription %s for submission %s", tID, sID)
 	q := svc.DB.NewQuery("update transcriptions set transcription={:t} where id={:id}")
 	q.Bind(dbx.Params{"id": tID})
 	q.Bind(dbx.Params{"t": req.Transcription})
@@ -43,7 +43,7 @@ func (svc *ServiceContext) UpdateTranscription(c *gin.Context) {
 func (svc *ServiceContext) DeleteTranscription(c *gin.Context) {
 	sID := c.Param("id")
 	tID := c.Param("tid")
-	log.Printf("Delete transcription %s from submission %s", tID, sID)
+	log.Printf("INFO: delete transcription %s from submission %s", tID, sID)
 
 	q := svc.DB.NewQuery("delete from transcriptions where id={:id}")
 	q.Bind(dbx.Params{"id": tID})
@@ -65,7 +65,7 @@ func (svc *ServiceContext) DeleteTranscription(c *gin.Context) {
 func (svc *ServiceContext) ApproveTranscription(c *gin.Context) {
 	sID := c.Param("id")
 	tID := c.Param("tid")
-	log.Printf("Approve transcription %s from submission %s", tID, sID)
+	log.Printf("INFO: approve transcription %s from submission %s", tID, sID)
 
 	// Get the submission file that the transcription to be approved is for
 	var subID int
@@ -99,7 +99,7 @@ func (svc *ServiceContext) ApproveTranscription(c *gin.Context) {
 // DeleteSubmission deletes all aspected of a submission from the system
 func (svc *ServiceContext) DeleteSubmission(c *gin.Context) {
 	subID := c.Param("id")
-	log.Printf("Delete submission %s", subID)
+	log.Printf("INFO: delete submission %s", subID)
 	q := svc.DB.NewQuery("select upload_id, submitted_at from submissions where id={:id}")
 	q.Bind(dbx.Params{"id": subID})
 	var sub struct {
@@ -114,13 +114,13 @@ func (svc *ServiceContext) DeleteSubmission(c *gin.Context) {
 	}
 
 	tgtDir := fmt.Sprintf("%s/%s/%s/%s", svc.UploadDir, "submitted", sub.SubmittedAt.Format("2006/01"), sub.UploadID)
-	log.Printf("Submission %s found; removing submitted images from %s", subID, tgtDir)
+	log.Printf("INFO: submission %s found; removing submitted images from %s", subID, tgtDir)
 	err = os.RemoveAll(tgtDir)
 	if err != nil {
-		log.Printf("WARN: Could not remove submitted files from %s", tgtDir)
+		log.Printf("WARNING: Could not remove submitted files from %s", tgtDir)
 	}
 
-	log.Printf("Removing submission %s from DB", subID)
+	log.Printf("INFO: removing submission %s from DB", subID)
 	_, err = svc.DB.Delete("submissions", dbx.HashExp{"id": subID}).Execute()
 	if err != nil {
 		log.Printf("ERROR: Unable to delete submission %s:%s", subID, err.Error())
@@ -134,7 +134,7 @@ func (svc *ServiceContext) DeleteSubmission(c *gin.Context) {
 // PublishSubmission publishes a previously unpublished submission
 func (svc *ServiceContext) PublishSubmission(c *gin.Context) {
 	subID := c.Param("id")
-	log.Printf("Publishing submission %s", subID)
+	log.Printf("INFO: publishing submission %s", subID)
 	_, err := svc.DB.Update("submissions",
 		dbx.Params{"public": 1},
 		dbx.HashExp{"id": subID}).Execute()
@@ -143,27 +143,27 @@ func (svc *ServiceContext) PublishSubmission(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Printf("Submission %s has been published", subID)
+	log.Printf("INFO: submission %s has been published", subID)
 	c.String(http.StatusOK, "ok")
 }
 
 // RotateImage rotatates the image specified by URL on the POST body to teh right by 90 degrees.
 // The thumbnail image is also rotated
 func (svc *ServiceContext) RotateImage(c *gin.Context) {
-	log.Printf("Rotate image requested")
+	log.Printf("INFO: rotate image requested")
 	subID := c.Param("id")
 	subPath := fmt.Sprintf("%s/submitted", svc.UploadDir)
 	imgPath := strings.Replace(c.Query("url"), "/uploads", subPath, -1)
-	log.Printf("Submission %s: rotate image %s", subID, imgPath)
+	log.Printf("INFO: submission %s: rotate image %s", subID, imgPath)
 	if _, err := os.Stat(imgPath); err != nil {
-		log.Printf("File %s not found", imgPath)
+		log.Printf("ERROR: file %s not found", imgPath)
 		c.String(http.StatusNotFound, fmt.Sprintf("%s not found", imgPath))
 		return
 	}
 
 	err := rotateImage(imgPath)
 	if err != nil {
-		log.Printf("Rotate %s failed: %s", imgPath, err.Error())
+		log.Printf("ERROR: rotate %s failed: %s", imgPath, err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -171,7 +171,7 @@ func (svc *ServiceContext) RotateImage(c *gin.Context) {
 	thumbPath := getThumbFilename(imgPath)
 	err = rotateImage(thumbPath)
 	if err != nil {
-		log.Printf("Rotate THUMB %s failed: %s", thumbPath, err.Error())
+		log.Printf("ERROR: rotate THUMB %s failed: %s", thumbPath, err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -181,7 +181,7 @@ func (svc *ServiceContext) RotateImage(c *gin.Context) {
 
 func rotateImage(imgPath string) error {
 	args := []string{"-rotate", "90", imgPath, imgPath}
-	log.Printf("convert args: %+v", args)
+	log.Printf("INFO: convert args: %+v", args)
 	cmd := exec.Command("convert", args...)
 	return cmd.Run()
 }
@@ -189,7 +189,7 @@ func rotateImage(imgPath string) error {
 // UnpublishSubmission makes a previoulsy public submission private
 func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 	subID := c.Param("id")
-	log.Printf("UNPublishing submission %s", subID)
+	log.Printf("INFO:  un-publishing submission %s", subID)
 	_, err := svc.DB.Update("submissions",
 		dbx.Params{"public": 0},
 		dbx.HashExp{"id": subID}).Execute()
@@ -198,7 +198,7 @@ func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Printf("Submission %s has been published", subID)
+	log.Printf("INFO: submission %s has been published", subID)
 	c.String(http.StatusOK, "ok")
 }
 
@@ -211,7 +211,7 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	log.Printf("Received updated submission: %+v", submission)
+	log.Printf("INFO: received updated submission: %+v", submission)
 	err = svc.DB.Model(&submission).Exclude("Files", "Tags", "UploadID", "SubmittedAt", "Public").Update()
 	if err != nil {
 		log.Printf("ERROR: Unable to update submission - %s", err.Error())
@@ -219,7 +219,7 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Updating all tags")
+	log.Printf("INFO: updating all tags")
 	dq := svc.DB.NewQuery("delete from submission_tags where submission_id={:id}")
 	dq.Bind(dbx.Params{"id": submission.ID})
 	dq.Execute()
@@ -260,7 +260,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	}
 	out := SubmissionsPage{Total: 0, Page: page, PageSize: pageSize}
 
-	log.Printf("Get total submissions")
+	log.Printf("INFO: get total submissions")
 	tq := svc.DB.NewQuery("select count(*) as total from submissions")
 	tq.Row(&out.Total)
 
@@ -277,7 +277,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	qParam := strings.TrimSpace(c.Query("q"))
 	qQuery := ""
 	if qParam != "" {
-		log.Printf("Filter submission by query string [%s]", qParam)
+		log.Printf("INFO: filter submission by query string [%s]", qParam)
 		qParam = "%" + qParam + "%"
 		qQuery = ` where (t.name like {:q} or s.title like {:q} or s.author like {:q}
 			or s.publication_info like {:q} or s.library like {:q} or s.call_number like {:q}
@@ -287,7 +287,7 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 
 	tParam := strings.TrimSpace(c.Query("t"))
 	if tParam != "" {
-		log.Printf("Filter submission by tag [%s]", tParam)
+		log.Printf("INFO: filter submission by tag [%s]", tParam)
 		// To ensure all tags are included in result, can't use where clause.
 		// If used, only the single matching tag is returned. Instead add a having
 		// clause to the group by. The is leaves all tags in the results and matches
@@ -313,13 +313,13 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 			countQS += " t.name={:t}"
 		}
 
-		log.Printf("Get filtered total")
+		log.Printf("INFO: get filtered total")
 		cq := svc.DB.NewQuery(countQS)
 		cq.Bind(dbx.Params{"q": qParam, "t": tParam})
 		cq.Row(&out.FilteredTotal)
 	}
 
-	log.Printf("Get one page of submission data")
+	log.Printf("INFO: get one page of submission data")
 	qs = qs + groupQS + pageQS
 	q := svc.DB.NewQuery(qs)
 	q.Bind(dbx.Params{"q": qParam, "t": tParam})
