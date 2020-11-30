@@ -35,6 +35,30 @@
                https://booktraces.lib.virginia.edu/
             </a>
          </p>
+         <div>
+            <div class="book-info"><strong>Coming Soon</strong></div>
+            <div class="book">
+               <div class="cover">
+                  <a href="https://www.upenn.edu/pennpress/book/16176.html" target="_blank">
+                     <img src="../assets/booktraces_book.jpg"/>
+                  </a>
+               </div>
+               <div class="blurb">
+                  <div>
+                     <a href="https://www.upenn.edu/pennpress/book/16176.html" target="_blank">
+                        Book Traces: Nineteenth-Century Readers and the Future of the Library
+                     </a>
+                  </div>
+                  <p>
+                     In Book Traces, Andrew M. Stauffer adopts what he calls "guided serendipity" as a tactic in pursuit of two goals:
+                     first, to read nineteenth-century poetry through the clues and objects earlier readers left in their books and, second,
+                     to defend the value of keeping the physical volumes on the shelves. Finding in such books of poetry the inscriptions, annotations,
+                     and insertions made by their original owners, and using them as exemplary case studies, Stauffer shows how the physical,
+                     historical book enables a modern reader to encounter poetry through the eyes of someone for whom it was personal.
+                  </p>
+               </div>
+            </div>
+         </div>
       </div>
       <div class="recents">
          <h3>Recently Submitted Books</h3>
@@ -96,6 +120,32 @@ export default {
 h3, h1 {
    font-family: 'Special Elite', cursive;
    margin-bottom: 5px;
+}
+div.book-info {
+   font-weight: bold;
+   font-size: 1.1em;
+   margin: 25px 0 10px 0;
+}
+div.book {
+   display: flex;
+   flex-flow: row wrap;
+   justify-content: center;
+}
+div.book img {
+   flex: 1 1 10%;
+   max-height: 200px;
+   margin-bottom: 20px;
+}
+div.blurb {
+   margin-left: 20px;
+   flex: 1 1 70%;
+}
+div.book a {
+   margin: 0 !important;
+}
+div.blurb p {
+   padding: 0;
+   margin: 10px 0;
 }
 h3 {
   margin-bottom: 10px;

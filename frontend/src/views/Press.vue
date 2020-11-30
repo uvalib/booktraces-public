@@ -2,7 +2,7 @@
    <div class="content press">
       <h2>Press</h2>
       <p><b>TEXT:</b></p>
-      <p> 
+      <p>
          <a href="http://www.mountholyokenews.com/news/2020/2/14/kristin-jensen-99-presents-book-traces-project" target="_blank">
          Kristin Jensen '99 Presents Book Traces Project
          </a>
@@ -125,6 +125,15 @@
          </strong> 168
          <br>2014
       </p>
+      <p>
+         <a href="https://content.fromthepage.com/kristin-jensen/"
+            target="_blank">"An Interview with Kristin Jensen of BookTraces.org"</a>
+         <br>Nick Allen
+         <br>
+         <strong>FromThePage</strong>
+         <br>October 7, 2020
+      </p>
+
       <p><b>AUDIO:</b></p>
       <p>
          Interview with
