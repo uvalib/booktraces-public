@@ -30,7 +30,7 @@ type ServiceConfig struct {
 
 // Load will load the service configuration from env/cmdline
 func (cfg *ServiceConfig) Load() {
-	log.Printf("Loading configuration...")
+	log.Printf("INFO: loading configuration...")
 
 	flag.StringVar(&cfg.DBHost, "dbhost", "", "DB Host (required)")
 	flag.StringVar(&cfg.DBName, "dbname", "", "DB Name (required)")

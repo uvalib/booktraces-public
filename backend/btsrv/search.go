@@ -44,7 +44,7 @@ func (svc *ServiceContext) Search(c *gin.Context) {
 }
 
 func getByInstitution(db *dbx.DB, c *gin.Context, institutionID int) {
-	log.Printf("Get submissions by institution [%d]", institutionID)
+	log.Printf("INFO: get submissions by institution [%d]", institutionID)
 	searchQ := fmt.Sprintf(`%s and institution_id={:i} group by s.id order by submitted_at`, getBaseQuery())
 	q := db.NewQuery(searchQ)
 	q.Bind(dbx.Params{"i": institutionID})
@@ -52,7 +52,7 @@ func getByInstitution(db *dbx.DB, c *gin.Context, institutionID int) {
 }
 
 func getArchives(db *dbx.DB, c *gin.Context, tgtYearMonth string) {
-	log.Printf("Get archives from [%s]", tgtYearMonth)
+	log.Printf("INFO: get archives from [%s]", tgtYearMonth)
 	year := strings.Split(tgtYearMonth, "-")[0]
 	month := strings.Split(tgtYearMonth, "-")[1]
 	searchQ := fmt.Sprintf(`%s 
@@ -65,7 +65,7 @@ func getArchives(db *dbx.DB, c *gin.Context, tgtYearMonth string) {
 }
 
 func getTaggedSubmissions(db *dbx.DB, c *gin.Context, tgtTag string) {
-	log.Printf("Get submission tagged [%s]", tgtTag)
+	log.Printf("INFO: get submission tagged [%s]", tgtTag)
 	searchQ := fmt.Sprintf(`%s group by s.id having find_in_set({:t}, tags) order by submitted_at`, getBaseQuery())
 	q := db.NewQuery(searchQ)
 	q.Bind(dbx.Params{"t": tgtTag})
@@ -73,7 +73,7 @@ func getTaggedSubmissions(db *dbx.DB, c *gin.Context, tgtTag string) {
 }
 
 func doQuery(db *dbx.DB, c *gin.Context, query string) {
-	log.Printf("Search for string [%s]", query)
+	log.Printf("INFO: search for string [%s]", query)
 	searchStr := fmt.Sprintf("%%%s%%", query)
 	searchQ := fmt.Sprintf(`%s 
 		and (t.name like {:q} or s.title like {:q} or s.author like {:q}

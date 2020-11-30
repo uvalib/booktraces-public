@@ -21,7 +21,7 @@ func (svc *ServiceContext) GetUploadID(c *gin.Context) {
 
 // UploadFile handles raw file uploads from the front end. These will go into a pending directory
 func (svc *ServiceContext) UploadFile(c *gin.Context) {
-	log.Printf("Checking for upload identifier...")
+	log.Printf("INFO: checking for upload identifier...")
 	uploadID := c.PostForm("uploadID")
 	if uploadID == "" {
 		log.Printf("ERROR: No upload identifier submitted")
@@ -29,7 +29,7 @@ func (svc *ServiceContext) UploadFile(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Identifier received. Create upload directory.")
+	log.Printf("INFO: identifier received. Create upload directory.")
 	pendingDir := fmt.Sprintf("%s/%s", svc.UploadDir, "pending")
 	uploadDir := fmt.Sprintf("%s/%s", pendingDir, uploadID)
 	os.MkdirAll(uploadDir, 0777)
@@ -46,11 +46,11 @@ func (svc *ServiceContext) UploadFile(c *gin.Context) {
 			return
 		}
 		filename := header.Filename
-		log.Printf("Received CHUNKED request to upload %s, chunk %s size %s", filename, chunkIdx, c.PostForm("dzchunksize"))
+		log.Printf("INFO: received CHUNKED request to upload %s, chunk %s size %s", filename, chunkIdx, c.PostForm("dzchunksize"))
 		dest := fmt.Sprintf("%s/%s", uploadDir, filename)
 		if chunkIdx == "0" {
-			if _, err := os.Stat(dest); err == nil {
-				log.Printf("WARN: File %s already exists; removing", dest)
+			if _, err = os.Stat(dest); err == nil {
+				log.Printf("WARNING: File %s already exists; removing", dest)
 				os.Remove(dest)
 			}
 		}
@@ -59,7 +59,7 @@ func (svc *ServiceContext) UploadFile(c *gin.Context) {
 			c.String(http.StatusInternalServerError, fmt.Sprintf("unable to receive file %s", err.Error()))
 		}
 		defer outFile.Close()
-		_, err = io.Copy(outFile, file)
+		_, _ = io.Copy(outFile, file)
 	} else {
 		// not chunked; just save the file in the temp dir
 		file, err := c.FormFile("file")
@@ -70,15 +70,15 @@ func (svc *ServiceContext) UploadFile(c *gin.Context) {
 		filename := filepath.Base(file.Filename)
 		dest := fmt.Sprintf("%s/%s", uploadDir, filename)
 		if _, err := os.Stat(dest); err == nil {
-			log.Printf("WARN: File %s already exists; removing", dest)
+			log.Printf("WARNING: File %s already exists; removing", dest)
 			os.Remove(dest)
 		}
-		log.Printf("Receiving non-chunked file %s", filename)
+		log.Printf("INFO: receiving non-chunked file %s", filename)
 		if err := c.SaveUploadedFile(file, dest); err != nil {
 			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 			return
 		}
-		log.Printf("Done receiving %s", filename)
+		log.Printf("INFO: done receiving %s", filename)
 		c.String(http.StatusOK, "Submitted")
 	}
 }
@@ -88,19 +88,19 @@ func (svc *ServiceContext) DeleteUploadedFile(c *gin.Context) {
 	tgtFile := c.Param("file")
 	uploadID := c.Query("key")
 	tgt := fmt.Sprintf("%s/%s/%s/%s", svc.UploadDir, "pending", uploadID, tgtFile)
-	log.Printf("Request to delete %s", tgt)
+	log.Printf("INFO: request to delete %s", tgt)
 	if _, err := os.Stat(tgt); err == nil {
 		delErr := os.Remove(tgt)
 		if delErr != nil {
-			log.Printf("WARN: Unable to delete %s: %s", tgt, delErr.Error())
+			log.Printf("WARNING: Unable to delete %s: %s", tgt, delErr.Error())
 			c.String(http.StatusInternalServerError, delErr.Error())
 			return
 		}
 	} else {
-		log.Printf("WARN: Target file %s does not exist", tgt)
+		log.Printf("WARNING: Target file %s does not exist", tgt)
 		c.String(http.StatusNotFound, "% not found", tgtFile)
 		return
 	}
-	log.Printf("Deleted %s", tgt)
+	log.Printf("INFO: deleted %s", tgt)
 	c.String(http.StatusOK, "deleted %s", tgtFile)
 }

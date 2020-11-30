@@ -16,13 +16,13 @@ import (
 // to force it through NetBadge authentication. This route does nothing more than ensure users have been thru
 // authentication and create a user if one does not exist. End result is a redirect.
 func (svc *ServiceContext) Authenticate(c *gin.Context) {
-	log.Printf("Checking authentication headers...")
+	log.Printf("INFO: checking authentication headers...")
 	computingID := c.GetHeader("remote_user")
 	devMode := false
 	if svc.DevAuthUser != "" {
 		computingID = svc.DevAuthUser
 		devMode = true
-		log.Printf("Using dev auth user ID: %s", computingID)
+		log.Printf("INFO: using dev auth user ID: %s", computingID)
 	}
 	if computingID == "" {
 		log.Printf("ERROR: Expected auth header not present in request. Not authorized.")
@@ -34,17 +34,17 @@ func (svc *ServiceContext) Authenticate(c *gin.Context) {
 	user := User{}
 	err := user.FindByEmail(svc.DB, email)
 	if err != nil {
-		log.Printf("No user record found for authorized computing ID. Not authorized. %s", err.Error())
+		log.Printf("WARNING: no user record found for authorized computing ID. Not authorized. %s", err.Error())
 		c.Redirect(http.StatusFound, "/forbidden")
 		return
 	}
 
-	log.Printf("Adding access token to user")
+	log.Printf("INFO: adding access token to user")
 	user.Token = xid.New().String()
 	svc.DB.Model(&user).Update("Token")
 
 	tgtURL := c.Query("url")
-	log.Printf("Authentication successful for %s at URL %s", computingID, tgtURL)
+	log.Printf("INFO: authentication successful for %s at URL %s", computingID, tgtURL)
 	json, _ := json.Marshal(user)
 
 	// Set user account into in an open cookie, and place the access token
@@ -63,27 +63,27 @@ func (svc *ServiceContext) Authenticate(c *gin.Context) {
 // AuthMiddleware sits in front of all admin API calls and makes the auth token generated
 // by the shibboleth-fronted authenticate handler is present and valid
 func (svc *ServiceContext) AuthMiddleware(c *gin.Context) {
-	log.Printf("AuthMiddleware is checking for access cookie")
+	log.Printf("INFO: AuthMiddleware is checking for access cookie")
 	cookieStr, err := c.Cookie("bt_admin_session")
 	if err != nil {
 		log.Printf("ERROR: unable to retrieve access cookie")
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	log.Printf("AuthMiddleware found cookie %s; verifying", cookieStr)
+	log.Printf("INFO: AuthMiddleware found cookie %s; verifying", cookieStr)
 	user := User{}
 	err = user.FindByToken(svc.DB, strings.Split(cookieStr, "|")[0])
 	if err != nil {
-		log.Printf("No user record found for token. Not authorized.")
+		log.Printf("WARNING: no user record found for token. Not authorized.")
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
 	if user.Email != strings.Split(cookieStr, "|")[1] {
-		log.Printf("Email / token mismatch. Not authorized.")
+		log.Printf("WARNING: Email / token mismatch. Not authorized.")
 		c.AbortWithStatus(http.StatusForbidden)
 	}
 
-	log.Printf("User %s is authorized for %s", user.Email, c.Request.RequestURI)
+	log.Printf("INFO: user %s is authorized for %s", user.Email, c.Request.RequestURI)
 	c.Next()
 }

@@ -29,13 +29,13 @@ type ServiceContext struct {
 
 // Init will initialize the service context based on the config parameters
 func (svc *ServiceContext) Init(cfg *ServiceConfig) {
-	log.Printf("Initializing Service...")
+	log.Printf("INFO: initializing Service...")
 	svc.UploadDir = cfg.UploadDir
 	svc.DevAuthUser = cfg.DevAuthUser
 	svc.SMTP = cfg.SMTP
 	svc.BookTracesURL = cfg.BookTracesURL
 
-	log.Printf("Init DB connection to %s...", cfg.DBHost)
+	log.Printf("INFO: init DB connection to %s...", cfg.DBHost)
 	connectStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBPort, cfg.DBName)
 	db, err := dbx.Open("mysql", connectStr)
 	if err != nil {
@@ -69,7 +69,7 @@ func (svc *ServiceContext) HealthCheck(c *gin.Context) {
 }
 
 func (svc *ServiceContext) sendTranscriptionEmail(subID int, title string, transcription Transcription) {
-	log.Printf("Sending transcription notification email for transcription %d", transcription.ID)
+	log.Printf("INFO: sending transcription notification email for transcription %d", transcription.ID)
 	var vars struct {
 		BookTracesURL string
 		SubmissionID  int
@@ -91,7 +91,7 @@ func (svc *ServiceContext) sendTranscriptionEmail(subID int, title string, trans
 }
 
 func (svc *ServiceContext) sendSubmissionEmail(submission ClientSubmission) {
-	log.Printf("Sending submission notification email for submission %d", submission.ID)
+	log.Printf("INFO: sending submission notification email for submission %d", submission.ID)
 	var vars struct {
 		BookTracesURL string
 		Submission    ClientSubmission
@@ -109,7 +109,7 @@ func (svc *ServiceContext) sendSubmissionEmail(submission ClientSubmission) {
 }
 
 func (svc *ServiceContext) sendEmail(subject string, emailBody string) {
-	log.Printf("Generate SMTP message")
+	log.Printf("INFO: generate SMTP message")
 	// Per: https://stackoverflow.com/questions/36485857/sending-emails-with-name-email-from-go
 	// sending addresses like 'user name <email.com>' does not work with the default
 	// mail package. Leaving at just email address for now. Can revisit after meetings
@@ -121,12 +121,12 @@ func (svc *ServiceContext) sendEmail(subject string, emailBody string) {
 	msg := []byte(subject + toHdr + mime + emailBody)
 
 	if svc.SMTP.DevMode {
-		log.Printf("Email is in dev mode. Logging message instead of sending")
+		log.Printf("INFO: Email is in dev mode. Logging message instead of sending")
 		log.Printf("==================================================")
 		log.Printf("%s", msg)
 		log.Printf("==================================================")
 	} else {
-		log.Printf("Sending noty email to %s", strings.Join(to, ","))
+		log.Printf("INFO: sending noty email to %s", strings.Join(to, ","))
 		err := smtp.SendMail(fmt.Sprintf("%s:%d", svc.SMTP.Host, svc.SMTP.Port), nil, "no-reply@virginia.edu", to, msg)
 		if err != nil {
 			log.Printf("ERROR: Unable to send receipt email: %s", err.Error())
@@ -136,7 +136,7 @@ func (svc *ServiceContext) sendEmail(subject string, emailBody string) {
 
 // Generate 150x150x thumbnails for all images (.png and .jpg) in the srcDir
 func generateThumbnails(srcDir string) error {
-	log.Printf("Generate 150x150 thumbnail for all images in %s", srcDir)
+	log.Printf("INFO: generate 150x150 thumbnail for all images in %s", srcDir)
 	files, err := ioutil.ReadDir(srcDir)
 	if err != nil {
 		return err
@@ -149,16 +149,16 @@ func generateThumbnails(srcDir string) error {
 		origFn := fmt.Sprintf("%s/%s", srcDir, imgFile.Name())
 		os.Chmod(origFn, 0666)
 		thumbFn := getThumbFilename(origFn)
-		log.Printf("Generate thumbnail file %s...", thumbFn)
+		log.Printf("INFO: generate thumbnail file %s...", thumbFn)
 		args := []string{"-quiet", "-resize", "150x150^", "-extent", "150x150", "-gravity", "center", origFn, thumbFn}
-		log.Printf("convert args: %+v", args)
+		log.Printf("INFO: convert args: %+v", args)
 		cmd := exec.Command("convert", args...)
 		err := cmd.Run()
 		if err != nil {
 			return err
 		}
 		os.Chmod(thumbFn, 0666)
-		log.Printf("Thunbnail %s generated", thumbFn)
+		log.Printf("INFO: thunbnail %s generated", thumbFn)
 	}
 	return nil
 }

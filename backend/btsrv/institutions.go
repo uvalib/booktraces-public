@@ -34,7 +34,7 @@ func (svc *ServiceContext) GetInstitutions(c *gin.Context) {
 // DeleteInstitution removes the specified institution
 func (svc *ServiceContext) DeleteInstitution(c *gin.Context) {
 	institutionID := c.Param("id")
-	log.Printf("Delete institution %s", institutionID)
+	log.Printf("INFO: delete institution %s", institutionID)
 	q := svc.DB.NewQuery("delete from institutions where id={:id}")
 	q.Bind(dbx.Params{"id": institutionID})
 	_, err := q.Execute()
@@ -48,7 +48,7 @@ func (svc *ServiceContext) DeleteInstitution(c *gin.Context) {
 
 // AddInstitution adds a new instutution
 func (svc *ServiceContext) AddInstitution(c *gin.Context) {
-	log.Printf("Add new institution")
+	log.Printf("INFO: add new institution")
 	var inst Institution
 	err := c.ShouldBindJSON(&inst)
 	if err != nil {

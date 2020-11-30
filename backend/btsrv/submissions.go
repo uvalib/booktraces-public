@@ -121,24 +121,24 @@ func (svc *ServiceContext) lookupSubmission(tgtID string) (*SubmissionDetails, e
 		return nil, err
 	}
 
-	log.Printf("Get institution for submission %s", tgtID)
+	log.Printf("INFO: get institution for submission %s", tgtID)
 	q = svc.DB.NewQuery("select * from institutions where id={:id}")
 	q.Bind((dbx.Params{"id": sub.InstitutionID}))
 	var inst Institution
 	err = q.One(&inst)
 	if err != nil {
-		log.Printf("WARN: Unable to get institution for %d failed: %s", sub.ID, err.Error())
+		log.Printf("WARNING: Unable to get institution for %d failed: %s", sub.ID, err.Error())
 	} else {
 		sub.InstitutionName = inst.Name
 	}
 
-	log.Printf("Get next/previous submissions %s", tgtID)
+	log.Printf("INFO: get next/previous submissions %s", tgtID)
 	qs := fmt.Sprintf(`select id from submissions where public = 1 and id > %d limit 1`, sub.ID)
 	qn := svc.DB.NewQuery(qs)
 	var nextID []int
 	err = qn.Column(&nextID)
 	if err != nil {
-		log.Printf("WARN: Next ID request for %d failed: %s", sub.ID, err.Error())
+		log.Printf("WARNING: Next ID request for %d failed: %s", sub.ID, err.Error())
 	} else {
 		if len(nextID) > 0 {
 			sub.NextID = nextID[0]
@@ -150,14 +150,14 @@ func (svc *ServiceContext) lookupSubmission(tgtID string) (*SubmissionDetails, e
 	qp := svc.DB.NewQuery(qs)
 	err = qp.Column(&prevID)
 	if err != nil {
-		log.Printf("WARN: Previous ID request for %d failed: %s", sub.ID, err.Error())
+		log.Printf("WARNING: Previous ID request for %d failed: %s", sub.ID, err.Error())
 	} else {
 		if len(prevID) > 0 {
 			sub.PreviousID = prevID[0]
 		}
 	}
 
-	log.Printf("Get tags for submission %d", sub.ID)
+	log.Printf("INFO: get tags for submission %d", sub.ID)
 	sub.Tags = make([]string, 0)
 	q = svc.DB.NewQuery("select t.name as name from tags t inner join submission_tags st on st.tag_id = t.id where submission_id={:id}")
 	q.Bind((dbx.Params{"id": sub.ID}))
@@ -172,7 +172,7 @@ func (svc *ServiceContext) lookupSubmission(tgtID string) (*SubmissionDetails, e
 		}
 	}
 
-	log.Printf("Get file URLS for submission %d", sub.ID)
+	log.Printf("INFO: get file URLS for submission %d", sub.ID)
 	q = svc.DB.NewQuery("select id,filename from submission_files where submission_id={:id}")
 	q.Bind((dbx.Params{"id": sub.ID}))
 	rows, err = q.Rows()
@@ -189,7 +189,7 @@ func (svc *ServiceContext) lookupSubmission(tgtID string) (*SubmissionDetails, e
 			tq.Bind(dbx.Params{"fid": f.ID})
 			terr := tq.All(&transcriptions)
 			if terr != nil {
-				log.Printf("WARN: unable to get transcriptions for file %d", f.ID)
+				log.Printf("WARNING: unable to get transcriptions for file %d", f.ID)
 				f.Transcriptions = make([]Transcription, 0)
 			} else {
 				f.Transcriptions = transcriptions
@@ -226,7 +226,7 @@ func (svc *ServiceContext) SubmitTranscription(c *gin.Context) {
 		return
 	}
 
-	log.Printf("%s (%s) has submitted a transcription for file %d", params.Email, params.Transcriber, params.FileID)
+	log.Printf("INFO: %s (%s) has submitted a transcription for file %d", params.Email, params.Transcriber, params.FileID)
 	model := Transcription{FileID: params.FileID, Transcriber: params.Transcriber,
 		TranscriberEmail: params.Email, Text: params.Transcription, TranscribedAt: time.Now()}
 	err = svc.DB.Model(&model).Insert()
@@ -285,7 +285,7 @@ func (svc *ServiceContext) GetThumbs(c *gin.Context) {
 
 	out := RecentThumbs{Total: 0, Page: page, PageSize: pageSize}
 
-	log.Printf("Get total submissions")
+	log.Printf("INFO: get total submissions")
 	tq := svc.DB.NewQuery("select count(*) as total from submissions where public=1")
 	tq.One(&out)
 
@@ -323,7 +323,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		c.String(http.StatusBadRequest, "All fields are required")
 		return
 	}
-	log.Printf("Received submission: %+v", submission)
+	log.Printf("INFO: received submission: %+v", submission)
 	pendingDir := fmt.Sprintf("%s/%s", svc.UploadDir, "pending")
 	uploadDir := fmt.Sprintf("%s/%s", pendingDir, submission.UploadID)
 
@@ -333,7 +333,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 	submittedDir := fmt.Sprintf("%s/%s/%s", svc.UploadDir, "submitted", dateDirs)
 	os.MkdirAll(submittedDir, 0777)
 	tgtDir := fmt.Sprintf("%s/%s", submittedDir, submission.UploadID)
-	log.Printf("Moving pending upload files from %s to %s", uploadDir, tgtDir)
+	log.Printf("INFO: moving pending upload files from %s to %s", uploadDir, tgtDir)
 	err = os.Rename(uploadDir, tgtDir)
 	if err != nil {
 		log.Printf("ERROR: Unable to move pending files to submitted: %s", err.Error())
@@ -349,7 +349,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Create DB record of submission")
+	log.Printf("INFO: create DB record of submission")
 	submission.SubmittedAt = time.Now()
 	err = svc.DB.Model(&submission).Exclude("Files", "Tags").Insert()
 	if err != nil {
@@ -358,14 +358,14 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Attach files to submission")
+	log.Printf("INFO: attach files to submission")
 	for _, fn := range submission.Files {
 		_, err := svc.DB.Insert("submission_files", dbx.Params{
 			"submission_id": submission.ID,
 			"filename":      fmt.Sprintf("%s/%s/%s", dateDirs, submission.UploadID, fn),
 		}).Execute()
 		if err != nil {
-			log.Printf("WARN: Unable to attach %s to submission %d", fn, submission.ID)
+			log.Printf("WARNING: Unable to attach %s to submission %d", fn, submission.ID)
 		}
 	}
 
@@ -378,7 +378,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 
 // WriteTags commits submission tags to DB
 func writeTags(db *dbx.DB, submissionID int, tags []string) {
-	log.Printf("Attach tags to submission")
+	log.Printf("INFO: attach tags to submission")
 	for _, tagIDStr := range tags {
 		tagID, _ := strconv.Atoi(tagIDStr)
 		_, err := db.Insert("submission_tags", dbx.Params{
@@ -386,7 +386,7 @@ func writeTags(db *dbx.DB, submissionID int, tags []string) {
 			"tag_id":        tagID,
 		}).Execute()
 		if err != nil {
-			log.Printf("WARN: Unable to attach tag %d to submission %d", tagID, submissionID)
+			log.Printf("WARNING: Unable to attach tag %d to submission %d", tagID, submissionID)
 		}
 	}
 }
