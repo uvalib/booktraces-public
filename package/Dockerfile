@@ -45,7 +45,7 @@ RUN mkdir -p $APP_HOME/scripts $APP_HOME/bin $APP_HOME/db
 RUN chown -R docker $APP_HOME && chgrp -R sse $APP_HOME
 
 # add the migrate tool
-RUN cd $APP_HOME/bin && wget -O - https://github.com/golang-migrate/migrate/releases/download/v4.6.1/migrate.linux-amd64.tar.gz | tar xvz && mv migrate.linux-amd64 migrate
+RUN cd $APP_HOME/bin && wget -O - https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz && mv migrate.linux-amd64 migrate
 
 # Specify the user
 USER docker
