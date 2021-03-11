@@ -4,7 +4,7 @@
       <dl>
          <dt>Director</dt>
          <dd>
-            <a href="http://www.engl.virginia.edu/people/ams4k" target="_blank">Andrew Stauffer</a>,&nbsp;
+            <a href="https://english.as.virginia.edu/people/profile/ams4k" target="_blank">Andrew Stauffer</a>,&nbsp;
             Department of English, University of Virginia
          </dd>
          <dt>Project Manager</dt>
@@ -39,37 +39,37 @@
       </p>
       <p>
          We believe that special attention should be paid to these historical materials, which <b>bear marks of use by their original owners.</b>
-         &nbsp;<router-link to="/submissions/1">Marginalia</router-link>, 
-         &nbsp;<router-link to="/submissions/361">inscriptions</router-link>, 
-         &nbsp;<router-link to="/submissions/69">photos</router-link>, 
-         &nbsp;<router-link to="/submissions/1233">original manuscripts</router-link>, 
-         &nbsp;<router-link to="/submissions/508">letters</router-link>, 
-         &nbsp;<router-link to="/submissions/578">drawings</router-link>, 
-         &nbsp;<router-link to="/submissions/397">locks of hair</router-link>, 
+         &nbsp;<router-link to="/submissions/1">Marginalia</router-link>,
+         &nbsp;<router-link to="/submissions/361">inscriptions</router-link>,
+         &nbsp;<router-link to="/submissions/69">photos</router-link>,
+         &nbsp;<router-link to="/submissions/1233">original manuscripts</router-link>,
+         &nbsp;<router-link to="/submissions/508">letters</router-link>,
+         &nbsp;<router-link to="/submissions/578">drawings</router-link>,
+         &nbsp;<router-link to="/submissions/397">locks of hair</router-link>,
          &nbsp;<router-link to="/submissions/1196">flowers</router-link>, and many other unique pieces
          of historical data can be found in individual copies, many of them associated with the history of the institution that
          collected the books in the first place. These unique attributes cannot be located by any electronic catalog.
          <span class="big">Each book has to be opened and examined.</span>
       </p>
       <p>
-        <span class="big">That’s where you come in.</span> Thousands of such books — marked or otherwise customized by nineteenth-century 
-        owners – are on library shelves. The Book Traces project hopes to inspire the development of processes 
-        for discovering them, cataloguing them more fully, preserving them, and making better-informed decisions 
-        about print collections management. Further, we hope to model this process as part of a national effort 
+        <span class="big">That’s where you come in.</span> Thousands of such books — marked or otherwise customized by nineteenth-century
+        owners – are on library shelves. The Book Traces project hopes to inspire the development of processes
+        for discovering them, cataloguing them more fully, preserving them, and making better-informed decisions
+        about print collections management. Further, we hope to model this process as part of a national effort
         for coordinating the management of nineteenth-century printed materials in academic libraries.
       </p>
       <p>
          Book Traces is sponsored by <a href="http://nines.org" target="_blank">NINES</a> at
-         the <a href="http://virginia.edu" target="_blank">University of Virginia</a>, with 
-         <a href="https://news.library.virginia.edu/2017/06/01/hidden-in-plain-sight-book-traces-uva-a-clir-hidden-collections-project/" 
-            targte="_blank">funding from CLIR</a> and the 
+         the <a href="http://virginia.edu" target="_blank">University of Virginia</a>, with
+         <a href="https://news.library.virginia.edu/2017/06/01/hidden-in-plain-sight-book-traces-uva-a-clir-hidden-collections-project/"
+            targte="_blank">funding from CLIR</a> and the
          <a href="https://www.mellon.org/grants/grants-database/grants/university-of-virginia/1901-06518/" target="_blank">Andrew W. Mellon Foundation</a>.
       </p>
       <p>
-        If you have any questions or remarks, please contact <a href="mailto:ams4k@virginia.edu">Andrew Stauffer (ams4k@virginia.edu)</a> 
-        or <a href="mailto:khj5c@virginia.edu">Kristin Jensen (khj5c@virginia.edu)</a>. 
-        And please, <b>share the site widely!</b> We want as many seekers out there in the library stacks as we can muster. 
-        The more examples we can locate, the more we will know about the history and future of the nineteenth-century book. We can also help co-ordinate 
+        If you have any questions or remarks, please contact <a href="mailto:ams4k@virginia.edu">Andrew Stauffer (ams4k@virginia.edu)</a>
+        or <a href="mailto:khj5c@virginia.edu">Kristin Jensen (khj5c@virginia.edu)</a>.
+        And please, <b>share the site widely!</b> We want as many seekers out there in the library stacks as we can muster.
+        The more examples we can locate, the more we will know about the history and future of the nineteenth-century book. We can also help co-ordinate
         class exercises based on stack searches in your library.
       </p>
       <h4>Book Traces Scholarly Advisory Board</h4>

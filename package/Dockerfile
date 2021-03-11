@@ -1,18 +1,18 @@
 #
 # build the target application
 #
-FROM golang:1.15 as builder
-RUN apt-get -y update
+FROM golang:1.16.0-alpine3.13 as builder
+RUN apk update && apk upgrade && apk add make yarn
 
 # see https://github.com/nodesource/distributions/blob/master/README.md
-RUN apt-get -y install apt-transport-https
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-RUN apt-get -y install nodejs
+#RUN apt-get -y install apt-transport-https
+#RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+#RUN apt-get -y install nodejs
 
 # see https://yarnpkg.com/en/docs/install#debian-stable
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get -y update && apt-get -y install yarn 
+#RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+#RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+#RUN apt-get -y update && apt-get -y install yarn 
 
 WORKDIR /build
 COPY go.mod go.sum Makefile ./
@@ -24,7 +24,7 @@ RUN make linux-full
 #
 # build the target container
 #
-FROM alpine:3.11
+FROM alpine:3.13
 
 # update the packages
 RUN apk update && apk upgrade && apk add bash tzdata ca-certificates imagemagick msttcorefonts-installer && rm -rf /var/cache/apk/* && update-ms-fonts
@@ -45,7 +45,7 @@ RUN mkdir -p $APP_HOME/scripts $APP_HOME/bin $APP_HOME/db
 RUN chown -R docker $APP_HOME && chgrp -R sse $APP_HOME
 
 # add the migrate tool
-RUN cd $APP_HOME/bin && wget -O - https://github.com/golang-migrate/migrate/releases/download/v4.6.1/migrate.linux-amd64.tar.gz | tar xvz && mv migrate.linux-amd64 migrate
+RUN cd $APP_HOME/bin && wget -O - https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz && mv migrate.linux-amd64 migrate
 
 # Specify the user
 USER docker
