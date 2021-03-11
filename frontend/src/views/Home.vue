@@ -36,7 +36,7 @@
             </a>
          </p>
          <div>
-            <div class="book-info"><strong>Coming Soon</strong></div>
+            <div class="book-info"><strong>Now Available!</strong></div>
             <div class="book">
                <div class="cover">
                   <a href="https://www.upenn.edu/pennpress/book/16176.html" target="_blank">

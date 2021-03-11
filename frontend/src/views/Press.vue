@@ -3,6 +3,14 @@
       <h2>Press</h2>
       <p><b>TEXT:</b></p>
       <p>
+         <a href="https://blog.bookstellyouwhy.com/redefining-the-rare-book-an-interview-on-andrew-stauffers-book-traces"
+            target="_blank">"Redefining the Rare Book"</a>
+         <br/>Audrey Golden
+          <br>
+         <strong>Books Tell You Why</strong>
+         <br/>February 26, 2021
+      </p>
+      <p>
          <a href="https://content.fromthepage.com/kristin-jensen/"
             target="_blank">"An Interview with Kristin Jensen of BookTraces.org"</a>
          <br>Nick Allen
