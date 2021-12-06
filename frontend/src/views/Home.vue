@@ -20,15 +20,17 @@
             (<b>not</b> rare books or special collections).  <b>Join the search!</b>
          </p>
          <p>
-            We’ve received a new Grant from the
-            <a href="https://news.library.virginia.edu/2019/04/29/book-traces-awarded-a-110000-planning-grant-from-the-andrew-w-mellon-foundation/"
-              class="inline" target="_blank">Mellon Foundation</a> for 2019-2020!
+            Download the Data Set for Book Traces: Civil War Era Readers and Their Books in Virginia Libraries from UVA's LibraData:<br/>
+            <a href="https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/XVEQMH" target="_blank">
+               https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/XVEQMH
+            </a>
          </p>
          <p>
             Explore our CLIR-funded project at the University of Virginia:<br/>
             <a href="http://booktraces.library.virginia.edu" target="_blank">
                http://booktraces.library.virginia.edu
             </a>
+         </p>
          <p>
             Search the Book Traces database of over 12,000 University of Virginia books:<br/>
             <a href="https://booktraces.lib.virginia.edu/" target="_blank">

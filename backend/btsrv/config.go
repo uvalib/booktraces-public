@@ -50,9 +50,19 @@ func (cfg *ServiceConfig) Load() {
 	flag.BoolVar(&cfg.SMTP.DevMode, "stubsmtp", false, "Log email insted of sending (dev mode)")
 
 	flag.Parse()
-	log.Printf("%#v", cfg)
 
-	// if anything is still not set, die
+	log.Printf("[CONFIG] port          = [%d]", cfg.Port)
+	log.Printf("[CONFIG] dbhost        = [%s]", cfg.DBHost)
+	log.Printf("[CONFIG] dbport        = [%d]", cfg.DBPort)
+	log.Printf("[CONFIG] dbname        = [%s]", cfg.DBName)
+	log.Printf("[CONFIG] dbuser        = [%s]", cfg.DBUser)
+	log.Printf("[CONFIG] upload        = [%s]", cfg.UploadDir)
+	log.Printf("[CONFIG] url           = [%s]", cfg.BookTracesURL)
+	log.Printf("[CONFIG] smtphost      = [%s]", cfg.SMTP.Host)
+	log.Printf("[CONFIG] smtpport      = [%d]", cfg.SMTP.Port)
+	log.Printf("[CONFIG] smtpto        = [%s]", cfg.SMTP.To)
+	log.Printf("[CONFIG] stubsmto      = [%t]", cfg.SMTP.DevMode)
+
 	if cfg.DBHost == "" || cfg.DBUser == "" ||
 		cfg.DBPass == "" || cfg.DBName == "" {
 		flag.Usage()

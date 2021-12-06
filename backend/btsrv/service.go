@@ -2,11 +2,11 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/smtp"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	dbx "github.com/go-ozzo/ozzo-dbx"
 	_ "github.com/go-sql-driver/mysql"
+	"gopkg.in/gomail.v2"
 )
 
 // ServiceContext contains the data
@@ -108,30 +109,30 @@ func (svc *ServiceContext) sendSubmissionEmail(submission ClientSubmission) {
 	svc.sendEmail("Subject: Book Traces Submisssion\n", renderedEmail.String())
 }
 
+// SendEmail will and send an email to the specified recipients
 func (svc *ServiceContext) sendEmail(subject string, emailBody string) {
 	log.Printf("INFO: generate SMTP message")
-	// Per: https://stackoverflow.com/questions/36485857/sending-emails-with-name-email-from-go
-	// sending addresses like 'user name <email.com>' does not work with the default
-	// mail package. Leaving at just email address for now. Can revisit after meetings
-	/// about functionality.
-	// toAddr := mail.Address{Name: emailMap[reserveReq.Request.Library], Address: svc.CourseReserveEmail}
-	to := []string{svc.SMTP.To}
-	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	toHdr := fmt.Sprintf("To: %s\n", strings.Join(to, ","))
-	msg := []byte(subject + toHdr + mime + emailBody)
+	to := strings.Split(svc.SMTP.To, ",")
+	mail := gomail.NewMessage()
+	mail.SetHeader("MIME-version", "1.0")
+	mail.SetHeader("Content-Type", "text/plain; charset=\"UTF-8\"")
+	mail.SetHeader("Subject", subject)
+	mail.SetHeader("To", to...)
+	mail.SetHeader("From", "no-reply@virginia.edu")
+	mail.SetBody("text/plain", emailBody)
 
 	if svc.SMTP.DevMode {
-		log.Printf("INFO: Email is in dev mode. Logging message instead of sending")
+		log.Printf("Email is in dev mode. Logging message instead of sending")
 		log.Printf("==================================================")
-		log.Printf("%s", msg)
+		mail.WriteTo(log.Writer())
 		log.Printf("==================================================")
-	} else {
-		log.Printf("INFO: sending noty email to %s", strings.Join(to, ","))
-		err := smtp.SendMail(fmt.Sprintf("%s:%d", svc.SMTP.Host, svc.SMTP.Port), nil, "no-reply@virginia.edu", to, msg)
-		if err != nil {
-			log.Printf("ERROR: Unable to send receipt email: %s", err.Error())
-		}
+		return
 	}
+
+	log.Printf("Sending %s email to %s with no auth", subject, svc.SMTP.To)
+	dialer := gomail.Dialer{Host: svc.SMTP.Host, Port: svc.SMTP.Port}
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	dialer.DialAndSend(mail)
 }
 
 // Generate 150x150x thumbnails for all images (.png and .jpg) in the srcDir
