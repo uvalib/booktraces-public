@@ -1,18 +1,8 @@
 #
 # build the target application
 #
-FROM golang:1.16.0-alpine3.13 as builder
+FROM golang:1.16.5-alpine3.13 as builder
 RUN apk update && apk upgrade && apk add make yarn
-
-# see https://github.com/nodesource/distributions/blob/master/README.md
-#RUN apt-get -y install apt-transport-https
-#RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-#RUN apt-get -y install nodejs
-
-# see https://yarnpkg.com/en/docs/install#debian-stable
-#RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-#RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-#RUN apt-get -y update && apt-get -y install yarn 
 
 WORKDIR /build
 COPY go.mod go.sum Makefile ./
@@ -65,3 +55,7 @@ COPY --from=builder /build/bin/templates $APP_HOME/bin/templates
 # Add the build tag
 ARG BUILD_TAG
 RUN test -n "$BUILD_TAG" && touch $APP_HOME/buildtag.build-$BUILD_TAG || touch $APP_HOME/buildtag.build-0
+
+#
+# end of file
+#
