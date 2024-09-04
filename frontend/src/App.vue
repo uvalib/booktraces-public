@@ -9,14 +9,13 @@
             <BookTracesSidebar/>
          </div>
          <div class="pure-u-5-6 bkg">
-            <!-- <BookTracesSearch/> -->
+            <BookTracesSearch/>
             <!-- <router-view/> -->
          </div>
       </div>
    </template>
    <BookTracesFooter/>
 </template>
-
 
 <script setup>
 import BookTracesSearch from "@/components/BookTracesSearch.vue"
