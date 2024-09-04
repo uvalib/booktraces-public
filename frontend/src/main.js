@@ -21,4 +21,6 @@ app.component('pinch-zoom', PinchZoom)
 import VueCookies from 'vue-cookies'
 app.use(VueCookies)
 
+import '@fortawesome/fontawesome-free/css/all.css'
+
 app.mount('#app')
