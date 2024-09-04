@@ -59,7 +59,7 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
-import Transcribe from "@/components/Transcribe"
+import Transcribe from "@/components/Transcribe.vue"
 
 export default {
    name: "submission",

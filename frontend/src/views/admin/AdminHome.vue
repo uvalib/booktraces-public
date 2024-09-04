@@ -29,7 +29,7 @@
                <td>{{ sub.title }}</td>
                <td>{{ sub.author }}</td>
                <td>
-                  <span class="tag" v-for="(tag,idx) in tagList(sub)" :key="idx" @click="tagClicked">{{tag}}</span>   
+                  <span class="tag" v-for="(tag,idx) in tagList(sub)" :key="idx" @click="tagClicked">{{tag}}</span>
                </td>
                <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
                <td class="centered">
@@ -47,7 +47,7 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
-import AdminPager from "@/components/AdminPager"
+import AdminPager from "@/components/AdminPager.vue"
 export default {
    name: "admin",
    components: {
@@ -70,7 +70,7 @@ export default {
       tagList( sub ) {
          if (sub.tags) {
             return sub.tags.split(",")
-         } 
+         }
          return []
       },
       updateSearchQuery(e) {

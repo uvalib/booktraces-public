@@ -47,7 +47,7 @@
 <script>
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
-import InstitutionSearch from "@/components/InstitutionSearch"
+import InstitutionSearch from "@/components/InstitutionSearch.vue"
 export default {
    name: "results",
    components: {

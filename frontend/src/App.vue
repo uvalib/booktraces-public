@@ -1,32 +1,30 @@
 <template>
-   <div id="app">
-      <BookTracesHeader/>
-      <template v-if="adminMode">
-         <router-view/>
-      </template>
-      <template v-else>
-         <div class="main pure-g">
-            <div class="pure-u-1-6">
-               <BookTracesSidebar/>
-            </div>
-            <div class="pure-u-5-6 bkg">
-               <BookTracesSearch/>
-               <router-view/>
-            </div>
+   <BookTracesHeader/>
+   <!-- <template v-if="adminMode">
+      <router-view/>
+   </template>
+   <template v-else> -->
+      <div class="main pure-g">
+         <div class="pure-u-1-6">
+            <BookTracesSidebar/>
          </div>
-      </template>
-      <BookTracesFooter/>
-   </div>
+         <div class="pure-u-5-6 bkg">
+            <BookTracesSearch/>
+            <router-view/>
+         </div>
+      </div>
+   <!-- </template> -->
+   <BookTracesFooter/>
 </template>
 
 
 <script>
-import BookTracesSearch from "@/components/BookTracesSearch"
-import BookTracesSidebar from "@/components/BookTracesSidebar"
-import BookTracesHeader from "@/components/BookTracesHeader"
-import BookTracesFooter from "@/components/BookTracesFooter"
-import { mapGetters } from "vuex"
-import { mapState } from 'vuex'
+import BookTracesSearch from "@/components/BookTracesSearch.vue"
+import BookTracesSidebar from "@/components/BookTracesSidebar.vue"
+import BookTracesHeader from "@/components/BookTracesHeader.vue"
+import BookTracesFooter from "@/components/BookTracesFooter.vue"
+// import { mapGetters } from "vuex"
+// import { mapState } from 'vuex'
 
 export default {
    components: {
@@ -35,17 +33,17 @@ export default {
       BookTracesSidebar,
       BookTracesFooter
    },
-   computed: {
-      ...mapGetters({
-         isAuthenticated: "admin/isAuthenticated"
-      }),
-      ...mapState({
-         adminMode: state => state.adminMode,
-      })
-   },
-   data: function() {
-      return {}
-   },
+   // computed: {
+   //    ...mapGetters({
+   //       isAuthenticated: "admin/isAuthenticated"
+   //    }),
+   //    ...mapState({
+   //       adminMode: state => state.adminMode,
+   //    })
+   // },
+   // data: function() {
+   //    return {}
+   // },
 };
 </script>
 
@@ -67,7 +65,7 @@ body {
    /* background-image: url(./assets/main-bkg.jpg); */
    background-color: black;
 }
-#app .main { 
+#app .main {
    padding-top:0;
 }
 #app {

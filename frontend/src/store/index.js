@@ -1,4 +1,4 @@
-import Vue from 'vue'
+// import Vue from 'vue'
 import Vuex from 'vuex'
 import auth from './modules/auth'
 import unauth from './modules/unauth'
@@ -9,7 +9,7 @@ import transcribe from './modules/transcribe'
 import axios from 'axios'
 import { version } from '../../package.json'
 
-Vue.use(Vuex)
+// Vue.use(Vuex)
 
 export default new Vuex.Store({
    // Global state/mutations/actions: for stuff that is used across modules

@@ -27,7 +27,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import UVAViewer from "@/components/UVAViewer"
+import UVAViewer from "@/components/UVAViewer.vue"
 export default {
    components: {
       UVAViewer

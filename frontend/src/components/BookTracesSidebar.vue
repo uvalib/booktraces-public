@@ -10,16 +10,6 @@
             </div>
          </div>
       </div>
-      <div id="tfeed" class="section">
-         <p class="subtitle pad">Recent Tweets</p>
-
-         <Timeline id="booktracesuva" sourceType="profile" 
-            :options="{ height: 400, theme: 'dark', chrome: 'noheader,transparent,nofooter', dnt: true }"
-            error-message="Timeline could not be loaded. If using an ad-blocker, try whitelisting this site." 
-            error-message-class="tweet-not-found" />
-
-      </div>
-
       <div class="section">
          <p class="subtitle pad">Archives</p>
          <div class="archive" v-for="(archive,idx) in archives" :key="idx">
@@ -33,11 +23,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import {Timeline} from 'vue-tweet-embed'
 export default {
-   components: {
-      Timeline,
-   },
    computed: {
       ...mapState({
          recents: state => state.public.recents,
@@ -53,7 +39,7 @@ export default {
          return "/submissions/"+id
       },
       archiveClicked(event) {
-         let tgtDate = event.currentTarget.dataset.date 
+         let tgtDate = event.currentTarget.dataset.date
          this.$store.dispatch("public/getArchive", tgtDate)
          this.$router.push("/results")
       }
@@ -81,7 +67,7 @@ div.section {
    position: relative;
 }
 .recent, .archive {
-   font-size: 0.9em; 
+   font-size: 0.9em;
    margin: 0 0 5px 8px;
 }
 .recent p {

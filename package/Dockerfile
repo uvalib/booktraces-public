@@ -4,7 +4,7 @@
 FROM public.ecr.aws/docker/library/golang:1.22.3-alpine3.20 as builder
 
 # update the packages
-RUN apk update && apk upgrade && apk add --no-cache make yarn
+RUN apk update && apk upgrade && apk add --no-cache make npm
 
 # see: https://stackoverflow.com/questions/69692842/error-message-error0308010cdigital-envelope-routinesunsupported
 ENV NODE_OPTIONS --openssl-legacy-provider
@@ -31,7 +31,7 @@ RUN addgroup --gid 18570 sse && adduser --uid 1984 docker -G sse -D
 ENV TZ=UTC
 RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Specify home 
+# Specify home
 ENV APP_HOME /booktraces-public
 WORKDIR $APP_HOME
 

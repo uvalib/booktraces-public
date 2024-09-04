@@ -1,21 +1,24 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import { createApp } from 'vue'
+import App from '@/App.vue'
+import router from '@/router'
+import store from '@/store'
 
-import BTSpinner from "@/components/BTSpinner"
-Vue.component('BTSpinner', BTSpinner)
+const app = createApp(App)
+
+// provide store access to the rouer
+store.router = router
+
+// bind store and router to all componens as $store and $router
+app.use(store)
+app.use(router)
+
+import BTSpinner from "@/components/BTSpinner.vue"
+app.component('BTSpinner', BTSpinner)
 
 import PinchZoom from 'vue-pinch-zoom'
-Vue.component('pinch-zoom', PinchZoom)
+app.component('pinch-zoom', PinchZoom)
 
 import VueCookies from 'vue-cookies'
-Vue.use(VueCookies)
+app.use(VueCookies)
 
-Vue.config.productionTip = false
-
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+app.mount('#app')
