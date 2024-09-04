@@ -3,7 +3,7 @@
       <p class="subtitle">Find unique copies of old library books</p>
       <div class="section">
          <p class="subtitle pad">Recent Submissions</p>
-         <div class="recent" v-for="recent in recents" :key="recent.id">
+         <div class="recent" v-for="recent in unAuth.recents" :key="recent.id">
             <div @click="recentClicked(recent.id)" class="recent-link">
                <p class="title">{{recent.title}}</p>
                <p>{{recent.submittedAt}}</p>
@@ -12,8 +12,8 @@
       </div>
       <div class="section">
          <p class="subtitle pad">Archives</p>
-         <div class="archive" v-for="(archive,idx) in archives" :key="idx">
-            <span @click="archiveClicked" :data-date="archive.internalDate" class="archive-date">
+         <div class="archive" v-for="(archive,idx) in unAuth.archives" :key="idx">
+            <span @click="archiveClicked(archive.dataset.date)" :data-date="archive.internalDate" class="archive-date">
                {{archive.displayDate}}
             </span>
          </div>
@@ -21,30 +21,25 @@
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-export default {
-   computed: {
-      ...mapState({
-         recents: state => state.public.recents,
-         archives: state => state.public.archives,
-      }),
-   },
-    methods: {
-      recentClicked(id) {
-         this.$router.push("/submissions/" + id)
-         this.$store.dispatch("getSubmissionDetail", id)
-      },
-      thumbURL(id) {
-         return "/submissions/"+id
-      },
-      archiveClicked(event) {
-         let tgtDate = event.currentTarget.dataset.date
-         this.$store.dispatch("public/getArchive", tgtDate)
-         this.$router.push("/results")
-      }
-    }
-}
+<script setup>
+import { useSystemStore } from "@/stores/system"
+import { useUnauthStore } from "@/stores/unauth"
+import { useRouter } from 'vue-router'
+
+const system = useSystemStore()
+const unAuth = useUnauthStore()
+const router = useRouter()
+
+const recentClicked = ((id) => {
+   router.push("/submissions/" + id)
+   system.getSubmissionDetail(id)
+})
+
+const archiveClicked = ((tgtDate) => {
+   unAuth.getArchive(tgtDate)
+   router.push("/results")
+})
+
 </script>
 
 <style scoped>

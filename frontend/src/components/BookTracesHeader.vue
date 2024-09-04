@@ -5,9 +5,9 @@
             <span class="site-name">Book Traces</span>
          </router-link>
       </div>
-      <div v-if="!adminMode" class="pure-menu pure-menu-horizontal menubar">
+      <div v-if="!system.adminMode" class="pure-menu pure-menu-horizontal menubar">
          <ul class="pure-menu-list">
-            <li @click="adminClicked" v-bind:class="{active: adminMode}" class="pure-menu-item admin">Admin</li>
+            <li @click="adminClicked" v-bind:class="{active: system.adminMode}" class="pure-menu-item admin">Admin</li>
             <li class="pure-menu-item"><router-link to="/" exact>Home</router-link></li>
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
@@ -18,7 +18,7 @@
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>
          <span @click="showSearchClick" class="search">
-            <i v-bind:class="{selected: showSearch}" class="fas fa-search"></i>
+            <i v-bind:class="{selected: unAuth.showSearch}" class="fas fa-search"></i>
          </span>
       </div>
       <div v-else class="pure-menu pure-menu-horizontal menubar">
@@ -30,10 +30,10 @@
             <li class="pure-menu-item"><router-link to="/admin/pedagogy">Pedagogy</router-link></li>
          </ul>
       </div>
-      <div  v-if="!adminMode" class="hmenu">
+      <div  v-if="!system.adminMode" class="hmenu">
          <div @click="toggleHMenu" class="hmenu-button"><i class="fas fa-bars"></i></div>
          <ul id="hmenu" class="hmenu-items hidden">
-            <li @click="adminClicked" v-bind:class="{active: adminMode}" class="admin">Admin</li>
+            <li @click="adminClicked" v-bind:class="{active: system.adminMode}" class="admin">Admin</li>
             <li @click="toggleHMenu"><router-link to="/" exact>Home</router-link></li>
             <li @click="toggleHMenu"><router-link to="/about">About</router-link></li>
             <li @click="toggleHMenu"><router-link to="/press">Press</router-link></li>
@@ -48,40 +48,38 @@
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-export default {
-   computed: {
-      ...mapState({
-         showSearch: state => state.public.showSearch,
-         adminMode: state => state.adminMode
-      }),
-   },
-   methods: {
-      adminClicked() {
-         window.location.href = "/authenticate?url=/admin/submissions"
-         this.hideHMenu()
-      },
-      showSearchClick() {
-         this.$store.commit('public/showSearch', !this.showSearch )
-         this.hideHMenu()
-      },
-      hideHMenu() {
-         let items = document.getElementById("hmenu")
-         if (!items.classList.contains("hidden")) {
-            items.classList.add("hidden")
-         }
-      },
-      toggleHMenu() {
-         let items = document.getElementById("hmenu")
-         if (items.classList.contains("hidden")) {
-            items.classList.remove("hidden")
-         } else {
-            items.classList.add("hidden")
-         }
-      }
+<script setup>
+import { useSystemStore } from "@/stores/system"
+import { useUnauthStore } from "@/stores/unauth"
+
+const system = useSystemStore()
+const unAuth = useUnauthStore()
+
+const adminClicked = (() => {
+   window.location.href = "/authenticate?url=/admin/submissions"
+   hideHMenu()
+})
+
+const showSearchClick = (() => {
+   unAuth.showSearch = !unAuth.showSearch
+   hideHMenu()
+})
+
+const hideHMenu = (() => {
+   let items = document.getElementById("hmenu")
+   if (!items.classList.contains("hidden")) {
+      items.classList.add("hidden")
    }
-}
+})
+
+const toggleHMenu = (() => {
+   let items = document.getElementById("hmenu")
+   if (items.classList.contains("hidden")) {
+      items.classList.remove("hidden")
+   } else {
+      items.classList.add("hidden")
+   }
+})
 </script>
 
 <style scoped>

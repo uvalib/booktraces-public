@@ -1,58 +1,42 @@
 <template>
    <BookTracesHeader/>
-   <!-- <template v-if="adminMode">
-      <router-view/>
+   <template v-if="system.adminMode">
+      <!-- <router-view/> -->
    </template>
-   <template v-else> -->
+   <template v-else>
       <div class="main pure-g">
          <div class="pure-u-1-6">
             <BookTracesSidebar/>
          </div>
          <div class="pure-u-5-6 bkg">
-            <BookTracesSearch/>
-            <router-view/>
+            <!-- <BookTracesSearch/> -->
+            <!-- <router-view/> -->
          </div>
       </div>
-   <!-- </template> -->
+   </template>
    <BookTracesFooter/>
 </template>
 
 
-<script>
+<script setup>
 import BookTracesSearch from "@/components/BookTracesSearch.vue"
 import BookTracesSidebar from "@/components/BookTracesSidebar.vue"
 import BookTracesHeader from "@/components/BookTracesHeader.vue"
 import BookTracesFooter from "@/components/BookTracesFooter.vue"
-// import { mapGetters } from "vuex"
-// import { mapState } from 'vuex'
+import { useSystemStore } from "@/stores/system"
+import { useUnauthStore } from "@/stores/unauth"
+import { onBeforeMount } from 'vue'
 
-export default {
-   components: {
-      BookTracesSearch,
-      BookTracesHeader,
-      BookTracesSidebar,
-      BookTracesFooter
-   },
-   // computed: {
-   //    ...mapGetters({
-   //       isAuthenticated: "admin/isAuthenticated"
-   //    }),
-   //    ...mapState({
-   //       adminMode: state => state.adminMode,
-   //    })
-   // },
-   // data: function() {
-   //    return {}
-   // },
-};
+const system = useSystemStore()
+const unAuth = useUnauthStore()
+
+onBeforeMount( () => {
+   unAuth.getArchiveDates()
+   unAuth.getRecentSubmissions()
+})
 </script>
 
 <style>
-.tweet-not-found {
-   color: #fe6d6d;
-   font-size: 0.9em;
-   padding: 2px 5px 2px 10px;
-}
 @media only screen and (max-width: 1050px) {
    #app .main div.pure-u-5-6.bkg {
       width: 100%;

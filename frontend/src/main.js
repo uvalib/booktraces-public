@@ -1,15 +1,18 @@
-import { createApp } from 'vue'
+import { createApp, markRaw } from 'vue'
+import { createPinia } from 'pinia'
 import App from '@/App.vue'
 import router from '@/router'
-import store from '@/store'
 
 const app = createApp(App)
 
-// provide store access to the rouer
-store.router = router
+const pinia = createPinia()
+pinia.use(({ store }) => {
+   // all stores can access router with this.router
+   store.router = markRaw(router)
+})
 
 // bind store and router to all componens as $store and $router
-app.use(store)
+app.use(pinia)
 app.use(router)
 
 import BTSpinner from "@/components/BTSpinner.vue"

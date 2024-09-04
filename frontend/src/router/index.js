@@ -16,7 +16,6 @@ import AdminEvents from '@/views/admin/AdminEvents.vue'
 import AdminNews from '@/views/admin/AdminNews.vue'
 import AdminPedagogy from '@/views/admin/AdminPedagogy.vue'
 import AdminSubmission from '@/views/admin/AdminSubmission.vue'
-import store from '@/store'
 
 const router = createRouter({
   history: createWebHistory(),
