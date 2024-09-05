@@ -2,24 +2,24 @@
    <div class="search content">
       <div class="bt-banner">
          <h1>Book Traces</h1>
-         <h3 v-if="searchType=='query'">Search Results for: {{query}}</h3>
-         <h3 v-if="searchType=='archive'">Submissions from: {{archiveDate}}</h3>
-         <h3 v-if="searchType=='institution'">Submissions from: {{institutionName()}}</h3>
-         <h3 v-if="searchType=='tag'">Submissions tagged: {{tgtTag}}</h3>
+         <h3 v-if="submissionsStore.searchType=='query'">Search Results for: {{ submissionsStore.query }}</h3>
+         <h3 v-if="submissionsStore.searchType=='archive'">Submissions from: {{ submissionsStore.archiveDate }}</h3>
+         <h3 v-if="submissionsStore.searchType=='institution'">Submissions from: {{ institutionName }}</h3>
+         <h3 v-if="submissionsStore.searchType=='tag'">Submissions tagged: {{ submissionsStore.tgtTag }}</h3>
       </div>
-      <h4 v-if="loading===true">Loading...</h4>
+      <h4 v-if="system.loading===true">Loading...</h4>
       <template v-else>
-         <div v-if="searchHitCount==0">
+         <div v-if="submissionsStore.searchHitCount==0">
             <h4>Sorry, but nothing matched your search terms. Please try again with some different keywords.</h4>
          </div>
          <div v-else class="hits">
             <div class="controls">
-               <span>Total Matches Found: {{searchHitCount}}</span>
+               <span>Total Matches Found: {{ submissionsStore.searchHitCount }}</span>
                <InstitutionSearch style="margin-left: auto"/>
             </div>
             <div class="hits">
-               <div v-for="hit in hits" :key="hit.id">
-                  <router-link class="hit" :to="submissionURL(hit.id)">
+               <div v-for="hit in submissionsStore.searchResults" :key="hit.id">
+                  <router-link class="hit" :to="`/submissions/${hit.id}`">
                      <div class="hit pure-g">
                         <img class="pure-u-1-3 thumb" :src="hit.url"/>
                         <div class="pure-u-2-3 data">
@@ -44,60 +44,44 @@
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
+<script setup>
+import { onMounted, computed } from 'vue'
 import InstitutionSearch from "@/components/InstitutionSearch.vue"
-export default {
-   name: "results",
-   components: {
-      InstitutionSearch
-   },
-   computed: {
-      ...mapState({
-         hits: state => state.public.searchResults,
-         loading: state => state.loading,
-         query: state => state.public.query,
-         archiveDate: state => state.public.archiveDate,
-         tgtTag: state => state.public.tgtTag,
-         targetInstitution: state => state.public.targetInstitution,
-         institutions: state => state.institutions,
-      }),
-      ...mapGetters({
-         searchHitCount: 'public/searchHitCount',
-         searchType: 'public/searchType',
-      }),
-   },
-   created() {
-      if (this.searchType == "none") {
-         this.$router.replace("/")
-      }
-   },
-   methods: {
-      institutionName() {
-       let tgt = this.institutions.find( i => i.id == this.targetInstitution)
-       if (tgt) {
-          return tgt.name
-       }
-       return ""
-      },
-      submissionURL(id) {
-         return "/submissions/"+id
-      },
-      formatDescription(text) {
-         if (text.length < 250) {
-            return text;
-         }
-         return text.substr(0,249)+"..."
-      },
-      formatTags(text) {
-         if (!text) {
-            return "None"
-         }
-         return text.split(",").join(", ")
-      }
-   },
-};
+import { useSubmissionsStore } from "@/stores/submissions"
+import { useSystemStore } from "@/stores/system"
+import { useRouter } from 'vue-router'
+
+const submissionsStore = useSubmissionsStore()
+const system = useSystemStore()
+const router = useRouter()
+
+onMounted(() => {
+   if (submissionsStore.searchType == "none") {
+      router.replace("/")
+   }
+})
+
+const institutionName = computed(() => {
+   let tgt = system.institutions.find( i => i.id == submissionsStore.targetInstitution)
+   if (tgt) {
+      return tgt.name
+   }
+   return ""
+})
+
+const formatDescription = ((text) => {
+   if (text.length < 250) {
+      return text;
+   }
+   return text.substr(0,249)+"..."
+})
+
+const formatTags = ((text) => {
+   if (!text) {
+      return "None"
+   }
+   return text.split(",").join(", ")
+})
 </script>
 
 <style scoped>

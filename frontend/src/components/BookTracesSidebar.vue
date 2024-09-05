@@ -12,8 +12,8 @@
       </div>
       <div class="section">
          <p class="subtitle pad">Archives</p>
-         <div class="archive" v-for="(archive,idx) in submissionsStore.archives" :key="idx">
-            <span @click="archiveClicked(archive.dataset.date)" :data-date="archive.internalDate" class="archive-date">
+         <div class="archive" v-for="archive in submissionsStore.archives">
+            <span @click="archiveClicked(archive.internalDate)" class="archive-date">
                {{archive.displayDate}}
             </span>
          </div>
