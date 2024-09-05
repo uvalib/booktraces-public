@@ -18,7 +18,7 @@
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>
          <span @click="showSearchClick" class="search">
-            <i v-bind:class="{selected: unAuth.showSearch}" class="fas fa-search"></i>
+            <i v-bind:class="{selected: submissionsStore.showSearch}" class="fas fa-search"></i>
          </span>
       </div>
       <div v-else class="pure-menu pure-menu-horizontal menubar">
@@ -50,10 +50,10 @@
 
 <script setup>
 import { useSystemStore } from "@/stores/system"
-import { useUnauthStore } from "@/stores/unauth"
+import { useSubmissionsStore } from "@/stores/submissions"
 
 const system = useSystemStore()
-const unAuth = useUnauthStore()
+const submissionsStore = useSubmissionsStore()
 
 const adminClicked = (() => {
    window.location.href = "/authenticate?url=/admin/submissions"
@@ -61,7 +61,7 @@ const adminClicked = (() => {
 })
 
 const showSearchClick = (() => {
-   unAuth.showSearch = !unAuth.showSearch
+   submissionsStore.showSearch = !submissionsStore.showSearch
    hideHMenu()
 })
 

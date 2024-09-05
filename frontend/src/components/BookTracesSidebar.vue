@@ -3,7 +3,7 @@
       <p class="subtitle">Find unique copies of old library books</p>
       <div class="section">
          <p class="subtitle pad">Recent Submissions</p>
-         <div class="recent" v-for="recent in unAuth.recents" :key="recent.id">
+         <div class="recent" v-for="recent in submissionsStore.recents" :key="recent.id">
             <div @click="recentClicked(recent.id)" class="recent-link">
                <p class="title">{{recent.title}}</p>
                <p>{{recent.submittedAt}}</p>
@@ -12,7 +12,7 @@
       </div>
       <div class="section">
          <p class="subtitle pad">Archives</p>
-         <div class="archive" v-for="(archive,idx) in unAuth.archives" :key="idx">
+         <div class="archive" v-for="(archive,idx) in submissionsStore.archives" :key="idx">
             <span @click="archiveClicked(archive.dataset.date)" :data-date="archive.internalDate" class="archive-date">
                {{archive.displayDate}}
             </span>
@@ -23,11 +23,11 @@
 
 <script setup>
 import { useSystemStore } from "@/stores/system"
-import { useUnauthStore } from "@/stores/unauth"
+import { useSubmissionsStore } from "@/stores/submissions"
 import { useRouter } from 'vue-router'
 
 const system = useSystemStore()
-const unAuth = useUnauthStore()
+const submissionsStore = useSubmissionsStore()
 const router = useRouter()
 
 const recentClicked = ((id) => {
@@ -36,7 +36,7 @@ const recentClicked = ((id) => {
 })
 
 const archiveClicked = ((tgtDate) => {
-   unAuth.getArchive(tgtDate)
+   submissionsStore.getArchive(tgtDate)
    router.push("/results")
 })
 

@@ -65,57 +65,38 @@
       <div class="recents">
          <h3>Recently Submitted Books</h3>
          <div class="controls">
-            <span>Total Submission: {{total}}</span>
+            <span>Total Submissions: {{submissionsStore.total}}</span>
              <InstitutionSearch style="margin-left:auto" />
          </div>
          <div class="pure-g thumbs">
-            <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in thumbs" :key="thumb.submissionID">
-               <router-link :to="thumbURL(thumb.submissionID)"><img class="pure-img thumb" :src="thumb.url"/></router-link>
+            <div class="pure-u-sm-1-3 pure-u-md-1-4 pure-u-lg-1-5  pure-u-xl-1-5" v-for="thumb in submissionsStore.thumbs" :key="thumb.submissionID">
+               <router-link :to="`/submissions/${thumb.submissionID}`"><img class="pure-img thumb" :src="thumb.url"/></router-link>
             </div>
          </div>
-         <h4 v-if="loading===true">Loading...</h4>
-         <button v-if="thumbsCount < total" @click="moreClicked" class="more pure-button pure-button-primary">More</button>
+         <h4 v-if="system.loading===true">Loading...</h4>
+         <button v-if="submissionsStore.thumbsCount < submissionsStore.total" @click="moreClicked" class="more pure-button pure-button-primary">More</button>
       </div>
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
+<script setup>
+import { onMounted } from 'vue'
+import { useSubmissionsStore } from "@/stores/submissions"
+import { useSystemStore } from "@/stores/system"
 import InstitutionSearch from "@/components/InstitutionSearch.vue"
-export default {
-   name: "home",
-   components: {
-      InstitutionSearch
-   },
-   computed: {
-      ...mapState({
-         total: state => state.public.totalSubmissions,
-         thumbs: state => state.public.thumbs,
-         loading: state => state.loading,
-      }),
-      ...mapGetters({
-         thumbsCount: 'public/thumbsCount',
-      }),
-   },
-   methods: {
-      thumbURL(id) {
-         return "/submissions/"+id
-      },
-      adminClicked() {
-         window.location.href = "/authenticate?url=/admin"
-      },
-      moreClicked() {
-         this.$store.dispatch("public/getRecentThumbs")
-      }
-   },
-   created() {
-      this.$store.commit('public/clearThumbs' )
-      this.$store.dispatch("public/getRecentThumbs")
-      this.$store.dispatch('getInstitutions')
-      this.$store.commit("transcribe/cancel")
-   }
-};
+
+const submissionsStore = useSubmissionsStore()
+const system = useSystemStore()
+
+const moreClicked = (() => {
+   submissionsStore.getRecentThumbs()
+})
+
+onMounted(() => {
+   submissionsStore.clearThumbs()
+   submissionsStore.getRecentThumbs()
+   system.getInstitutions()
+})
 </script>
 
 <style scoped>

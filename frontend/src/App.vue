@@ -10,7 +10,7 @@
          </div>
          <div class="pure-u-5-6 bkg">
             <BookTracesSearch/>
-            <!-- <router-view/> -->
+            <router-view/>
          </div>
       </div>
    </template>
@@ -23,15 +23,15 @@ import BookTracesSidebar from "@/components/BookTracesSidebar.vue"
 import BookTracesHeader from "@/components/BookTracesHeader.vue"
 import BookTracesFooter from "@/components/BookTracesFooter.vue"
 import { useSystemStore } from "@/stores/system"
-import { useUnauthStore } from "@/stores/unauth"
+import { useSubmissionsStore } from "@/stores/submissions"
 import { onBeforeMount } from 'vue'
 
 const system = useSystemStore()
-const unAuth = useUnauthStore()
+const submissionsStore = useSubmissionsStore()
 
 onBeforeMount( () => {
-   unAuth.getArchiveDates()
-   unAuth.getRecentSubmissions()
+   submissionsStore.getArchiveDates()
+   submissionsStore.getRecentSubmissions()
 })
 </script>
 

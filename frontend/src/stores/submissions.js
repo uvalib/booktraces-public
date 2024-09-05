@@ -2,11 +2,11 @@ import { defineStore } from 'pinia'
 import { useSystemStore } from './system'
 import axios from 'axios'
 
-export const useUnauthStore = defineStore('unauth', {
+export const useSubmissionsStore = defineStore('submissions', {
    state: () => ({
       uploadID: null,
       uploadedFiles: [],
-      totalSubmissions: 0,
+      total: 0,
       thumbs: [],
       archives: [],
       recents: [],
@@ -62,7 +62,7 @@ export const useUnauthStore = defineStore('unauth', {
       },
       clearThumbs() {
          this.currPage = 0
-         this.totalSubmissions = 0
+         this.total = 0
          this.thumbs = []
       },
       clearUploadedFiles() {
@@ -168,8 +168,8 @@ export const useUnauthStore = defineStore('unauth', {
          system.loading = true
          this.currPage++
          axios.get("/api/thumbs?page=" + this.currPage).then((response) => {
-            this.totalSubmissions = response.data.total
-            response.data.thumbs.forEach(function (thumb) {
+            this.total = response.data.total
+            response.data.thumbs.forEach((thumb) => {
                this.thumbs.push(thumb)
             })
             system.loading = false
