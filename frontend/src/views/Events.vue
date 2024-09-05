@@ -2,7 +2,7 @@
    <div class="content events">
       <h2>Events</h2>
       <table>
-         <tr v-for="event in events" :key="event.id">
+         <tr v-for="event in eventsStore.list">
             <td class="date">{{event.date}}</td>
             <td><span v-html="event.description"></span></td>
          </tr>
@@ -10,20 +10,15 @@
    </div>
 </template>
 
-<script>
-export default {
-   name: "events",
-   computed: {
-      events() {
-         return this.$store.state.events.list
-      }
-   },
-   created: function () {
-      this.$store.dispatch('events/getAll')
-   },
-   methods: {
-   }
-};
+<script setup>
+import { onMounted } from 'vue'
+import { useEventsStore } from "@/stores/events"
+
+const eventsStore = useEventsStore()
+
+onMounted(() => {
+   eventsStore.getAll()
+})
 </script>
 
 <style scoped>
