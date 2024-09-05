@@ -1,17 +1,19 @@
+import { defineStore } from 'pinia'
+import { useSystemStore } from './system'
 import axios from 'axios'
 
-const pedagogy = {
-   namespaced: true,
-   state: {
+export const usePedagogyStore = defineStore('pedagogy', {
+	state: () => ({
       document: null,
       list: []
-   },
+   }),
 
-   getters: {
-   },
-
-   mutations: {
-      setDocument(state, doc) {
+   actions: {
+      setDocument(doc) {
+         if ( doc == null ) {
+            this.document = null
+            return
+         }
          let content = doc.content
          let idx = content.indexOf("$DOC[")
          while (idx > -1) {
@@ -29,87 +31,76 @@ const pedagogy = {
             idx = content.indexOf("$DOC[")
          }
          doc.content = content
-         state.document = doc
+         this.document = doc
       },
-      clearList(state) {
-         state.list = []
-      },
-      setDocumentList(state, list) {
-         list.forEach( doc => {
-            doc.createdAt = doc.createdAt.split("T")[0]
-            state.list.push( doc )
+
+      getList() {
+         const system = useSystemStore()
+         system.loading = true
+         this.list = []
+         axios.get(`/api/admin/pedagogy`).then((response) => {
+            response.data.forEach( doc => {
+               doc.createdAt = doc.createdAt.split("T")[0]
+               this.list.push( doc )
+            })
+         }).catch((error) => {
+            system.setError(error)
+         }).finally( ()=>{
+            system.loading = false
          })
       },
-      deleteDocument(state, key) {
-         let idx = state.list.findIndex( d => d.key == key)
-         if ( idx > -1) {
-            state.list.splice(idx,1)
-         }
+
+      async getDocument(key) {
+         const system = useSystemStore()
+         system.loading = true
+         return axios.get(`/api/pedagogy/${key}`).then((response) => {
+            this.setDocument(response.data)
+         }).catch((error) => {
+            this.setDocument(null)
+            system.setError(error)
+         }).finally( ()=>{
+            system.loading = false
+         })
       },
-      updateDocument(state, doc) {
-         let idx = state.list.findIndex( d => d.id == doc.id)
-         state.list.splice(idx, 1)
-         state.list.push(doc)
+
+      deleteDocument( key ) {
+         const system = useSystemStore()
+         system.loading = true
+         axios.delete(`/api/admin/pedagogy/${key}`).then((_response) => {
+            let idx = this.list.findIndex( d => d.key == key)
+            if ( idx > -1) {
+               this.list.splice(idx,1)
+            }
+         }).catch((error) => {
+            ctx.commit("setError", error, {root: true})
+         }).finally( ()=>{
+            system.loading = false
+         })
       },
-      addDocument(state, doc) {
-         state.list.push(doc)
+
+      updateDocument( doc ) {
+         const system = useSystemStore()
+         system.loading = true
+         let docIdx = this.list.findIndex( d => d.id == doc.id)
+         return axios.put(`/api/admin/pedagogy/${this.list[docIdx].key}`, doc).then((response) => {
+            this.list[docIdx] = doc
+         }).catch((error) => {
+            system.setError(error)
+         }).finally( ()=>{
+            system.loading = false
+         })
+      },
+
+      addDocument( doc ) {
+         const system = useSystemStore()
+         system.loading = true
+         return axios.post(`/api/admin/pedagogy`, doc).then((response) => {
+            this.list.push( response.data )
+         }).catch((error) => {
+            system.setError(error)
+         }).finally( ()=>{
+            system.loading = false
+         })
       }
    },
-
-   actions: {
-      getList(ctx) {
-         ctx.commit("setLoading", true, {root: true})
-         ctx.commit("clearList")
-         axios.get(`/api/admin/pedagogy`).then((response) => {
-            ctx.commit('setDocumentList', response.data)
-         }).catch((error) => {
-            ctx.commit("setError", error, {root: true})
-         }).finally( ()=>{
-            ctx.commit("setLoading", false, {root: true})
-         })
-      },
-      get(ctx, key) {
-         ctx.commit("setLoading", true, {root: true})
-         return axios.get(`/api/pedagogy/${key}`).then((response) => {
-            ctx.commit('setDocument', response.data)
-         }).catch((_error) => {
-            ctx.commit('setDocument', null)
-         }).finally( ()=>{
-            ctx.commit("setLoading", false, {root: true})
-         })
-      },
-      deleteDocument(ctx, key) {
-         ctx.commit("setLoading", true, {root: true})
-         axios.delete(`/api/admin/pedagogy/${key}`).then((_response) => {
-            ctx.commit('deleteDocument', key)
-         }).catch((error) => {
-            ctx.commit("setError", error, {root: true})
-         }).finally( ()=>{
-            ctx.commit("setLoading", false, {root: true})
-         })
-      },
-      updateDocument(ctx, doc) {
-         ctx.commit("setLoading", true, {root: true})
-         let old = ctx.state.list.find( d => d.id == doc.id)
-         return axios.put(`/api/admin/pedagogy/${old.key}`, doc).then((response) => {
-            ctx.commit('updateDocument', response.data)
-         }).catch((error) => {
-            ctx.commit("setError", error, {root: true})
-         }).finally( ()=>{
-            ctx.commit("setLoading", false, {root: true})
-         })
-      },
-      addDocument(ctx, doc) {
-         ctx.commit("setLoading", true, {root: true})
-         return axios.post(`/api/admin/pedagogy`, doc).then((response) => {
-            ctx.commit('addDocument', response.data)
-         }).catch((error) => {
-            ctx.commit("setError", error, {root: true})
-         }).finally( ()=>{
-            ctx.commit("setLoading", false, {root: true})
-         })
-      }
-   }
-}
-
-export default pedagogy
+})

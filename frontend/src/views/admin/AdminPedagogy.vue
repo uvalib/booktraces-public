@@ -123,7 +123,6 @@ export default {
       }
    },
    created() {
-      this.$store.commit("pedagogy/clearList")
       this.$store.dispatch("pedagogy/getList")
    },
 };
