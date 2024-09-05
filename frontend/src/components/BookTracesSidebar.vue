@@ -22,17 +22,17 @@
 </template>
 
 <script setup>
-import { useSystemStore } from "@/stores/system"
 import { useSubmissionsStore } from "@/stores/submissions"
+import { useDetailsStore } from "@/stores/details"
 import { useRouter } from 'vue-router'
 
-const system = useSystemStore()
+const details = useDetailsStore()
 const submissionsStore = useSubmissionsStore()
 const router = useRouter()
 
 const recentClicked = ((id) => {
    router.push("/submissions/" + id)
-   system.getSubmissionDetail(id)
+   details.getSubmission(id)
 })
 
 const archiveClicked = ((tgtDate) => {

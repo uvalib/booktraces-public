@@ -18,14 +18,9 @@ export const useSubmissionsStore = defineStore('submissions', {
       targetInstitution: "",
       tgtTag: "",
       news: [],
-      transcribeFile: null,
-      transcribeError: ""
    }),
 
    getters: {
-      isTranscribing: state => {
-         return state.transcribeFile != null
-      },
       thumbsCount: state => {
          return state.thumbs.length
       },
@@ -50,9 +45,6 @@ export const useSubmissionsStore = defineStore('submissions', {
    },
 
    actions: {
-      cancelTranscribe() {
-         this.transcribeFile = null
-      },
       updateSearchQuery(q) {
          this.query = q
          this.searchResults = []

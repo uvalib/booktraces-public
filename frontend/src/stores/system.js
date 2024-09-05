@@ -7,7 +7,6 @@ export const useSystemStore = defineStore('system', {
       institutions: [],
       error: null,
       loading: true,
-      submissionDetail: null,
       adminMode: false,
       appVersion: "2.0.0"
    }),
@@ -23,30 +22,6 @@ export const useSystemStore = defineStore('system', {
       setError(error) {
          this.error = error
          setTimeout( ()=>{ this.error = ""}, 10000)
-      },
-      clearSubmissionDetail() {
-         this.submissionDetail = null
-      },
-      setFileTranscribed(fileID) {
-         let idx = this.submissionDetail.files.findIndex( f =>f.id = fileID )
-         if (idx > -1 ) {
-            let pend = {text: "pending", approved: false}
-            this.submissionDetail.files[idx].transcriptions.push( pend )
-         }
-      },
-      updateTranscription(data) {
-         let f = this.submissionDetail.files.find( f=> f.id == data.fileID)
-         if ( f ) {
-            let t = f.transcriptions.find( t => t.id == data.transcriptionID )
-            if ( t ) {
-               t.text = data.transcription
-            }
-         }
-      },
-      setCurrSubPublished(pub) {
-         if (this.submissionDetail) {
-            this.submissionDetail.published = pub
-         }
       },
       getTags() {
          axios.get("/api/tags").then((response) => {
@@ -68,17 +43,6 @@ export const useSystemStore = defineStore('system', {
          let url = `/api/institutions`
          return axios.post(url, { name: name }).then((response) => {
             this.institutions.push( response.data )
-         })
-      },
-      getSubmissionDetail(id) {
-         this.loading = true
-         this.clearSubmissionDetail()
-         axios.get("/api/submissions/" + id).then((response) => {
-            this.submissionDetail = response.data
-            this.loading = false
-         }).catch((error) => {
-            this.setError("Unable to get submission detail: " + error.response.data)
-            this.loading = false
          })
       },
    },

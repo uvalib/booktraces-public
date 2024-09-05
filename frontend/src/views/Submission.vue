@@ -1,38 +1,36 @@
 <template>
    <div class="submission content">
-      <template v-if="loading">
+      <template v-if="system.loading">
          <h1>Loading Details...</h1>
       </template>
-      <template v-else-if="hasError">
-        <div class="error">{{error}}</div>
+      <template v-else-if="system.hasError ">
+        <div class="error">{{system.error}}</div>
       </template>
       <template v-else>
-          <div class="paging" v-if="!isTranscribing">
-            <button v-bind:class="{disabled: hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
-            <button v-bind:class="{disabled: hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
+          <div class="paging" v-if="!details.isTranscribing">
+            <button v-bind:class="{disabled: details.hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
+            <button v-bind:class="{disabled: details.hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
          </div>
          <div class="submit-header">
-            <h3><b>BOOK SUBMISSION:</b> {{details.title}}</h3>
+            <h3><b>BOOK SUBMISSION:</b> {{submission.title}}</h3>
             <div class="submit-time">
                <i class="far fa-clock"></i><span>{{submitDate}}</span>
             </div>
          </div>
          <div class="details">
-            <div><label>Title: </label><span class="value">{{details.title}}</span></div>
-            <div><label>Author: </label><span class="value">{{details.author}}</span></div>
-            <div><label>Publication date:</label><span class="value">{{details.publication}}</span></div>
-            <div><label>Institution: </label><span class="value">{{details.institution}}</span></div>
-            <div><label>Call number: </label><span class="value">{{details.callNumber}}</span></div>
-            <div><label>Submitted by: </label><span class="value">{{details.submitter}}</span></div>
-            <div><label>Description: </label><p class="value" v-html="formatDescription(details.description)"></p></div>
+            <div><label>Title: </label><span class="value">{{submission.title}}</span></div>
+            <div><label>Author: </label><span class="value">{{submission.author}}</span></div>
+            <div><label>Publication date:</label><span class="value">{{submission.publication}}</span></div>
+            <div><label>Institution: </label><span class="value">{{submission.institution}}</span></div>
+            <div><label>Call number: </label><span class="value">{{submission.callNumber}}</span></div>
+            <div><label>Submitted by: </label><span class="value">{{submission.submitter}}</span></div>
+            <div><label>Description: </label><p class="value" v-html="formatDescription(submission.description)"></p></div>
          </div>
-         <Transcribe v-if="isTranscribing" />
+         <Transcribe v-if="details.isTranscribing" />
          <div v-else class="thumbs">
-            <div class="thumb" v-for="(file,idx) in details.files" :key="idx">
+            <div class="thumb" v-for="file in submission.files">
                <div class="zoom-wrap">
-                  <pinch-zoom v-bind:limitZoom="200">
-                     <img class="thumb" :src="file.url"/>
-                  </pinch-zoom>
+                  <vue-image-zoomer :regular="file.url" />
                   <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary"
                      :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
                </div>
@@ -48,91 +46,80 @@
             </div>
          </div>
          <div class="tags">
-            <div @click="tagClicked" class="tag" v-for="(tag,idx) in details.tags" :key="idx">
-               {{tag}}
-            </div>
+            <div @click="tagClicked(tag)" class="tag" v-for="tag in submission.tags">{{ tag }}</div>
          </div>
       </template>
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
+<script setup>
+import { onMounted, computed } from 'vue'
+import { useDetailsStore } from "@/stores/details"
+import { useSystemStore } from "@/stores/system"
+import { useSubmissionsStore } from "@/stores/submissions"
 import Transcribe from "@/components/Transcribe.vue"
+import { useRoute, useRouter } from 'vue-router'
 
-export default {
-   name: "submission",
-   components: {
-       Transcribe
-   },
-   computed: {
-      ...mapGetters({
-         isTranscribing: "transcribe/isTranscribing"
-      }),
-      ...mapState({
-         details: state => state.submissionDetail,
-         loading: state => state.loading,
-         error: state => state.error,
-      }),
-      submitDate() {
-         return this.details.submittedAt.split("T")[0]
-      },
-      hasError() {
-         return this.$store.getters.hasError
-      },
-      hasPrev() {
-         return this.details.nextId > 0
-      },
-      hasNext() {
-         return this.details.previousId > 0
-      },
-   },
-   methods: {
-      transcribeClicked(file) {
-         if (this.hasPendingTranscription(file) == false) {
-            this.$store.commit("transcribe/setFile", file)
-         }
-      },
-      hasTranscription(file) {
-         return file.transcriptions.length > 0 && file.transcriptions[0].approved
-      },
-      hasPendingTranscription(file) {
-         return file.transcriptions.length > 0 && file.transcriptions[0].approved == false
-      },
-      transcription(file) {
-         let t = file.transcriptions.find( t=> t.approved == true)
-         if ( t!=null) {
-            return t.text
-         }
-         return ""
-      },
-      tagClicked(event) {
-         let t = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
-         this.$store.dispatch("public/getTaggedSubmissions", t)
-         this.$router.push("/results")
-      },
-      formatDescription( desc ) {
-         let out = desc.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
-         return out
-      },
-      prevClicked() {
-         if (this.details.nextId > 0) {
-            this.$router.push("/submissions/" + this.details.nextId)
-            this.$store.dispatch("getSubmissionDetail", this.details.nextId)
-         }
-      },
-      nextClicked() {
-         if (this.details.previousId > 0) {
-            this.$router.push("/submissions/" + this.details.previousId)
-            this.$store.dispatch("getSubmissionDetail", this.details.previousId)
-         }
-      }
-   },
-   created: function() {
-      this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
+const system = useSystemStore()
+const submissions = useSubmissionsStore()
+const details = useDetailsStore()
+const route = useRoute()
+const router = useRouter()
+
+const submitDate = computed( () => {
+   return details.submission.submittedAt.split("T")[0]
+})
+
+const submission = computed( () => {
+   return details.submission
+})
+
+onMounted(() => {
+   details.getSubmission( route.params.id )
+})
+
+const transcribeClicked = ((imgFile) => {
+   if (this.hasPendingTranscription(imgFile) == false) {
+      details.setTranscriptionTarget( imgFile )
    }
-};
+})
+
+const hasPendingTranscription = ((imgFile) => {
+   return imgFile.transcriptions.length > 0 && imgFile.transcriptions[0].approved == false
+})
+
+const transcription = ((imgFile) => {
+   let t = imgFile.transcriptions.find( t=> t.approved == true)
+   if ( t!=null) {
+      return t.text
+   }
+   return ""
+})
+
+const tagClicked  = ((tag) => {
+   submissions.getTaggedSubmissions( tag )
+   router.push("/results")
+})
+
+const formatDescription = (( desc ) => {
+   let out = desc.replace(/\r|\r\n/gm, '\n').replace(/\n+/gm, "<br/><br/>")
+   return out
+})
+
+const prevClicked = (() => {
+   if (details.submission.nextId > 0) {
+      router.push("/submissions/" + details.submission.nextId )
+      details.getSubmission( details.submission.nextId )
+   }
+})
+
+const nextClicked = (() => {
+   if ( details.submission.previousId > 0) {
+      router.push("/submissions/" + details.submission.previousId)
+      details.getSubmission( details.submission.previousId )
+   }
+})
+
 </script>
 
 <style scoped>

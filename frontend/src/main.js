@@ -18,8 +18,9 @@ app.use(router)
 import BTSpinner from "@/components/BTSpinner.vue"
 app.component('BTSpinner', BTSpinner)
 
-import PinchZoom from 'vue-pinch-zoom'
-app.component('pinch-zoom', PinchZoom)
+import VueImageZoomer from 'vue-image-zoomer'
+import 'vue-image-zoomer/dist/style.css'
+app.use(VueImageZoomer)
 
 import VueCookies from 'vue-cookies'
 app.use(VueCookies)

@@ -27,4 +27,9 @@ const doInstitutionSearch = (() => {
 </script>
 
 <style scoped>
+select {
+   padding: 5px 10px;
+   border-color: #999;
+   border-radius: 4px;
+}
 </style>
