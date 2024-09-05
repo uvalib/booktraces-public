@@ -17,7 +17,6 @@ export const useSubmissionsStore = defineStore('submissions', {
       archiveDate: "",
       targetInstitution: "",
       tgtTag: "",
-      news: [],
    }),
 
    getters: {
@@ -63,10 +62,6 @@ export const useSubmissionsStore = defineStore('submissions', {
       addUploadedFile(filename) {
          this.uploadedFiles.push(filename)
       },
-      setNews(news) {
-         this.news = news
-      },
-
       search() {
          const system = useSystemStore()
          system.loading = true

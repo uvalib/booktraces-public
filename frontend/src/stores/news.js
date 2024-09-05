@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
+import { useSystemStore } from './system'
 import axios from 'axios'
 
 export const useNewsStore = defineStore('news', {
-   state: () => ({
+	state: () => ({
       list: []
    }),
 
@@ -14,9 +15,6 @@ export const useNewsStore = defineStore('news', {
    },
 
    actions: {
-      setNews(news) {
-         this.list = news
-      },
       addPlaceholder() {
          this.list.unshift({ content: "", title: "" })
       },
@@ -26,70 +24,58 @@ export const useNewsStore = defineStore('news', {
       addNews(newNews) {
          this.list[0] = Object.assign({}, newNews)
       },
-      updateNews(modified) {
-         this.list = this.list.map(n => {
-            if (n.id === modified.id) {
-               return Object.assign({}, n, modified)
-            }
-            return n
-         })
-      },
-      deleteNews(id) {
-         this.list.some(function (e, idx) {
-            if (e.id == id) {
-               this.list.splice(idx, 1)
-               return true
-            }
-            return false
+      getAll() {
+         this.list = []
+         axios.get("/api/news").then((response) => {
+            this.list = response.data
+         }).catch((error) => {
+            useSystemStore().setError("Unable to get news: " + error.response.data)
          })
       },
 
-      getAll(ctx) {
-         axios.get("/api/news").then((response) => {
-            ctx.commit('setNews', response.data)
+      togglePublication( index) {
+         this.list[index].published =  !this.list[index].published
+         axios.put("/api/admin/news/" + news.id, news).catch((error) => {
+            useSystemStore().setError("Unable to toggle news publication: " + error.response.data)
+         })
+      },
+
+      // FIXME
+      // updateNews(ctx, modified) {
+      //    return new Promise((resolve, reject) => {
+      //       axios.put("/api/admin/news/" + modified.id, modified).then(() => {
+      //          ctx.commit("updateNews", modified)
+      //          resolve()
+      //       }).catch((error) => {
+      //          useSystemStore().setError("Unable to get news: " + error.response.data)
+      //          reject(error)
+      //       })
+      //    })
+      // },
+
+      deleteNews(id) {
+         axios.delete("/api/admin/news/" + id).then(() => {
+            let delIdx = this.list.findIndex( n => n.id == id)
+            if (delIdx > -1) {
+               this.list.splice(delIdx, 1)
+            }
          }).catch((error) => {
-            ctx.commit('setNews', [])
-            ctx.commit('setError', "Unable to get news: " + error.response.data)
+            useSystemStore().setError("Unable to delete news: " + error.response.data)
          })
       },
-      togglePublication(ctx, index) {
-         let news = Object.assign({}, ctx.this.list[index])
-         news.published = !news.published
-         axios.put("/api/admin/news/" + news.id, news).then((/*response*/) => {
-            ctx.commit("updateNews", news)
-         }).catch((error) => {
-            ctx.commit("setError", error.response.data, { root: true })
-         })
-      },
-      updateNews(ctx, modified) {
-         return new Promise((resolve, reject) => {
-            axios.put("/api/admin/news/" + modified.id, modified).then((/*response*/) => {
-               ctx.commit("updateNews", modified)
-               resolve()
-            }).catch((error) => {
-               ctx.commit("setError", error.response.data, { root: true })
-               reject(error)
-            })
-         })
-      },
-      deleteNews(ctx, id) {
-         axios.delete("/api/admin/news/" + id).then((/*response*/) => {
-            ctx.commit("deleteNews", id)
-         }).catch((error) => {
-            ctx.commit("setError", error.response.data, { root: true })
-         })
-      },
-      addNews(ctx, newNews) {
-         return new Promise((resolve, reject) => {
-            let data = { title: newNews.title, content: newNews.content }
-            axios.post("/api/admin/news/", data).then((response) => {
-               ctx.commit("addNews", response.data)
-               resolve()
-            }).catch((error) => {
-               ctx.commit("setError", error.response.data, { root: true })
-               reject(error)
-            })
-         })
-      },
+
+      //FIXME
+      // addNews(ctx, newNews) {
+      //    return new Promise((resolve, reject) => {
+      //       let data = { title: newNews.title, content: newNews.content }
+      //       axios.post("/api/admin/news/", data).then((response) => {
+      //          ctx.commit("addNews", response.data)
+      //          resolve()
+      //       }).catch((error) => {
+      //          useSystemStore().setError("Unable to get news: " + error.response.data)
+      //          reject(error)
+      //       })
+      //    })
+      // },
    }
 })
