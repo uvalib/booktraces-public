@@ -6,10 +6,7 @@
    </div>
 </template>
 
-<script>
-export default {
-  name: 'forbidden',
-}
+<script setup>
 </script>
 
 <style scoped>

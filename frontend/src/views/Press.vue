@@ -169,11 +169,7 @@
    </div>
 </template>
 
-<script>
-export default {
-   name: "press",
-   methods: {}
-};
+<script setup>
 </script>
 
 <style scoped>
