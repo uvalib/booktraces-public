@@ -4,8 +4,6 @@ import axios from 'axios'
 
 export const useSubmissionsStore = defineStore('submissions', {
    state: () => ({
-      uploadID: null,
-      uploadedFiles: [],
       total: 0,
       thumbs: [],
       archives: [],
@@ -55,12 +53,6 @@ export const useSubmissionsStore = defineStore('submissions', {
          this.currPage = 0
          this.total = 0
          this.thumbs = []
-      },
-      clearUploadedFiles() {
-         this.uploadedFiles = []
-      },
-      addUploadedFile(filename) {
-         this.uploadedFiles.push(filename)
       },
       search() {
          const system = useSystemStore()
@@ -165,33 +157,5 @@ export const useSubmissionsStore = defineStore('submissions', {
             system.loading = false
          })
       },
-      getUploadID() {
-         this.uploadID = null
-         axios.get("/api/identifier").then((response) => {
-            this.uploadID = response.data
-         }).catch((error) => {
-            const system = useSystemStore()
-            system.setError("Unable to get uploadID: " + error.response.data)
-         })
-      },
-      removeUploadedFile(filename) {
-         let index = this.uploadedFiles.indexOf(filename)
-         if (index !== -1) {
-            this.uploadedFiles.splice(index, 1)
-         }
-         axios.delete("/api/upload/" + filename + "?key=" + this.getters.uploadID)
-      },
-      submitTranscription(transcription) {
-         this.transcribeError = ""
-         if (this.transcribeFile == null) {
-             this.transcribeError = "File is missing"
-            return
-         }
-         axios.post("/api/transcription", {fileID: this.transcribeFile.id, transcription: transcription}).then((_response) => {
-            this.transcribeFile = null
-         }).catch ( err => {
-            this.transcribeError = err.response.data
-         })
-      }
    }
 })

@@ -124,6 +124,21 @@ export const useDetailsStore = defineStore('details', {
          })
       },
 
+      // FIXME? NOT SURE WHICH TO USE
+      // THIS WAS A DUPLICATE FROM SUBMISSIONS.JS
+      // submitTranscription(transcription) {
+      //    this.transcribeError = ""
+      //    if (this.transcribeFile == null) {
+      //        this.transcribeError = "File is missing"
+      //       return
+      //    }
+      //    axios.post("/api/transcription", {fileID: this.transcribeFile.id, transcription: transcription}).then((_response) => {
+      //       this.transcribeFile = null
+      //    }).catch ( err => {
+      //       this.transcribeError = err.response.data
+      //    })
+      // }
+
       setCurrSubPublished(pub) {
          if (this.submission) {
             this.submission.published = pub

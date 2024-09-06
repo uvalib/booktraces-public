@@ -18,107 +18,103 @@ import AdminPedagogy from '@/views/admin/AdminPedagogy.vue'
 import AdminSubmission from '@/views/admin/AdminSubmission.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: Home
-    },
-    {
-      path: '/about',
-      name: 'about',
-      component: About
-    },
-    {
-      path: '/press',
-      name: 'press',
-      component: Press
-    },
-    {
-      path: '/news',
-      name: 'news',
-      component: News
-    },
-    {
-      path: '/pedagogy/:id?',
-      name: 'pedagogy',
-      component: Pedagogy
-    },
-    {
-      path: '/events',
-      name: 'events',
-      component: Events
-    },
-    {
-      path: '/faq',
-      name: 'faq',
-      component: FAQ
-    },
-    {
-      path: '/submit',
-      name: 'submit',
-      component: Submit,
-      beforeEnter: (_to, _from, next) => {
-        store.dispatch('public/getUploadID')
-        next()
+   history: createWebHistory(),
+   routes: [
+      {
+         path: '/',
+         name: 'home',
+         component: Home
+      },
+      {
+         path: '/about',
+         name: 'about',
+         component: About
+      },
+      {
+         path: '/press',
+         name: 'press',
+         component: Press
+      },
+      {
+         path: '/news',
+         name: 'news',
+         component: News
+      },
+      {
+         path: '/pedagogy/:id?',
+         name: 'pedagogy',
+         component: Pedagogy
+      },
+      {
+         path: '/events',
+         name: 'events',
+         component: Events
+      },
+      {
+         path: '/faq',
+         name: 'faq',
+         component: FAQ
+      },
+      {
+         path: '/submit',
+         name: 'submit',
+         component: Submit,
+      },
+      {
+         path: '/submissions/:id',
+         name: 'submission',
+         component: Submission
+      },
+      {
+         path: '/results',
+         name: 'results',
+         component: SearchResults
+      },
+      {
+         path: '/thanks',
+         name: 'thanks',
+         component: Thanks
+      },
+      {
+         path: '/admin',
+         redirect: '/admin/submissions',
+      },
+      {
+         path: '/admin/submissions',
+         name: 'admin',
+         component: AdminHome,
+         meta: { requiresAuth: true }
+      },
+      {
+         path: '/admin/submissions/:id',
+         name: 'admin-submission',
+         component: AdminSubmission,
+         meta: { requiresAuth: true }
+      },
+      {
+         path: '/admin/events',
+         name: 'admin-events',
+         component: AdminEvents,
+         meta: { requiresAuth: true }
+      },
+      {
+         path: '/admin/news',
+         name: 'admin-news',
+         component: AdminNews,
+         meta: { requiresAuth: true }
+      },
+      {
+         path: '/admin/pedagogy',
+         name: 'admin-pedagogy',
+         component: AdminPedagogy,
+         meta: { requiresAuth: true }
+      },
+      {
+         path: '/forbidden',
+         name: 'forbidden',
+         component: Forbidden
       }
-    },
-    {
-      path: '/submissions/:id',
-      name: 'submission',
-      component: Submission
-    },
-    {
-      path: '/results',
-      name: 'results',
-      component: SearchResults
-    },
-    {
-      path: '/thanks',
-      name: 'thanks',
-      component: Thanks
-    },
-    {
-      path: '/admin',
-      redirect: '/admin/submissions',
-    },
-    {
-      path: '/admin/submissions',
-      name: 'admin',
-      component: AdminHome,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/submissions/:id',
-      name: 'admin-submission',
-      component: AdminSubmission,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/events',
-      name: 'admin-events',
-      component: AdminEvents,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/news',
-      name: 'admin-news',
-      component: AdminNews,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/pedagogy',
-      name: 'admin-pedagogy',
-      component: AdminPedagogy,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/forbidden',
-      name: 'forbidden',
-      component: Forbidden
-    }
-  ],
+   ],
 })
 
 // router.beforeEach((to, _from, next) => {

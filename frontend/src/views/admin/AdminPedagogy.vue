@@ -1,5 +1,5 @@
 <template>
-   <div class="admin">
+   <!-- <div class="admin">
       <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>
@@ -40,92 +40,92 @@
             </tr>
          </table>
       </div>
-   </div>
+   </div> -->
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-import { VueEditor } from 'vue2-editor'
-export default {
-   name: "admin-pedagogy",
-   data: function() {
-      return {
-         edit: false,
-         working: {
-            id: 0,
-            key: "",
-            title: "",
-            content: ""
-         },
-         customToolbar: [
-            [{ header: [false, 1, 2, 3, 4, 5, 6] }],
-            ["bold", "italic", "underline"],
-            ["blockquote"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            [
-               { align: "" },
-               { align: "center" },
-               { align: "right" },
-               { align: "justify" }
-            ],
-            [{ indent: "-1" }, { indent: "+1" }],
-            [{ color: [] }, { background: [] }],
-            ["link"],
+// import { mapState, mapGetters } from 'vuex'
+// import { VueEditor } from 'vue2-editor'
+// export default {
+//    name: "admin-pedagogy",
+//    data: function() {
+//       return {
+//          edit: false,
+//          working: {
+//             id: 0,
+//             key: "",
+//             title: "",
+//             content: ""
+//          },
+//          customToolbar: [
+//             [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+//             ["bold", "italic", "underline"],
+//             ["blockquote"],
+//             [{ list: "ordered" }, { list: "bullet" }],
+//             [
+//                { align: "" },
+//                { align: "center" },
+//                { align: "right" },
+//                { align: "justify" }
+//             ],
+//             [{ indent: "-1" }, { indent: "+1" }],
+//             [{ color: [] }, { background: [] }],
+//             ["link"],
 
-         ]
-      }
-   },
-   components: {
-      "vue-editor": VueEditor
-   },
-   computed: {
-      ...mapState({
-         documents: state => state.pedagogy.list,
-         error: state => state.error,
-         loading: state => state.loading,
-      }),
-      ...mapGetters({
-         loginName: 'admin/loginName',
-      })
-   },
-   methods: {
-      cancelEditClick() {
-         this.edit = false
-      },
-      async submitEditClick() {
-         if ( this.working.id == 0) {
-            await this.$store.dispatch("pedagogy/addDocument", this.working)
-         } else {
-            await this.$store.dispatch("pedagogy/updateDocument", this.working)
-         }
-         this.edit = false
-      },
-      documentClicked(doc) {
-         this.edit = true
-         this.working.id = doc.id
-         this.working.key = doc.key
-         this.working.title = doc.title
-         this.working.content = doc.content
-      },
-      deleteClicked(doc) {
-         event.stopPropagation()
-         let resp = confirm("Permanently delete this document?")
-         if (resp) {
-            this.$store.dispatch("pedagogy/deleteDocument", doc.key)
-         }
-      },
-      addClick() {
-         this.edit = true
-         this.working.id = 0
-         this.working.key = "new_doc"
-         this.working.title = ""
-         this.working.content = ""
-      }
-   },
-   created() {
-      this.$store.dispatch("pedagogy/getList")
-   },
-};
+//          ]
+//       }
+//    },
+//    components: {
+//       "vue-editor": VueEditor
+//    },
+//    computed: {
+//       ...mapState({
+//          documents: state => state.pedagogy.list,
+//          error: state => state.error,
+//          loading: state => state.loading,
+//       }),
+//       ...mapGetters({
+//          loginName: 'admin/loginName',
+//       })
+//    },
+//    methods: {
+//       cancelEditClick() {
+//          this.edit = false
+//       },
+//       async submitEditClick() {
+//          if ( this.working.id == 0) {
+//             await this.$store.dispatch("pedagogy/addDocument", this.working)
+//          } else {
+//             await this.$store.dispatch("pedagogy/updateDocument", this.working)
+//          }
+//          this.edit = false
+//       },
+//       documentClicked(doc) {
+//          this.edit = true
+//          this.working.id = doc.id
+//          this.working.key = doc.key
+//          this.working.title = doc.title
+//          this.working.content = doc.content
+//       },
+//       deleteClicked(doc) {
+//          event.stopPropagation()
+//          let resp = confirm("Permanently delete this document?")
+//          if (resp) {
+//             this.$store.dispatch("pedagogy/deleteDocument", doc.key)
+//          }
+//       },
+//       addClick() {
+//          this.edit = true
+//          this.working.id = 0
+//          this.working.key = "new_doc"
+//          this.working.title = ""
+//          this.working.content = ""
+//       }
+//    },
+//    created() {
+//       this.$store.dispatch("pedagogy/getList")
+//    },
+// };
 </script>
 
 <style lang="scss" scoped>

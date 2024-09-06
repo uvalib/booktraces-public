@@ -25,6 +25,25 @@ app.use(VueImageZoomer)
 import VueCookies from 'vue-cookies'
 app.use(VueCookies)
 
+// Styles
 import '@fortawesome/fontawesome-free/css/all.css'
+
+// Primevue setup
+import PrimeVue from 'primevue/config'
+import BookTraces from '@/assets/theme/booktraces'
+import 'primeicons/primeicons.css'
+import Button from 'primevue/button'
+
+app.component("Button", Button)
+
+app.use(PrimeVue, {
+   theme: {
+      preset: BookTraces,
+      options: {
+         prefix: 'p',
+         darkModeSelector: '.bt-dark'
+      }
+   }
+})
 
 app.mount('#app')

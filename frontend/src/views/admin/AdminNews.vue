@@ -1,6 +1,6 @@
 <template>
    <div class="admin">
-      <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
+      <!-- <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
       <div>
          <h3>News <span @click="addNewsClick" class="add pure-button pure-button-primary">Add News Item</span></h3>
          <div class="error">{{error}}</div>
@@ -26,109 +26,109 @@
                <div class="text" v-html="item.content"></div>
             </template>
          </div>
-      </div>
+      </div> -->
    </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
-import { VueEditor } from 'vue2-editor'
-export default {
-   name: "admin-news",
-   components: {
-      "vue-editor": VueEditor
-   },
-   data: function () {
-      return {
-         edit: false,
-         editDetails: null,
-         addingNew: false,
-      }
-   },
-   computed: {
-      ...mapState({
-         error: state => state.error,
-         loading: state => state.loading,
-         news: state => state.news.list,
-      }),
-      ...mapGetters({
-         loginName: 'admin/loginName',
-      })
-   },
-   methods: {
-      togglePublication(idx) {
-         this.$store.dispatch("news/togglePublication", idx)
-      },
-      publishedText( item ) {
-         if (item.published) return "Published"
-         return "Not Published"
-      },
-      formatDate(date) {
-         return date.split("T")[0]
-      },
-      addNewsClick() {
-         this.$store.commit("news/addPlaceholder")
-         this.editDetails = Object.assign({}, this.news[0])
-         this.edit = true
-         this.addingNew = true
-      },
-      cancelClicked() {
-         this.edit = false
-         this.editDetails = null
-         if (this.addingNew) {
-            this.addingNew = false
-            this.$store.commit("news/cancelAdd")
-         }
-      },
-      saveClicked() {
-         if (this.addingNew) {
-            this.$store.dispatch('news/addNews',this.editDetails).then((/*response*/) => {
-               this.edit=false
-               this.editDetails = null
-               this.addingNew = false
-            })
-         } else {
-            this.$store.dispatch('news/updateNews',this.editDetails).then((/*response*/) => {
-               this.edit=false
-               this.editDetails = null
-               this.addingNew = false
-            })
-         }
-      },
-      editingItem(id) {
-         if (this.edit == false) return false 
-         return this.editDetails.id == id
-      },
-      deleteClicked(event) {
-         let tgt = event.currentTarget
-         let newsID = tgt.dataset.id
-         let resp = confirm("Delete this news item? All data will be permanently lost. Continue?")
-         if (resp) {
-             this.$store.dispatch('news/deleteNews', newsID)
-         }
-      },
-      editClicked(event) {
-         let tgt = event.currentTarget
-         var newsID = tgt.dataset.id
-         var tgtIdx = -1
-         this.news.some( function(e,idx) {
-          if (e.id == newsID) {
-            tgtIdx = idx
-            return true
-          }
-          return false
-        })
-        if (tgtIdx > -1) {
-           this.editDetails = Object.assign({}, this.news[tgtIdx])
-           this.edit = true
-        }
-      },
-   },
-   created() {
-      this.$store.dispatch('news/getAll')
-   },
-};
+// import { mapState } from 'vuex'
+// import { mapGetters } from 'vuex'
+// import { VueEditor } from 'vue2-editor'
+// export default {
+//    name: "admin-news",
+//    components: {
+//       "vue-editor": VueEditor
+//    },
+//    data: function () {
+//       return {
+//          edit: false,
+//          editDetails: null,
+//          addingNew: false,
+//       }
+//    },
+//    computed: {
+//       ...mapState({
+//          error: state => state.error,
+//          loading: state => state.loading,
+//          news: state => state.news.list,
+//       }),
+//       ...mapGetters({
+//          loginName: 'admin/loginName',
+//       })
+//    },
+//    methods: {
+//       togglePublication(idx) {
+//          this.$store.dispatch("news/togglePublication", idx)
+//       },
+//       publishedText( item ) {
+//          if (item.published) return "Published"
+//          return "Not Published"
+//       },
+//       formatDate(date) {
+//          return date.split("T")[0]
+//       },
+//       addNewsClick() {
+//          this.$store.commit("news/addPlaceholder")
+//          this.editDetails = Object.assign({}, this.news[0])
+//          this.edit = true
+//          this.addingNew = true
+//       },
+//       cancelClicked() {
+//          this.edit = false
+//          this.editDetails = null
+//          if (this.addingNew) {
+//             this.addingNew = false
+//             this.$store.commit("news/cancelAdd")
+//          }
+//       },
+//       saveClicked() {
+//          if (this.addingNew) {
+//             this.$store.dispatch('news/addNews',this.editDetails).then((/*response*/) => {
+//                this.edit=false
+//                this.editDetails = null
+//                this.addingNew = false
+//             })
+//          } else {
+//             this.$store.dispatch('news/updateNews',this.editDetails).then((/*response*/) => {
+//                this.edit=false
+//                this.editDetails = null
+//                this.addingNew = false
+//             })
+//          }
+//       },
+//       editingItem(id) {
+//          if (this.edit == false) return false
+//          return this.editDetails.id == id
+//       },
+//       deleteClicked(event) {
+//          let tgt = event.currentTarget
+//          let newsID = tgt.dataset.id
+//          let resp = confirm("Delete this news item? All data will be permanently lost. Continue?")
+//          if (resp) {
+//              this.$store.dispatch('news/deleteNews', newsID)
+//          }
+//       },
+//       editClicked(event) {
+//          let tgt = event.currentTarget
+//          var newsID = tgt.dataset.id
+//          var tgtIdx = -1
+//          this.news.some( function(e,idx) {
+//           if (e.id == newsID) {
+//             tgtIdx = idx
+//             return true
+//           }
+//           return false
+//         })
+//         if (tgtIdx > -1) {
+//            this.editDetails = Object.assign({}, this.news[tgtIdx])
+//            this.edit = true
+//         }
+//       },
+//    },
+//    created() {
+//       this.$store.dispatch('news/getAll')
+//    },
+// };
 </script>
 
 <style scoped>
@@ -216,7 +216,7 @@ div.date {
 label {
    display: inline-block;
    font-weight: bold;
-   color: #555; 
+   color: #555;
    text-align: right;
    margin-right: 15px;
 }

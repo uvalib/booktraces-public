@@ -1,5 +1,5 @@
 <template>
-   <div class="admin-submission">
+   <!-- <div class="admin-submission">
       <h2>
          System Admin Panel
          <span class="login">
@@ -225,230 +225,230 @@
             </div>
          </div>
       </template>
-   </div>
+   </div> -->
 </template>
 
 <script>
-import { mapState } from "vuex";
-import { mapGetters } from "vuex";
-import Multiselect from "vue-multiselect";
-export default {
-   name: "admin-submission",
-   components: {
-      Multiselect
-   },
-   data: function() {
-      return {
-         editTrans: false,
-         workingTrans: "",
-         edit: false,
-         editDetails: null,
-         showTagList: false,
-         selectedInstitution: null,
-         transcriptionIdx: 0
-      };
-   },
-   computed: {
-      ...mapState({
-         details: state => state.submissionDetail,
-         loading: state => state.loading,
-         error: state => state.error,
-         tags: state => state.tags,
-         institutions: state => state.institutions
-      }),
-      ...mapGetters({
-         loginName: "admin/loginName"
-      }),
-      submitDate() {
-         return this.details.submittedAt.split("T")[0];
-      },
-      hasError() {
-         return this.$store.getters.hasError;
-      },
-      published() {
-         if (this.details.published) {
-            return "YES";
-         } else {
-            return "NO";
-         }
-      },
-      submissionTagCSV() {
-         if (this.details.tags) {
-            return this.details.tags.join(", ");
-         }
-         return "";
-      }
-   },
-   methods: {
-      cancelEdit() {
-         this.editTrans = false
-         this.workingTrans = ""
-      },
-      async submitEdit(f) {
-         let data = {submissionID: this.details.id,
-            fileID: f.id,
-            transcriptionID: f.transcriptions[this.transcriptionIdx].id,
-            transcription: this.workingTrans}
-         await this.$store.dispatch("transcribe/update", data)
-         if (this.error == "" || this.error == null) {
-            this.editTrans = false
-            this.workingTrans = ""
-         }
-      },
-      approveTranscription(f) {
-         let t = f.transcriptions[this.transcriptionIdx]
-         this.$store.dispatch("transcribe/approve", t.id)
-      },
-      editTranscription(f) {
-         this.editTrans = true
-         this.workingTrans = f.transcriptions[this.transcriptionIdx].text
-      },
-      deleteTranscription(f) {
-         let resp = confirm("Are you sure you want to delete this transcrption?")
-         if (resp) {
-            let t = f.transcriptions[this.transcriptionIdx]
-            this.$store.dispatch("transcribe/delete", t.id)
-            this.transcriptionIdx = 0
-         }
-      },
-      getTranscribeStatus(f) {
-         if (f.transcriptions.length == 0) return ""
-         let t = f.transcriptions[this.transcriptionIdx]
-         if (t.approved) {
-            return "Approved"
-         }
-         return "Pending"
-      },
-      getTranscribeDate(f) {
-         if (f.transcriptions.length == 0) return ""
-         let t = f.transcriptions[this.transcriptionIdx]
-         return t.transcribed_at.split("T")[0]
-      },
-      getTranscriber(f) {
-         if (f.transcriptions.length == 0) return ""
-         let t = f.transcriptions[this.transcriptionIdx]
-         return `${t.transcriber_email} (${t.transcriber})`
-      },
-      nextTran(f) {
-         if (this.transcriptionIdx == f.transcriptions.length -1) {
-            return
-         }
-         this.transcriptionIdx++
-      },
-      priorTran(_f) {
-         if (this.transcriptionIdx == 0) {
-            return
-         }
-         this.transcriptionIdx--
-      },
-      addInstitution(newInstitutionName) {
-         this.$store
-            .dispatch("addInstitution", newInstitutionName)
-            .then(() => {
-               this.institutions.some(i => {
-                  if (i.name == newInstitutionName) {
-                     this.selectedInstitution = i
-                     return true;
-                  }
-                  return false;
-               })
-            })
-            .catch(error => {
-               // TODO something else maybe?
-               alert(error)
-            });
-      },
-      formatDescription(desc) {
-         let out = desc
-            .replace(/\r|\r\n/gm, "\n")
-            .replace(/\n+/gm, "<br/><br/>");
-         return out;
-      },
-      addTag(event) {
-         let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-         if (this.editDetails.tags.includes(addTag)) {
-            return;
-         }
-         this.editDetails.tags.push(addTag);
-      },
-      closeTagList() {
-         this.showTagList = false;
-      },
-      removeTag(event) {
-         let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-         var delIdx = -1;
-         this.editDetails.tags.some(function(tag, idx) {
-            if (tag == delTag) {
-               delIdx = idx;
-               return true;
-            }
-            return false;
-         });
-         this.editDetails.tags.splice(delIdx, 1);
-      },
-      rotateClicked(imgURL) {
-         this.$store.dispatch("admin/rotateImage", {
-            submissionID: this.details.id,
-            imgURL: imgURL
-         });
-      },
-      addTagClicked() {
-         this.showTagList = true;
-      },
-      deleteClicked() {
-         let resp = confirm(
-            "Delete this submission? All data and unloaded files will be permanently lost. Are you sure?"
-         );
-         if (resp) {
-            this.$store.dispatch("admin/deleteSubmission", {
-               id: this.details.id,
-               backToIndex: true
-            });
-         }
-      },
-      editClicked() {
-         this.editDetails = Object.assign({}, this.details);
-         this.edit = true;
-         this.institutions.some(i => {
-            if (i.name == this.editDetails.institution) {
-               this.selectedInstitution = i
-               return true
-            }
-            return false
-         })
-      },
-      saveClicked() {
-         this.editDetails.institution_id = this.selectedInstitution.id
-         this.editDetails.institution = this.selectedInstitution.name
-         this.$store
-            .dispatch("admin/updateSubmission", this.editDetails)
-            .then((/*response*/) => {
-               this.edit = false;
-               this.editDetails = null;
-            });
-      },
-      cancelClicked() {
-         this.edit = false;
-      },
-      publishClicked() {
-         this.$store.dispatch("admin/updatePublicationStatus", {
-            id: this.details.id,
-            public: true
-         });
-      },
-      unpublishClicked() {
-         this.$store.dispatch("admin/updatePublicationStatus", {
-            id: this.details.id,
-            public: false
-         });
-      }
-   },
-   created() {
-      this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
-      this.$store.dispatch("getTags")
-      this.$store.dispatch("getInstitutions")
-   }
-};
+// import { mapState } from "vuex";
+// import { mapGetters } from "vuex";
+// import Multiselect from "vue-multiselect";
+// export default {
+//    name: "admin-submission",
+//    components: {
+//       Multiselect
+//    },
+//    data: function() {
+//       return {
+//          editTrans: false,
+//          workingTrans: "",
+//          edit: false,
+//          editDetails: null,
+//          showTagList: false,
+//          selectedInstitution: null,
+//          transcriptionIdx: 0
+//       };
+//    },
+//    computed: {
+//       ...mapState({
+//          details: state => state.submissionDetail,
+//          loading: state => state.loading,
+//          error: state => state.error,
+//          tags: state => state.tags,
+//          institutions: state => state.institutions
+//       }),
+//       ...mapGetters({
+//          loginName: "admin/loginName"
+//       }),
+//       submitDate() {
+//          return this.details.submittedAt.split("T")[0];
+//       },
+//       hasError() {
+//          return this.$store.getters.hasError;
+//       },
+//       published() {
+//          if (this.details.published) {
+//             return "YES";
+//          } else {
+//             return "NO";
+//          }
+//       },
+//       submissionTagCSV() {
+//          if (this.details.tags) {
+//             return this.details.tags.join(", ");
+//          }
+//          return "";
+//       }
+//    },
+//    methods: {
+//       cancelEdit() {
+//          this.editTrans = false
+//          this.workingTrans = ""
+//       },
+//       async submitEdit(f) {
+//          let data = {submissionID: this.details.id,
+//             fileID: f.id,
+//             transcriptionID: f.transcriptions[this.transcriptionIdx].id,
+//             transcription: this.workingTrans}
+//          await this.$store.dispatch("transcribe/update", data)
+//          if (this.error == "" || this.error == null) {
+//             this.editTrans = false
+//             this.workingTrans = ""
+//          }
+//       },
+//       approveTranscription(f) {
+//          let t = f.transcriptions[this.transcriptionIdx]
+//          this.$store.dispatch("transcribe/approve", t.id)
+//       },
+//       editTranscription(f) {
+//          this.editTrans = true
+//          this.workingTrans = f.transcriptions[this.transcriptionIdx].text
+//       },
+//       deleteTranscription(f) {
+//          let resp = confirm("Are you sure you want to delete this transcrption?")
+//          if (resp) {
+//             let t = f.transcriptions[this.transcriptionIdx]
+//             this.$store.dispatch("transcribe/delete", t.id)
+//             this.transcriptionIdx = 0
+//          }
+//       },
+//       getTranscribeStatus(f) {
+//          if (f.transcriptions.length == 0) return ""
+//          let t = f.transcriptions[this.transcriptionIdx]
+//          if (t.approved) {
+//             return "Approved"
+//          }
+//          return "Pending"
+//       },
+//       getTranscribeDate(f) {
+//          if (f.transcriptions.length == 0) return ""
+//          let t = f.transcriptions[this.transcriptionIdx]
+//          return t.transcribed_at.split("T")[0]
+//       },
+//       getTranscriber(f) {
+//          if (f.transcriptions.length == 0) return ""
+//          let t = f.transcriptions[this.transcriptionIdx]
+//          return `${t.transcriber_email} (${t.transcriber})`
+//       },
+//       nextTran(f) {
+//          if (this.transcriptionIdx == f.transcriptions.length -1) {
+//             return
+//          }
+//          this.transcriptionIdx++
+//       },
+//       priorTran(_f) {
+//          if (this.transcriptionIdx == 0) {
+//             return
+//          }
+//          this.transcriptionIdx--
+//       },
+//       addInstitution(newInstitutionName) {
+//          this.$store
+//             .dispatch("addInstitution", newInstitutionName)
+//             .then(() => {
+//                this.institutions.some(i => {
+//                   if (i.name == newInstitutionName) {
+//                      this.selectedInstitution = i
+//                      return true;
+//                   }
+//                   return false;
+//                })
+//             })
+//             .catch(error => {
+//                // TODO something else maybe?
+//                alert(error)
+//             });
+//       },
+//       formatDescription(desc) {
+//          let out = desc
+//             .replace(/\r|\r\n/gm, "\n")
+//             .replace(/\n+/gm, "<br/><br/>");
+//          return out;
+//       },
+//       addTag(event) {
+//          let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
+//          if (this.editDetails.tags.includes(addTag)) {
+//             return;
+//          }
+//          this.editDetails.tags.push(addTag);
+//       },
+//       closeTagList() {
+//          this.showTagList = false;
+//       },
+//       removeTag(event) {
+//          let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
+//          var delIdx = -1;
+//          this.editDetails.tags.some(function(tag, idx) {
+//             if (tag == delTag) {
+//                delIdx = idx;
+//                return true;
+//             }
+//             return false;
+//          });
+//          this.editDetails.tags.splice(delIdx, 1);
+//       },
+//       rotateClicked(imgURL) {
+//          this.$store.dispatch("admin/rotateImage", {
+//             submissionID: this.details.id,
+//             imgURL: imgURL
+//          });
+//       },
+//       addTagClicked() {
+//          this.showTagList = true;
+//       },
+//       deleteClicked() {
+//          let resp = confirm(
+//             "Delete this submission? All data and unloaded files will be permanently lost. Are you sure?"
+//          );
+//          if (resp) {
+//             this.$store.dispatch("admin/deleteSubmission", {
+//                id: this.details.id,
+//                backToIndex: true
+//             });
+//          }
+//       },
+//       editClicked() {
+//          this.editDetails = Object.assign({}, this.details);
+//          this.edit = true;
+//          this.institutions.some(i => {
+//             if (i.name == this.editDetails.institution) {
+//                this.selectedInstitution = i
+//                return true
+//             }
+//             return false
+//          })
+//       },
+//       saveClicked() {
+//          this.editDetails.institution_id = this.selectedInstitution.id
+//          this.editDetails.institution = this.selectedInstitution.name
+//          this.$store
+//             .dispatch("admin/updateSubmission", this.editDetails)
+//             .then((/*response*/) => {
+//                this.edit = false;
+//                this.editDetails = null;
+//             });
+//       },
+//       cancelClicked() {
+//          this.edit = false;
+//       },
+//       publishClicked() {
+//          this.$store.dispatch("admin/updatePublicationStatus", {
+//             id: this.details.id,
+//             public: true
+//          });
+//       },
+//       unpublishClicked() {
+//          this.$store.dispatch("admin/updatePublicationStatus", {
+//             id: this.details.id,
+//             public: false
+//          });
+//       }
+//    },
+//    created() {
+//       this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
+//       this.$store.dispatch("getTags")
+//       this.$store.dispatch("getInstitutions")
+//    }
+// };
 </script>
 
 <style scoped>

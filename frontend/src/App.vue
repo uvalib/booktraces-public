@@ -101,22 +101,5 @@ div.bkg {
    padding-bottom: 5px;
    margin-bottom: 15px;
 }
-#customdropzone .dz-preview {
-   display: inline-block;
-   background: transparent;
-   margin: 5px;
-}
-#customdropzone .dz-preview .dz-details {
-   background-color: rgba(64, 64, 64, 0.5);
-   transition: none;
-}
-#customdropzone .dz-preview .dz-image {
-   width: 150px;
-   height: 150px;
-   border-radius: 50%;
-}
-#app a.dz-remove {
-   color: white;
-}
 </style>
 
