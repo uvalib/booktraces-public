@@ -1,9 +1,9 @@
 <template>
    <div class="admin">
-      <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
+      <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{admin.loginName}}</span></h2>
       <div>
          <h3>Submissions</h3>
-         <div class="error">{{error}}</div>
+         <!-- <div class="error">{{error}}</div>
          <div class="list-controls">
             <div class="search pure-button-group" role="group">
                <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search" :value="queryStr">
@@ -39,103 +39,107 @@
                   <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
                </td>
             </tr>
-         </table>
+         </table> -->
       </div>
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
+<script setup>
+import { onMounted } from 'vue'
 import AdminPager from "@/components/AdminPager.vue"
-export default {
-   name: "admin",
-   components: {
-      AdminPager
-   },
-   computed: {
-      ...mapState({
-         total: state => state.admin.totalSubmissions,
-         submissions: state => state.admin.submissions,
-         error: state => state.error,
-         loading: state => state.loading,
-         tgtTag: state => state.admin.tgtTag,
-         queryStr: state => state.admin.queryStr,
-      }),
-      ...mapGetters({
-         loginName: 'admin/loginName',
-      })
-   },
-   methods: {
-      tagList( sub ) {
-         if (sub.tags) {
-            return sub.tags.split(",")
-         }
-         return []
-      },
-      updateSearchQuery(e) {
-         this.$store.commit('admin/updateSearchQuery', e.target.value)
-      },
-      searchClicked() {
-         this.$store.dispatch("admin/getSubmissions")
-      },
-      isPublished(sub) {
-         return sub.published
-      },
-      publishIcon(sub) {
-         if (sub.published) {
-            return '<i class="published fas fa-check-circle"></i>'
-         } else {
-            return '<i class="unpublished fas fa-times-circle"></i>'
-         }
-      },
-      submissionClicked(event) {
-         let tgt = event.currentTarget
-         let subID = tgt.dataset.id
-         this.$router.push("/admin/submissions/" + subID)
-      },
-      deleteClicked(event) {
-         event.stopPropagation()
-         let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
-         if (resp) {
-            let id = event.currentTarget.dataset.id
-            this.$store.dispatch("admin/deleteSubmission", {id:id})
-         }
-      },
-      togglePublishClicked(event) {
-         event.stopPropagation()
-         let published = event.currentTarget.dataset.published
-         if (published ) {
-            let resp = confirm("Unpublish this submission?")
-            if (!resp) {
-               return
-            }
-         } else {
-            let resp = confirm("Publish this submission?")
-            if (!resp) {
-               return
-            }
-         }
-         let id = event.currentTarget.dataset.id
-         this.$store.dispatch("admin/updatePublicationStatus", {id:id, public: !published})
-      },
-      tagClicked(event) {
-         event.stopPropagation()
-         // textContent may return whitepace before/after tag. Strip it
-         let tag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
-         this.$store.commit('admin/setTagFilter', tag)
-         this.$store.dispatch("admin/getSubmissions")
-      },
-      removeFilter() {
-         this.$store.commit('admin/setTagFilter', "")
-         this.$store.dispatch("admin/getSubmissions")
-      }
-   },
-   created() {
-      this.$store.commit("clearSubmissionDetail")
-      this.$store.dispatch("admin/getSubmissions")
-   },
-};
+import { useSystemStore } from "@/stores/system"
+import { useAdminStore } from "@/stores/admin"
+
+const system = useSystemStore()
+const admin = useAdminStore()
+
+onMounted(() => {
+   system.getInstitutions()
+   system.getTags()
+   admin.getSubmissions()
+})
+
+//       ...mapState({
+//          total: state => state.admin.totalSubmissions,
+//          submissions: state => state.admin.submissions,
+//          error: state => state.error,
+//          loading: state => state.loading,
+//          tgtTag: state => state.admin.tgtTag,
+//          queryStr: state => state.admin.queryStr,
+//       }),
+//       ...mapGetters({
+//          loginName: 'admin/loginName',
+
+
+//       tagList( sub ) {
+//          if (sub.tags) {
+//             return sub.tags.split(",")
+//          }
+//          return []
+//       },
+//       updateSearchQuery(e) {
+//          this.$store.commit('admin/updateSearchQuery', e.target.value)
+//       },
+//       searchClicked() {
+//          this.$store.dispatch("admin/getSubmissions")
+//       },
+//       isPublished(sub) {
+//          return sub.published
+//       },
+//       publishIcon(sub) {
+//          if (sub.published) {
+//             return '<i class="published fas fa-check-circle"></i>'
+//          } else {
+//             return '<i class="unpublished fas fa-times-circle"></i>'
+//          }
+//       },
+//       submissionClicked(event) {
+//          let tgt = event.currentTarget
+//          let subID = tgt.dataset.id
+//          this.$router.push("/admin/submissions/" + subID)
+//       },
+//       deleteClicked(event) {
+//          event.stopPropagation()
+//          let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
+//          if (resp) {
+//             let id = event.currentTarget.dataset.id
+//             this.$store.dispatch("admin/deleteSubmission", {id:id})
+//          }
+//       },
+//       togglePublishClicked(event) {
+//          event.stopPropagation()
+//          let published = event.currentTarget.dataset.published
+//          if (published ) {
+//             let resp = confirm("Unpublish this submission?")
+//             if (!resp) {
+//                return
+//             }
+//          } else {
+//             let resp = confirm("Publish this submission?")
+//             if (!resp) {
+//                return
+//             }
+//          }
+//          let id = event.currentTarget.dataset.id
+//          this.$store.dispatch("admin/updatePublicationStatus", {id:id, public: !published})
+//       },
+//       tagClicked(event) {
+//          event.stopPropagation()
+//          // textContent may return whitepace before/after tag. Strip it
+//          let tag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
+//          this.$store.commit('admin/setTagFilter', tag)
+//          this.$store.dispatch("admin/getSubmissions")
+//       },
+//       removeFilter() {
+//          this.$store.commit('admin/setTagFilter', "")
+//          this.$store.dispatch("admin/getSubmissions")
+//       }
+//    },
+//    created() {
+//       this.$store.commit("clearSubmissionDetail")
+//       this.$store.dispatch("admin/getSubmissions")
+//    },
+// };
 </script>
 
 <style scoped>

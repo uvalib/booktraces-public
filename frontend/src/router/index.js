@@ -143,7 +143,9 @@ router.beforeEach(to => {
             VueCookies.remove("bt_admin_user")
          } else {
             console.log("REDIRECT TO AUTH")
-            return "/authenticate?url=" + to.fullPath
+            let authURL =  "/authenticate?url=" + to.fullPath
+            window.location.href = authURL
+            return false
          }
       } else {
          system.adminMode = false

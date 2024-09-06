@@ -50,13 +50,6 @@ export const useAdminStore = defineStore('admin', {
       clearUser() {
          this.user = { firstName: "", lastName: "", title: "", affiliation: "", email: "", phone: "" }
       },
-      setSubbmissionPage(resp) {
-         this.filteredTotal = resp.filteredTotal
-         this.totalSubmissions = resp.total
-         this.pageSize = resp.pageSize
-         this.page = resp.page
-         this.submissions = resp.submissions
-      },
       setPublished(payload) {
          if (!payload) {
             return
@@ -119,11 +112,15 @@ export const useAdminStore = defineStore('admin', {
             url = url + "&t=" + this.state.tgtTag
          }
          axios.get(url, { withCredentials: true }).then((response) => {
-            this.commit('setSubbmissionPage', response.data)
+            this.filteredTotal = response.data.filteredTotal
+            this.totalSubmissions = response.data.total
+            this.pageSize = response.data.pageSize
+            this.page = response.data.page
+            this.submissions = response.data.submissions
             system.loading = false
          }).catch((error) => {
             system.loading = false
-            this.commit('setError', "Unable to get recent submissions: " + error.response.data, { root: true })
+            system.setError("Unable to get recent submissions: " + error.response.data)
             if (error.response.status == 403) {
                router.push("/forbidden")
             }

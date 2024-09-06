@@ -1,7 +1,7 @@
 <template>
    <BookTracesHeader/>
    <template v-if="system.adminMode">
-      <!-- <router-view/> -->
+      <router-view/>
    </template>
    <template v-else>
       <div class="main pure-g">
