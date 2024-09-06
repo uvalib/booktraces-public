@@ -22,9 +22,6 @@ import VueImageZoomer from 'vue-image-zoomer'
 import 'vue-image-zoomer/dist/style.css'
 app.use(VueImageZoomer)
 
-import VueCookies from 'vue-cookies'
-app.use(VueCookies)
-
 // Styles
 import '@fortawesome/fontawesome-free/css/all.css'
 

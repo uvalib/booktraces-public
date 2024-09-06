@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { useSystemStore } from './system'
 import axios from 'axios'
 
-export const useAuthStore = defineStore('auth', {
+export const useAdminStore = defineStore('admin', {
    state: () => ({
       totalSubmissions: 0,
       filteredTotal: 0,
@@ -46,9 +46,6 @@ export const useAuthStore = defineStore('auth', {
       },
       prevPage() {
          this.page--
-      },
-      setUser(user) {
-         this.user = user
       },
       clearUser() {
          this.user = { firstName: "", lastName: "", title: "", affiliation: "", email: "", phone: "" }

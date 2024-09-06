@@ -16,6 +16,9 @@ import AdminEvents from '@/views/admin/AdminEvents.vue'
 import AdminNews from '@/views/admin/AdminNews.vue'
 import AdminPedagogy from '@/views/admin/AdminPedagogy.vue'
 import AdminSubmission from '@/views/admin/AdminSubmission.vue'
+import { useSystemStore } from "@/stores/system"
+import { useAdminStore } from "@/stores/admin"
+import VueCookies from 'vue-cookies'
 
 const router = createRouter({
    history: createWebHistory(),
@@ -115,29 +118,37 @@ const router = createRouter({
          component: Forbidden
       }
    ],
+   scrollBehavior(_to, _from, _savedPosition) {
+      return new Promise(resolve => {
+         setTimeout( () => {
+            resolve({left: 0, top: 0})
+         }, 100)
+      })
+   },
 })
 
-// router.beforeEach((to, _from, next) => {
-//   if (to.meta.requiresAuth == true) {
-//     store.commit("setAdminMode", true)
-//     let getters = store.getters
-//     if (getters["admin/isAuthenticated"] == false) {
-//       let authUser = Vue.$cookies.get("bt_admin_user")
-//       if (authUser) {
-//         authUser.authenticated = true
-//         store.commit("admin/setUser", authUser)
-//         Vue.$cookies.remove("bt_admin_user")
-//       } else {
-//         let authURL =  "/authenticate?url=" + to.fullPath
-//         window.location.href = authURL
-//       }
-//     }
-//   } else {
-//     store.commit("setAdminMode", false)
-//     store.dispatch("public/getArchiveDates")
-//     store.dispatch("public/getRecentSubmissions")
-//   }
-//   next()
-// })
+router.beforeEach(to => {
+   const system = useSystemStore()
+   if (to.meta.requiresAuth == true) {
+      console.log("AUTH REQUIRED")
+      const admin = useAdminStore()
+      system.adminMode = true
+      if (admin.isAuthenticated == false) {
+         console.log("NOT AUTHENTICATED")
+         let authUser = VueCookies.get("bt_admin_user")
+         if (authUser) {
+            console.log("HAS COOKED")
+            authUser.authenticated = true
+            admin.user = authUser
+            VueCookies.remove("bt_admin_user")
+         } else {
+            console.log("REDIRECT TO AUTH")
+            return "/authenticate?url=" + to.fullPath
+         }
+      } else {
+         system.adminMode = false
+      }
+   }
+})
 
 export default router

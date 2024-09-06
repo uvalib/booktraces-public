@@ -16,9 +16,6 @@ export const useSystemStore = defineStore('system', {
       }
    },
    actions: {
-      setAdminMode(mode) {
-         this.adminMode = mode
-      },
       setError(error) {
          this.error = error
          setTimeout( ()=>{ this.error = ""}, 10000)
