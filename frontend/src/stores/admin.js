@@ -80,9 +80,9 @@ export const useAdminStore = defineStore('admin', {
          this.working = true
          axios.post(url).then(() => {
             this.commit("setPublished", payload)
-            let idx = this.submissions.findIndex( sub => sub.id == id)
+            let idx = this.submissions.hits.findIndex( sub => sub.id == id)
             if (idx > -1) {
-               this.submissions[idx].public = published
+               this.submissions.hits[idx].public = published
             }
             this.working = false
          }).catch((error) => {
@@ -91,18 +91,14 @@ export const useAdminStore = defineStore('admin', {
          })
       },
 
-      deleteSubmission(payload) {
-         let tgtID = payload.id
+      deleteSubmission( subID ) {
          this.working = true
-         axios.delete("/api/admin/submissions/" + tgtID).then(() => {
-            let idx = this.submissions.findIndex( sub => sub.id == tgtID)
+         axios.delete("/api/admin/submissions/" + subID).then(() => {
+            let idx = this.submissions.hits.findIndex( sub => sub.id == subID)
             if (idx > -1) {
-               this.submissions.splice(idx, 1)
+               this.submissions.hits.splice(idx, 1)
             }
             this.working = false
-            if (payload.backToIndex) {
-               router.push("/admin")
-            }
          }).catch((error) => {
             useSystemStore.setError(error.response.data)
             this.working = false
@@ -110,32 +106,33 @@ export const useAdminStore = defineStore('admin', {
       },
 
       updateSubmission(modified) {
-         // update wants tags to be a list of IDs, but currently has names...
-         // clone the original list of tag names
-         var tagNames = []
-         if (modified.tags) {
-            tagNames = modified.tags.slice(0)
-            for (let i = 0; i < modified.tags.length; i++) {
-               let tn = modified.tags[i]
-               this.rootState.tags.some(function (t) {
-                  if (t.name == tn) {
-                     modified.tags[i] = t.id
-                  }
-                  return t.name == tn
-               })
-            }
-         }
-         return new Promise((resolve, reject) => {
-            axios.post("/api/admin/submissions/" + modified.id, modified).then((/*response*/) => {
-               // put the string tags back in place and update the model in root state
-               modified.tags = tagNames.slice(0)
-               this.commit("setSubmissionDetail", modified, { root: true })
-               resolve()
-            }).catch((error) => {
-               useSystemStore.setError(error.response.data)
-               reject(error)
-            })
-         })
+         // FIXME
+         // // update wants tags to be a list of IDs, but currently has names...
+         // // clone the original list of tag names
+         // var tagNames = []
+         // if (modified.tags) {
+         //    tagNames = modified.tags.slice(0)
+         //    for (let i = 0; i < modified.tags.length; i++) {
+         //       let tn = modified.tags[i]
+         //       this.rootState.tags.some(function (t) {
+         //          if (t.name == tn) {
+         //             modified.tags[i] = t.id
+         //          }
+         //          return t.name == tn
+         //       })
+         //    }
+         // }
+         // return new Promise((resolve, reject) => {
+         //    axios.post("/api/admin/submissions/" + modified.id, modified).then((/*response*/) => {
+         //       // put the string tags back in place and update the model in root state
+         //       modified.tags = tagNames.slice(0)
+         //       this.commit("setSubmissionDetail", modified, { root: true })
+         //       resolve()
+         //    }).catch((error) => {
+         //       useSystemStore.setError(error.response.data)
+         //       reject(error)
+         //    })
+         // })
       },
 
       // getNews() {

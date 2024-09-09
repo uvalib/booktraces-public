@@ -49,7 +49,7 @@
                      <Button @click="togglePublish(slotProps.data)" size="small"
                         :severity="publishSeverity(slotProps.data)"
                         :label="publishLabel(slotProps.data)"/>
-                     <Button @click="deleteSubmission(slotProps.data)" size="small" severity="danger" label="Delete" />
+                     <Button @click="deleteSubmisson(slotProps.data)" size="small" severity="danger" label="Delete" />
                   </div>
                </template>
             </Column>
@@ -74,10 +74,12 @@ import Column from 'primevue/column'
 import { useSystemStore } from "@/stores/system"
 import { useAdminStore } from "@/stores/admin"
 import { useRouter } from 'vue-router'
+import { useConfirm } from "primevue/useconfirm"
 
 const system = useSystemStore()
 const admin = useAdminStore()
 const router = useRouter()
+const confirm = useConfirm()
 
 onMounted(() => {
    system.getInstitutions()
@@ -131,7 +133,21 @@ const togglePublish = ( (submission) => {
 })
 
 const deleteSubmisson = ( (submission) => {
-
+   confirm.require({
+      message: 'Delete this submission? All data and unloaded files will be permanently lost. Are you sure?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: () => {
+         admin.deleteSubmission(submission.id)
+      }
+   })
 })
 
 

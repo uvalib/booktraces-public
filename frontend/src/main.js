@@ -30,8 +30,12 @@ import PrimeVue from 'primevue/config'
 import BookTraces from '@/assets/theme/booktraces'
 import 'primeicons/primeicons.css'
 import Button from 'primevue/button'
+import ConfirmationService from 'primevue/confirmationservice'
+import ConfirmDialog from 'primevue/confirmdialog'
 
+app.use(ConfirmationService)
 app.component("Button", Button)
+app.component("ConfirmDialog", ConfirmDialog)
 
 app.use(PrimeVue, {
    theme: {

@@ -1,4 +1,5 @@
 <template>
+   <ConfirmDialog position="top" :closable="false"/>
    <BookTracesHeader/>
    <template v-if="system.adminMode">
       <router-view/>
