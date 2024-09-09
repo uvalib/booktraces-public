@@ -137,7 +137,7 @@ router.beforeEach(to => {
          console.log("NOT AUTHENTICATED")
          let authUser = VueCookies.get("bt_admin_user")
          if (authUser) {
-            console.log("HAS COOKED")
+            console.log("HAS COOKIE")
             authUser.authenticated = true
             admin.user = authUser
             VueCookies.remove("bt_admin_user")

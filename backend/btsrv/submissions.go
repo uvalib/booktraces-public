@@ -64,23 +64,18 @@ type AdminSubmission struct {
 // Submission is the DB model for a submission. Many of the fields are reused in the ClientSubmission
 type Submission struct {
 	ID            int       `json:"id"`
-	UploadID      string    `json:"uploadId" binding:"required" db:"upload_id"`
-	Title         string    `json:"title" binding:"required"`
-	Author        string    `json:"author" binding:"required"`
+	UploadID      string    `json:"uploadId" db:"upload_id"`
+	Submitter     string    `json:"submitter" db:"submitter_name"`
+	Email         string    `json:"email" db:"submitter_email"`
+	Title         string    `json:"title"`
+	Author        string    `json:"author"`
 	Publication   string    `json:"publication" db:"publication_info"`
 	Library       string    `json:"library"`
-	InstitutionID int       `json:"institution_id" db:"institution_id" binding:"required"`
 	CallNumber    string    `json:"callNumber" db:"call_number"`
 	Description   string    `json:"description"`
-	Submitter     string    `json:"submitter" binding:"required" db:"submitter_name"`
-	Email         string    `json:"email" binding:"required" db:"submitter_email"`
 	SubmittedAt   time.Time `json:"submittedAt" db:"submitted_at"`
 	Public        bool      `json:"published" db:"public"`
-}
-
-// TableName sets the name of the table in the DB that this struct binds to
-func (sub *Submission) TableName() string {
-	return "submissions"
+	InstitutionID int       `json:"institution_id" db:"institution_id"`
 }
 
 // GetArchivesList will get a sorted list of archives dates

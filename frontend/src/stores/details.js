@@ -139,10 +139,5 @@ export const useDetailsStore = defineStore('details', {
       //    })
       // }
 
-      setCurrSubPublished(pub) {
-         if (this.submission) {
-            this.submission.published = pub
-         }
-      },
    },
 })

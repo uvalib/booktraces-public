@@ -4,14 +4,16 @@ import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', {
    state: () => ({
-      totalSubmissions: 0,
-      filteredTotal: 0,
-      pageSize: 0,
-      page: 1,
-      submissions: [],
+      working: false,
+      submissions: {
+         total: 0,
+         start: 0,
+         hits: [],
+         query: "",
+         tagFilter: "",
+      },
       user: null,
-      queryStr: "",
-      tgtTag: "",
+
       news: []
    }),
    getters: {
@@ -26,139 +28,87 @@ export const useAdminStore = defineStore('admin', {
             return state.user.firstName + " (" + state.user.email + ")"
          }
          return ""
-      }
+      },
    },
    actions: {
-      setTagFilter(val) {
-         this.tgtTag = val
-      },
-      updateSearchQuery(val) {
-         this.queryStr = val
-      },
-      gotoFirstPage() {
-         this.page = 1
-      },
-      gotoLastPage() {
-         this.page = Math.floor(this.totalSubmissions / this.pageSize) + 1
-      },
-      nextPage() {
-         this.page++
-      },
-      prevPage() {
-         this.page--
-      },
       clearUser() {
          this.user = { firstName: "", lastName: "", title: "", affiliation: "", email: "", phone: "" }
       },
-      setPublished(payload) {
-         if (!payload) {
-            return
-         }
-         let subID = payload.id
-         this.submissions.some(function (sub) {
-            if (sub.id == subID) {
-               sub.published = payload.public
-            }
-            return sub.id == subID
-         })
-      },
-      deleteSubmission(subID) {
-         this.submissions.some(function (sub, idx) {
-            if (sub.id == subID) {
-               this.submissions.splice(idx, 1)
-               return true
-            }
-            return false
-         })
-      },
-
-      firstPage() {
-         this.commit('gotoFirstPage')
-         this.dispatch("getSubmissions")
-      },
-      prevPage() {
-         this.commit('prevPage')
-         this.dispatch("getSubmissions")
-      },
-      nextPage() {
-         this.commit('nextPage')
-         this.dispatch("getSubmissions")
-      },
-      lastPage() {
-         this.commit('gotoLastPage')
-         this.dispatch("getSubmissions")
-      },
 
       rotateImage(data) {
-         const system = useSystemStore()
-         system.loading = true
+         this.working = true
          let url = `/api/admin/submissions/${data.submissionID}/rotate?url=${data.imgURL}`
          axios.put(url, { withCredentials: true }).then((_response) => {
-            system.loading = false
+            this.working = false
          }).catch((error) => {
-            system.loading = false
-            this.commit('setError', "Unable to get rotate image: " + error.response.data, { root: true })
+            this.working = false
+            useSystemStore().setError("Unable to get rotate image: " + error.response.data)
          })
       },
 
       getSubmissions() {
-         const system = useSystemStore()
-         system.loading = true
-         let url = "/api/admin/submissions?page=" + this.state.page
-         if (this.state.queryStr.length > 0) {
-            url = url + "&q=" + this.state.queryStr
+         this.working = true
+         let url = "/api/admin/submissions?start=" + this.submissions.start
+         if (this.submissions.query.length > 0) {
+            url = url + "&q=" + this.submissions.query
          }
-         if (this.state.tgtTag.length > 0) {
-            url = url + "&t=" + this.state.tgtTag
+         if (this.submissions.tagFilter.length > 0) {
+            url = url + "&t=" + this.submissions.tagFilter
          }
          axios.get(url, { withCredentials: true }).then((response) => {
-            this.filteredTotal = response.data.filteredTotal
-            this.totalSubmissions = response.data.total
-            this.pageSize = response.data.pageSize
-            this.page = response.data.page
-            this.submissions = response.data.submissions
-            system.loading = false
+            this.submissions.total = response.data.total
+            this.submissions.start = response.data.start
+            this.submissions.hits = response.data.submissions
+            this.working = false
+            console.log("GOT ADMIN SUBMISSIONS")
          }).catch((error) => {
-            system.loading = false
-            system.setError("Unable to get recent submissions: " + error.response.data)
+            this.working = false
+            useSystemStore().setError("Unable to get recent submissions: " + error.response.data)
             if (error.response.status == 403) {
                router.push("/forbidden")
             }
          })
       },
+
       updatePublicationStatus(payload) {
-         const system = useSystemStore()
          let id = payload.id
          let published = payload.public
          let url = "/api/admin/submissions/" + id + "/publish"
          if (!published) {
             url = "/api/admin/submissions/" + id + "/unpublish"
          }
-         system.loading = true
-         axios.post(url).then((/*response*/) => {
+         this.working = true
+         axios.post(url).then(() => {
             this.commit("setPublished", payload)
-            this.commit("setCurrSubPublished", published, { root: true })
-            system.loading = false
+            let idx = this.submissions.findIndex( sub => sub.id == id)
+            if (idx > -1) {
+               this.submissions[idx].public = published
+            }
+            this.working = false
          }).catch((error) => {
-            this.commit("setError", error.response.data, { root: true })
-            system.loading = false
+            useSystemStore.setError(error.response.data)
+            this.working = false
          })
       },
+
       deleteSubmission(payload) {
-         const system = useSystemStore()
-         let id = payload.id
-         system.loading = true
-         axios.delete("/api/admin/submissions/" + id).then((/*response*/) => {
-            this.commit("deleteSubmission", id)
-            system.loading = false
+         let tgtID = payload.id
+         this.working = true
+         axios.delete("/api/admin/submissions/" + tgtID).then(() => {
+            let idx = this.submissions.findIndex( sub => sub.id == tgtID)
+            if (idx > -1) {
+               this.submissions.splice(idx, 1)
+            }
+            this.working = false
             if (payload.backToIndex) {
                router.push("/admin")
             }
          }).catch((error) => {
-            this.commit("setError", error.response.data, { root: true })
-            system.loading = false
+            useSystemStore.setError(error.response.data)
+            this.working = false
          })
       },
+
       updateSubmission(modified) {
          // update wants tags to be a list of IDs, but currently has names...
          // clone the original list of tag names
@@ -182,18 +132,19 @@ export const useAdminStore = defineStore('admin', {
                this.commit("setSubmissionDetail", modified, { root: true })
                resolve()
             }).catch((error) => {
-               this.commit("setError", error.response.data, { root: true })
+               useSystemStore.setError(error.response.data)
                reject(error)
             })
          })
       },
-      getNews() {
-         axios.get("/api/admin/news").then((response) => {
-            this.commit('setNews', response.data)
-         }).catch((error) => {
-            this.commit('setNews', [])
-            this.commit('setError', "Unable to get news: " + error.response.data)
-         })
-      },
+
+      // getNews() {
+      //    axios.get("/api/admin/news").then((response) => {
+      //       this.commit('setNews', response.data)
+      //    }).catch((error) => {
+      //       this.commit('setNews', [])
+      //       this.commit('setError', "Unable to get news: " + error.response.data)
+      //    })
+      // },
    }
 })

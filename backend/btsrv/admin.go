@@ -232,16 +232,10 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 // GetSubmissions gets one page of admin submissions data
 func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 	// Params: page, filter
-	pageStr := c.Query("page")
+	start, _ := strconv.ParseInt(c.Query("start"), 10, 64)
 	const pageSize = 50
-	page := 1
-	if pageStr != "" {
-		pageInt, err := strconv.Atoi(pageStr)
-		if err == nil {
-			page = pageInt
-		}
-	}
-	start := (page - 1) * pageSize
+	tagParam := c.Query("t")
+	qParam := c.Query("q")
 
 	type SubmissionRow struct {
 		ID          int       `json:"id" db:"id"`
@@ -252,77 +246,60 @@ func (svc *ServiceContext) GetSubmissions(c *gin.Context) {
 		Published   int       `json:"published" db:"public"`
 	}
 	type SubmissionsPage struct {
-		Total         int             `json:"total"`
-		FilteredTotal int             `json:"filteredTotal"`
-		Page          int             `json:"page"`
-		PageSize      int             `json:"pageSize"`
-		Submissions   []SubmissionRow `json:"submissions"`
+		Total       int             `json:"total"`
+		Start       int64           `json:"start"`
+		PageSize    int             `json:"pageSize"`
+		Submissions []SubmissionRow `json:"submissions"`
 	}
-	out := SubmissionsPage{Total: 0, Page: page, PageSize: pageSize}
-
-	log.Printf("INFO: get total submissions")
-	tq := svc.DB.NewQuery("select count(*) as total from submissions")
-	tq.Row(&out.Total)
+	out := SubmissionsPage{Total: 0, Start: start, PageSize: pageSize}
 
 	// Generate the basic SQL strings used to get submission rows
-	selSQL := "select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags"
 	fromSQL := ` from submissions s
 		left outer join submission_tags st on st.submission_id = s.id
 		left outer join tags t on t.id = st.tag_id`
-	qs := selSQL + fromSQL
-	groupQS := " group by s.id"
-	pageQS := fmt.Sprintf(" order by submitted_at desc limit %d,%d", start, pageSize)
 
-	// Check for and apply and filter / query params
-	qParam := strings.TrimSpace(c.Query("q"))
-	qQuery := ""
+	var filterQ string
 	if qParam != "" {
 		log.Printf("INFO: filter submission by query string [%s]", qParam)
 		qParam = "%" + qParam + "%"
-		qQuery = ` where (t.name like {:q} or s.title like {:q} or s.author like {:q}
+		qQuery := `(t.name like {:q} or s.title like {:q} or s.author like {:q}
 			or s.publication_info like {:q} or s.library like {:q} or s.call_number like {:q}
 			or s.description like {:q} or s.description like {:q} or s.submitted_at like {:q})`
-		qs += qQuery
+		filterQ += qQuery
 	}
 
-	tParam := strings.TrimSpace(c.Query("t"))
-	if tParam != "" {
-		log.Printf("INFO: filter submission by tag [%s]", tParam)
-		// To ensure all tags are included in result, can't use where clause.
-		// If used, only the single matching tag is returned. Instead add a having
-		// clause to the group by. The is leaves all tags in the results and matches
-		// on the CSV tag list instead.
-		groupQS += " having Find_In_Set({:t}, tags)"
-	}
-
-	if qParam != "" || tParam != "" {
-		countQS := "select count(distinct s.id) as filtered_cnt " + fromSQL
-		if qQuery != "" {
-			countQS += qQuery
+	if tagParam != "" {
+		log.Printf("INFO: filter submission by tag [%s]", tagParam)
+		if filterQ != "" {
+			filterQ += " and "
 		}
-
-		// Since all of the tags are not required for a simple match count,
-		// the weird group by and having find_in_set is not needed.
-		// Just a simple where will work.
-		if tParam != "" {
-			if strings.Contains(countQS, " where ") {
-				countQS += " and "
-			} else {
-				countQS += " where "
-			}
-			countQS += " t.name={:t}"
-		}
-
-		log.Printf("INFO: get filtered total")
-		cq := svc.DB.NewQuery(countQS)
-		cq.Bind(dbx.Params{"q": qParam, "t": tParam})
-		cq.Row(&out.FilteredTotal)
+		filterQ += "t.name = {:t}"
 	}
+
+	log.Printf("INFO: get total filtered submissions")
+	cntQ := "select count(*) as total"
+	cntQ += fromSQL
+	if filterQ != "" {
+		cntQ += " where "
+		cntQ += filterQ
+	}
+	tq := svc.DB.NewQuery(cntQ)
+	tq.Bind(dbx.Params{"q": qParam, "t": tagParam})
+	tq.Row(&out.Total)
 
 	log.Printf("INFO: get one page of submission data")
+	selSQL := "select s.id as id, title, author, submitted_at, public, group_concat(t.name) as tags"
+	qs := selSQL + fromSQL
+	groupQS := " group by s.id"
+	pageQS := fmt.Sprintf(" order by submitted_at desc limit %d,%d", start, pageSize)
+	if filterQ != "" {
+		qs += " where "
+		qs += filterQ
+	}
+
 	qs = qs + groupQS + pageQS
 	q := svc.DB.NewQuery(qs)
-	q.Bind(dbx.Params{"q": qParam, "t": tParam})
+	q.Bind(dbx.Params{"q": qParam, "t": tagParam})
 
 	err := q.All(&out.Submissions)
 	if err != nil {

@@ -23,16 +23,9 @@ import BookTracesSidebar from "@/components/BookTracesSidebar.vue"
 import BookTracesHeader from "@/components/BookTracesHeader.vue"
 import BookTracesFooter from "@/components/BookTracesFooter.vue"
 import { useSystemStore } from "@/stores/system"
-import { useSubmissionsStore } from "@/stores/submissions"
-import { onBeforeMount } from 'vue'
 
 const system = useSystemStore()
-const submissionsStore = useSubmissionsStore()
 
-onBeforeMount( () => {
-   submissionsStore.getArchiveDates()
-   submissionsStore.getRecentSubmissions()
-})
 </script>
 
 <style>
@@ -100,6 +93,9 @@ div.bkg {
    font-family: 'Special Elite', cursive;
    padding-bottom: 5px;
    margin-bottom: 15px;
+}
+td.nowrap {
+   white-space: nowrap;
 }
 </style>
 

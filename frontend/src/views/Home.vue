@@ -93,9 +93,11 @@ const moreClicked = (() => {
 })
 
 onMounted(() => {
+   system.getInstitutions()
    submissionsStore.clearThumbs()
    submissionsStore.getRecentThumbs()
-   system.getInstitutions()
+   submissionsStore.getArchiveDates()
+   submissionsStore.getRecentSubmissions()
 })
 </script>
 
