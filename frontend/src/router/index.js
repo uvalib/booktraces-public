@@ -150,6 +150,8 @@ router.beforeEach(to => {
       } else {
          system.adminMode = false
       }
+   } else {
+      system.adminMode = false
    }
 })
 

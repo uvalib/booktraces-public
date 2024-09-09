@@ -63,12 +63,11 @@ export const useUploadStore = defineStore('uploads', {
             this.error = error.response.data
          })
       },
-      setUploadedImages( files ) {
-         this.uploadedFiles = []
-         files.forEach( f => this.uploadedFiles.push(f.name) )
+      addImage( file ) {
+         this.uploadedFiles.push( file.name )
       },
       getUploadID() {
-         this.uploadID = null
+         this.$reset()
          axios.get("/api/identifier").then((response) => {
             this.uploadID = response.data
          }).catch((error) => {

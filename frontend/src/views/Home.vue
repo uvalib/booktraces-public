@@ -74,7 +74,7 @@
             </div>
          </div>
          <h4 v-if="system.loading===true">Loading...</h4>
-         <button v-if="submissionsStore.thumbsCount < submissionsStore.total" @click="moreClicked" class="more pure-button pure-button-primary">More</button>
+         <Button v-if="submissionsStore.thumbsCount < submissionsStore.total" @click="moreClicked" class="more" label="More"/>
       </div>
    </div>
 </template>
@@ -143,7 +143,7 @@ h3 {
 .pure-img.thumb:hover {
    box-shadow: 0 0 5px green;
 }
-.pure-button.submit, .pure-button.more  {
+.pure-button.submit  {
    background: #24890d;
    font-weight: bold;
 }

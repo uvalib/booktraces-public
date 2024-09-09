@@ -129,7 +129,25 @@ const viewSubmission = ( (submission) => {
 })
 
 const togglePublish = ( (submission) => {
-
+   let act = "Publish"
+   if (submission.published) {
+      act = "Unpublish"
+   }
+   confirm.require({
+      message: `${act} this submission?`,
+      header: `Confirm ${act}`,
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: act
+      },
+      accept: () => {
+         admin.updatePublicationStatus(submission.id, !submission.published )
+      }
+   })
 })
 
 const deleteSubmisson = ( (submission) => {
@@ -150,15 +168,6 @@ const deleteSubmisson = ( (submission) => {
    })
 })
 
-
-//       deleteClicked(event) {
-//          event.stopPropagation()
-//          let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
-//          if (resp) {
-//             let id = event.currentTarget.dataset.id
-//             this.$store.dispatch("admin/deleteSubmission", {id:id})
-//          }
-//       },
 //       togglePublishClicked(event) {
 //          event.stopPropagation()
 //          let published = event.currentTarget.dataset.published

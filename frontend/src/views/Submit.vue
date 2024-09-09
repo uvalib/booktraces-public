@@ -36,7 +36,7 @@
             <label for="images">Images of unique features (e.g., marginalia, inserts)<span class="required">*</span></label>
             <FileUpload id="images" mode="advanced" url="/api/upload" name="uploadimage"
                :showUploadButton="false" :showCancelButton="false"
-               accept="image/jpeg,image/png" :multiple="true"
+               accept="image/jpeg,image/png" :multiple="false"
                @upload="imageUploaded" @before-upload="beforeImageUpload" @removeUploadedFile="imageRmoved"
                :auto="true" chooseLabel="Upload Images"
             >
@@ -96,7 +96,7 @@ const beforeImageUpload = (( evt ) => {
    evt.formData.append('uploadID', upload.uploadID);
 })
 const imageUploaded = ((evt) => {
-   upload.setUploadedImages( evt.files )
+   upload.addImage( evt.files[0] )
 })
 const imageRmoved = ((evt) => {
    upload.removeUploadedImage( evt.file.name )

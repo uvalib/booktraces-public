@@ -3,9 +3,6 @@
       <template v-if="system.loading">
          <h1>Loading Details...</h1>
       </template>
-      <template v-else-if="system.hasError ">
-        <div class="error">{{system.error}}</div>
-      </template>
       <template v-else>
           <div class="paging" v-if="!details.isTranscribing">
             <button v-bind:class="{disabled: details.hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
@@ -53,7 +50,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onBeforeMount, computed } from 'vue'
 import { useDetailsStore } from "@/stores/details"
 import { useSystemStore } from "@/stores/system"
 import { useSubmissionsStore } from "@/stores/submissions"
@@ -74,7 +71,8 @@ const submission = computed( () => {
    return details.submission
 })
 
-onMounted(() => {
+onBeforeMount(() => {
+   console.log("GET SUBMISSION")
    details.getSubmission( route.params.id )
 })
 
@@ -169,6 +167,7 @@ div.thumb {
    .zoom-wrap {
       flex-basis: 45%;
       margin-right: 15px;
+      text-align: center;
    }
    div.transcription-wrap {
       flex-basis: 50%;
@@ -178,6 +177,7 @@ div.thumb {
    .zoom-wrap {
       flex-basis: 95%;
       margin-bottom: 15px;
+      text-align: center;
    }
    div.transcription-wrap {
       flex-basis: 95%;

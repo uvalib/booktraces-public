@@ -78,6 +78,11 @@ type Submission struct {
 	InstitutionID int       `json:"institution_id" db:"institution_id"`
 }
 
+// TableName sets the name of the table in the DB that this struct binds to
+func (sub *Submission) TableName() string {
+	return "submissions"
+}
+
 // GetArchivesList will get a sorted list of archives dates
 func (svc *ServiceContext) GetArchivesList(c *gin.Context) {
 	type Archives struct {

@@ -70,19 +70,16 @@ export const useAdminStore = defineStore('admin', {
          })
       },
 
-      updatePublicationStatus(payload) {
-         let id = payload.id
-         let published = payload.public
+      updatePublicationStatus(id, published) {
          let url = "/api/admin/submissions/" + id + "/publish"
          if (!published) {
             url = "/api/admin/submissions/" + id + "/unpublish"
          }
          this.working = true
          axios.post(url).then(() => {
-            this.commit("setPublished", payload)
             let idx = this.submissions.hits.findIndex( sub => sub.id == id)
             if (idx > -1) {
-               this.submissions.hits[idx].public = published
+               this.submissions.hits[idx].published = published
             }
             this.working = false
          }).catch((error) => {
