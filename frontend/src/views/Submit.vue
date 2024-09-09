@@ -38,11 +38,10 @@
                :showUploadButton="false" :showCancelButton="false"
                accept="image/jpeg,image/png" :multiple="false"
                @upload="imageUploaded" @before-upload="beforeImageUpload" @removeUploadedFile="imageRmoved"
-               :auto="true" chooseLabel="Upload Images"
+               :auto="true" chooseLabel="Upload Image"
             >
                <template #empty>
-                  <div class="upload title">Drag and drop to upload content</div>
-                  <div class="upload subtitle">or click 'Upload Images' to select a file from your computer</div>
+                  <div class="upload">Drag and drop or click 'Upload Image' to add a .jpg or .png image from your computer.</div>
                </template>
             </FileUpload>
          </div>
@@ -159,10 +158,6 @@ form {
       font-weight: bold;
       padding-left: 5px;
       color: firebrick;
-   }
-   .upload.title {
-      font-weight: 700;
-      font-size: 1.2em;
    }
 }
 
