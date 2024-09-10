@@ -5,7 +5,7 @@
       <router-view/>
    </template>
    <template v-else>
-      <div class="main pure-g">
+      <div class="main">
          <div class="pure-u-1-6">
             <BookTracesSidebar/>
          </div>

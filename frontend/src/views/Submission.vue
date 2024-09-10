@@ -5,13 +5,13 @@
       </template>
       <template v-else>
           <div class="paging" v-if="!details.isTranscribing">
-            <button v-bind:class="{disabled: details.hasPrev == false}" @click="prevClicked" class="prev pure-button pure-button-primary">Prior Submission</button>
-            <button v-bind:class="{disabled: details.hasNext == false}" @click="nextClicked" class="next pure-button pure-button-primary">Next Submission</button>
+            <Button :disabled="!details.hasPrev" @click="prevClicked" label="Prior Submission"/>
+            <Button :disabled="!details.hasNext" @click="nextClicked" label="Next Submission"/>
          </div>
          <div class="submit-header">
             <h3><b>BOOK SUBMISSION:</b> {{submission.title}}</h3>
             <div class="submit-time">
-               <i class="far fa-clock"></i><span>{{submitDate}}</span>
+               <i class="pi pi-clock"></i><span>{{submitDate}}</span>
             </div>
          </div>
          <div class="details">
@@ -28,8 +28,7 @@
             <div class="thumb" v-for="file in submission.files">
                <div class="zoom-wrap">
                   <vue-image-zoomer :regular="file.url" />
-                  <span @click="transcribeClicked(file)" class="ctls pure-button pure-button-primary"
-                     :class="{disbled: hasPendingTranscription(file)}">Transcribe</span>
+                  <Button severity="info" @click="transcribeClicked(file)" :disabled="hasPendingTranscription(file)" label="Transcribe"/>
                </div>
                <div class="transcription-wrap">
                   <div class="head">Transcription</div>
@@ -43,7 +42,7 @@
             </div>
          </div>
          <div class="tags">
-            <div @click="tagClicked(tag)" class="tag" v-for="tag in submission.tags">{{ tag }}</div>
+            <Button v-for="tag in submission.tags" severity="info" rounded small :label="tag"  @click="tagClicked(tag)"/>
          </div>
       </template>
    </div>
@@ -120,10 +119,7 @@ const nextClicked = (() => {
 
 </script>
 
-<style scoped>
-h1 {
-   font-family: 'Special Elite', cursive;
-}
+<style scoped lang="scss">
 h3 {
    font-family: 'Special Elite', cursive;
    margin: 10px 0;
@@ -132,42 +128,103 @@ h3 {
 }
 div.submit-time {
    color: #aaa;
-   font-size: 0.85em;
+   display: flex;
+   flex-flow: row nowrap;
+   justify-content: flex-start;
+   align-items: flex-start;
+   gap: 10px;
 }
-div.submit-time span {
-   display: inline-block;
-   margin-left: 10px;
+div.paging {
+   display: flex;
+   flex-flow: row nowrap;
+   align-items: flex-start;
+   justify-content: flex-end;
+   gap: 5px;
 }
+
 div.details {
    margin-top:20px;
-}
-div.details div {
-   margin-bottom: 3px;
-}
-div.details .value {
-   font-weight: 200;
-   color: #444;
-}
-div.details p {
-   margin: 3px 30px;
-}
-div.details label {
-   font-weight: bold;
-   margin-right: 5px;
-}
-div.thumb {
-   margin: 0 0 15px 0;
-   padding-bottom: 15px;
+   padding-bottom: 20px;
    border-bottom: 1px solid #ccc;
+   div {
+      margin-bottom: 3px;
+   }
+   .value {
+      font-weight: 200;
+      color: #444;
+   }
+   p {
+      margin: 3px 30px;
+   }
+   label {
+      font-weight: bold;
+      margin-right: 5px;
+   }
+}
+
+.thumbs {
+   margin-top: 20px;
+   padding-top: 20px;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+   div.thumb {
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      flex-flow: row wrap;
+      align-content: flex-start;
+      gap: 15px;
+      div.zoom-wrap {
+         display: flex;
+         flex-direction: column;
+         justify-content: stretch;
+         align-items: stretch;
+         gap: 15px;
+         width: 100%;
+         background: #fafafa;
+         border: 1px solid #ddd;
+         padding: 10px;
+         border-radius: 4px;
+      }
+   }
+   div.transcription-wrap {
+      margin: 0;
+      border:1px solid #ddd;
+      border-radius: 4px;
+      .pending {
+         font-size: 1.3em;
+         text-align: center;
+         margin: 15% auto;
+      }
+      .head {
+         background: #dadada;
+         padding: 5px 10px;
+      }
+      .transcription {
+         padding: 5px 10px;
+         pre {
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+         }
+      }
+   }
+}
+div.tags {
    display: flex;
    flex-flow: row wrap;
-   align-content: flex-start;
+   justify-content: flex-start;
+   align-items: flex-start;
+   gap: 5px;
+   padding-top: 20px;
 }
+
 @media only screen and (min-width: 768px) {
    .zoom-wrap {
       flex-basis: 45%;
-      margin-right: 15px;
-      text-align: center;
    }
    div.transcription-wrap {
       flex-basis: 50%;
@@ -175,101 +232,10 @@ div.thumb {
 }
 @media only screen and (max-width: 768px) {
    .zoom-wrap {
-      flex-basis: 95%;
-      margin-bottom: 15px;
-      text-align: center;
+      flex-basis: 100%;
    }
    div.transcription-wrap {
-      flex-basis: 95%;
+      flex-basis: 100%;
    }
-}
-div.transcription-wrap {
-   box-sizing: border-box;
-   margin: 0;
-   border:1px solid #ccc;
-}
-.zoom-wrap .ctls.pure-button.pure-button-primary.disbled {
-   opacity: 0.2;
-   cursor: default;
-}
-div.thumb:first-of-type {
-   border-top: 1px solid #ccc;
-   padding-top: 15px;
-}
-.thumbs {
-   margin-top: 20px;
-   padding-top: 20px;
-}
-div.tags {
-   clear:both;
-   margin-top: 20px;
-   padding-top: 20px;
-}
-div.tag {
-   display: inline-block;
-   margin: 0 10px 5px 0;
-   font-size: 0.85em;
-   background: #68c;
-   color: white;
-   padding: 4px 20px 3px 20px;
-   border-radius: 10px;
-   text-transform: uppercase;
-   font-weight: 500;
-}
-div.paging {
-   font-size: 0.8em;
-   text-align: right;
-   position: relative;
-   top: -10px;
-   right: -5px;
-}
-div.paging .pure-button {
-   margin-left: 10px;
-   background: #24890d;
-}
-div.paging .pure-button.disabled {
-   margin-left: 10px;
-   background: #24890d;
-   opacity: 0.5;
-   cursor: default;
-}
-div.tag:hover {
-   cursor:pointer;
-   background: #79d;
-}
-.error {
-  margin: 5px 0 10px 0;
-  color: firebrick;
-  font-style: italic;
-}
-.ctls {
-   margin: 5px 0;
-   color: white !important;
-   width:100%;
-}
-.toolbar .ctls.pure-button.pure-button-primary.disbled {
-   opacity: 0.5;
-   cursor: default;
-   background: #aaa;
-}
-.pending {
-   font-size: 1.3em;
-   text-align: center;
-   margin: 15% auto;
-}
-.transcription-wrap .head {
-   font-size: 1.25em;
-   background: #dadada;
-   padding: 4px 8px;
-}
-.transcription-wrap .transcription {
-   padding: 5px 10px;
-}
-div.transcription pre {
-   white-space: pre-wrap;       /* Since CSS 2.1 */
-   white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-   white-space: -pre-wrap;      /* Opera 4-6 */
-   white-space: -o-pre-wrap;    /* Opera 7 */
-   word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 </style>
