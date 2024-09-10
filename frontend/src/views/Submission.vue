@@ -41,7 +41,7 @@
                </div>
             </div>
          </div>
-         <div class="tags">
+         <div class="tags" v-if="!details.isTranscribing">
             <Button v-for="tag in submission.tags" severity="info" rounded small :label="tag"  @click="tagClicked(tag)"/>
          </div>
       </template>
@@ -71,18 +71,24 @@ const submission = computed( () => {
 })
 
 onBeforeMount(() => {
-   console.log("GET SUBMISSION")
    details.getSubmission( route.params.id )
 })
 
 const transcribeClicked = ((imgFile) => {
-   if (this.hasPendingTranscription(imgFile) == false) {
+   if ( hasPendingTranscription(imgFile) == false) {
       details.setTranscriptionTarget( imgFile )
    }
 })
 
 const hasPendingTranscription = ((imgFile) => {
-   return imgFile.transcriptions.length > 0 && imgFile.transcriptions[0].approved == false
+   if (imgFile.transcriptions.length == 0 ) return false
+   let pending = true
+   imgFile.transcriptions.forEach( t => {
+      if (t.approved === true) {
+         pending = false
+      }
+   })
+   return pending
 })
 
 const transcription = ((imgFile) => {

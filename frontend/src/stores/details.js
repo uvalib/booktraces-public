@@ -4,7 +4,7 @@ import axios from 'axios'
 
 export const useDetailsStore = defineStore('details', {
 	state: () => ({
-      working: true,
+      working: false,
       submission: null,
       transcribeFile: null,
       transcribeError: "",
@@ -87,31 +87,35 @@ export const useDetailsStore = defineStore('details', {
          })
       },
 
-      submitTranscription(data) {
+      submitTranscription(transcription, name, email) {
          this.transcribeError = ""
          if (this.transcribeFile == null) {
             this.transcribeError =  "File is missing"
             return
          }
 
-         if (data.transcription == "") {
+         if (transcription == "") {
             this.transcribeError =  "Please enter a transcription"
             return
          }
-         if (data.name == "") {
+         if (name == "") {
             this.transcribeError =  "Name is required"
             return
          }
-         if (data.email == "") {
+         if (email == "") {
             this.transcribeError =  "Email is required"
             return
          }
          this.working = true
-         data.submissionID = this.submission.id
-         data.fileID = this.transcribeFile.id
-         axios.post("/api/transcription", data).then((_response) => {
-            ctx.commit("setFileTranscribed",  ctx.state.file.id, {root:true})
-            let idx = this.submission.files.findIndex( f =>f.id = data.fileID )
+         let req = {
+            transcription: transcription,
+            name: name,
+            email: email,
+            submissionID: this.submission.id,
+            fileID:  this.transcribeFile.id
+         }
+         axios.post("/api/transcription", req).then(() => {
+            let idx = this.submission.files.findIndex( f =>f.id = this.transcribeFile.id )
             if (idx > -1 ) {
                let pend = {text: "pending", approved: false}
                this.submission.files[idx].transcriptions.push( pend )
