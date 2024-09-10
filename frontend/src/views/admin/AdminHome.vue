@@ -54,15 +54,6 @@
                </template>
             </Column>
          </DataTable>
-         <!--
-               <td class="centered">
-                  <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
-               </td>
-               <td class="centered">
-                  <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-               </td>
-            </tr>
-         </table> -->
       </div>
    </div>
 </template>
@@ -167,24 +158,6 @@ const deleteSubmisson = ( (submission) => {
       }
    })
 })
-
-//       togglePublishClicked(event) {
-//          event.stopPropagation()
-//          let published = event.currentTarget.dataset.published
-//          if (published ) {
-//             let resp = confirm("Unpublish this submission?")
-//             if (!resp) {
-//                return
-//             }
-//          } else {
-//             let resp = confirm("Publish this submission?")
-//             if (!resp) {
-//                return
-//             }
-//          }
-//          let id = event.currentTarget.dataset.id
-//          this.$store.dispatch("admin/updatePublicationStatus", {id:id, public: !published})
-//       },
 </script>
 
 <style scoped lang="scss">

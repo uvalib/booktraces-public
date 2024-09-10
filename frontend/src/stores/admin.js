@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSystemStore } from './system'
+import { useEventsStore } from './events'
 import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', {
@@ -13,8 +14,7 @@ export const useAdminStore = defineStore('admin', {
          tagFilter: "",
       },
       user: null,
-
-      news: []
+      error: "",
    }),
    getters: {
       isAuthenticated: state => {
@@ -99,6 +99,18 @@ export const useAdminStore = defineStore('admin', {
          }).catch((error) => {
             useSystemStore.setError(error.response.data)
             this.working = false
+         })
+      },
+
+      deleteEvent(id) {
+         axios.delete("/api/admin/events/" + id).then(() => {
+            const events = useEventsStore()
+            let delIdx = events.list.findIndex( n => n.id == id)
+            if (delIdx > -1) {
+               events.list.splice(delIdx, 1)
+            }
+         }).catch((error) => {
+            this.error = error.response.data
          })
       },
 

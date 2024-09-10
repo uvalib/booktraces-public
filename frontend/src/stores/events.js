@@ -36,16 +36,6 @@ export const useEventsStore = defineStore('events', {
             useSystemStore().setError("Unable to get events: " + error.response.data)
          })
       },
-      deleteEvent(id) {
-         axios.delete("/api/admin/events/" + id).then(() => {
-            let delIdx = this.list.findIndex( n => n.id == id)
-            if (delIdx > -1) {
-               this.list.splice(delIdx, 1)
-            }
-         }).catch((error) => {
-            useSystemStore().setError("Unable to delete event: " + error.response.data)
-         })
-      },
       // FIXME
       // updateEvent(modified) {
       //    return new Promise((resolve, reject) => {
