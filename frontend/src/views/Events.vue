@@ -2,7 +2,7 @@
    <div class="content events">
       <h2>Events</h2>
       <table>
-         <tr v-for="event in eventsStore.list">
+         <tr v-for="event in system.events">
             <td class="date">{{event.date}}</td>
             <td><span v-html="event.description"></span></td>
          </tr>
@@ -12,12 +12,12 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useEventsStore } from "@/stores/events"
+import { useSystemStore } from "@/stores/system"
 
-const eventsStore = useEventsStore()
+const system = useSystemStore()
 
 onMounted(() => {
-   eventsStore.getAll()
+   system.getEvents()
 })
 </script>
 

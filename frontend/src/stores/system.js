@@ -5,6 +5,7 @@ export const useSystemStore = defineStore('system', {
 	state: () => ({
       tags: [],
       institutions: [],
+      events: [],
       error: null,
       loading: true,
       adminMode: false,
@@ -34,6 +35,20 @@ export const useSystemStore = defineStore('system', {
          }).catch((error) => {
             this.institutions = []
             this.setError("Unable to get institutions: " + error.response.data)
+         })
+      },
+      getEvents() {
+         this.loading = true
+         this.events = []
+         axios.get("/api/events").then((response) => {
+            response.data.forEach( evt => {
+               evt.date = evt.date.split("T")[0]
+               this.events.push(evt)
+            })
+            this.loading = false
+         }).catch((error) => {
+            this.setError("Unable to get events: " + error.response.data)
+            this.loading = true
          })
       },
       async addInstitution(name) {

@@ -8,15 +8,21 @@
       </h2>
       <div>
          <h3>Events</h3>
-         <!-- <span @click="addEventClick" class="add pure-button pure-button-primary">Add Event</span> -->
          <div class="error" v-if="admin.error">{{admin.error}}</div>
-         <DataTable :value="eventsStore.list" ref="eventsTable" dataKey="id" size="small" stripedRows
-            :lazy="false" :paginator="true" :rows="30" :rowsPerPageOptions="[30,50,100]" :alwaysShowPaginator="false"
+         <DataTable :value="system.events" ref="eventsTable" dataKey="id" size="small" stripedRows
+            :lazy="false" :paginator="true" :rows="30" :rowsPerPageOptions="[30,50,100]"
             paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="{first} - {last} of {totalRecords}" paginatorPosition="top"
-            editMode="row" v-model:editingRows="editRows" @row-edit-save="saveEdits"
+            editMode="row" v-model:editingRows="editRows" @row-edit-save="saveEdits" :loading="system.loading"
          >
-            <Column field="date" header="Date" class="nowrap"/>
+            <template #paginatorstart>
+               <Button label="Add Event" severity="secondary" size="small" @click="addClicked"/>
+            </template>
+            <Column field="date" header="Date" class="nowrap">
+               <template #editor="{ data, field }">
+                  <InputText v-model="data[field]" fluid />
+                </template>
+            </Column>
             <Column field="description" header="Description">
                <template #body="slotProps">
                   <div v-html="slotProps.data.description"></div>
@@ -34,24 +40,46 @@
          </DataTable>
       </div>
    </div>
+   <Dialog v-model:visible="showAdd" :style="{width: '450px'}" header="Add Event" :modal="true" position="top">
+      <div class="add-form">
+         <div class="row">
+            <label for="new-date">Date</label>
+            <InputText id="new-date" v-model="newDate" />
+         </div>
+         <div class="row">
+            <label for="new-desc">Description</label>
+            <Textarea id="new-desc" v-model="newDesc" :rows="4"/>
+         </div>
+      </div>
+      <template #footer>
+         <Button label="Cancel" severity="secondary" @click="showAdd = false" autofocus />
+         <Button label="Add Event"  @click="addEvent" autofocus :disabled="newDate == '' || newDesc=='' || admin.working"/>
+      </template>
+   </Dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useEventsStore } from "@/stores/events"
+import { useSystemStore } from "@/stores/system"
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
+import InputText from 'primevue/inputtext'
 import { useAdminStore } from "@/stores/admin"
 import { useConfirm } from "primevue/useconfirm"
 
 const admin = useAdminStore()
-const eventsStore = useEventsStore()
-const editRows = ref([])
+const system = useSystemStore()
 const confirm = useConfirm()
 
+const editRows = ref([])
+const showAdd = ref(false)
+const newDate = ref("")
+const newDesc = ref("")
+
 onMounted(() => {
-   eventsStore.getAll()
+   system.getEvents()
 })
 
 const deleteEvent = ((evt) => {
@@ -72,43 +100,23 @@ const deleteEvent = ((evt) => {
    })
 })
 
-const saveEdits = (() => {
-
+const saveEdits = ( async ( event) => {
+   // TODO error handling
+   let { newData, index } = event
+   await admin.updateEvent( index, newData )
 })
 
-// saveClicked() {
-//    if (this.addingNew) {
-//       this.$store.dispatch('events/addEvent',this.editDetails).then((/*response*/) => {
-//          this.edit=false
-//          this.editDetails = null
-//          this.addingNew = false
-//       })
-//    } else {
-//       this.$store.dispatch('events/updateEvent',this.editDetails).then((/*response*/) => {
-//          this.edit=false
-//          this.editDetails = null
-//          this.addingNew = false
-//       })
-//    }
-// },
-// editingEvent(id) {
-//    if (this.edit == false) return false
-//    return this.editDetails.id == id
-// },
-// deleteClicked(event) {
-//    let tgt = event.currentTarget
-//    let eventID = tgt.dataset.id
-//    let resp = confirm("Delete this event? All data will be permanently lost. Continue?")
-//    if (resp) {
-//          this.$store.dispatch('events/deleteEvent', eventID)
-//    }
-// },
-// addEventClick() {
-//    this.$store.commit("events/addEventPlaceholder")
-//    this.editDetails = Object.assign({}, this.events[0])
-//    this.edit = true
-//    this.addingNew = true
-// }
+const addClicked = (() => {
+   newDate.value = ""
+   newDesc.value = ""
+   showAdd.value = true
+})
+
+const addEvent = ( async () => {
+   // TODO error handling
+   await admin.addEvent( newDate.value, newDesc.value )
+   showAdd.value = false
+})
 </script>
 
 <style scoped lang="scss">
@@ -117,6 +125,9 @@ div.admin {
    min-height: 600px;
    background: white;
    color: #444;
+   h3 {
+      margin-bottom: 10px;
+   }
    h2 {
       display: flex;
       flex-flow: row wrap;
@@ -139,6 +150,16 @@ div.admin {
             margin-right: 10px;
          }
       }
+   }
+}
+.add-form {
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+   .row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
    }
 }
 </style>

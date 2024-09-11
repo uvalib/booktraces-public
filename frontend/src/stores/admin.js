@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useSystemStore } from './system'
-import { useEventsStore } from './events'
 import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', {
@@ -83,7 +82,7 @@ export const useAdminStore = defineStore('admin', {
             }
             this.working = false
          }).catch((error) => {
-            useSystemStore.setError(error.response.data)
+            useSystemStore().setError(error.response.data)
             this.working = false
          })
       },
@@ -97,20 +96,55 @@ export const useAdminStore = defineStore('admin', {
             }
             this.working = false
          }).catch((error) => {
-            useSystemStore.setError(error.response.data)
+            this.error = error.response.data
             this.working = false
          })
       },
 
       deleteEvent(id) {
          axios.delete("/api/admin/events/" + id).then(() => {
-            const events = useEventsStore()
-            let delIdx = events.list.findIndex( n => n.id == id)
+            const system = useSystemStore()
+            let delIdx = system.events.findIndex( n => n.id == id)
             if (delIdx > -1) {
-               events.list.splice(delIdx, 1)
+               system.events.splice(delIdx, 1)
             }
          }).catch((error) => {
             this.error = error.response.data
+         })
+      },
+      async updateEvent(idx, updated) {
+         const system = useSystemStore()
+         let origEvt = system.events[idx]
+         this.working = true
+         await axios.put(`/api/admin/events/${origEvt.id}`, updated).then(() => {
+            origEvt.date = updated.date
+            origEvt.description = updated.description
+            this.working = false
+            console.log("UPDATED")
+         }).catch((error) => {
+            this.error = error.response.data
+            this.working = false
+         })
+      },
+      async addEvent(newDate, newDesc) {
+         const system = useSystemStore()
+         let newEvent = {date: newDate, description: newDesc}
+         this.working = true
+         await axios.post("/api/admin/events/", newEvent).then((response) => {
+            system.events.push(response.data)
+            system.events.sort( (a,b) => {
+               if ( a.date < b.date ){
+                  return 1
+                }
+                if ( a.date > b.date ){
+                  return -1
+                }
+                return 0
+            })
+            this.working = false
+         }).catch((error) => {
+            this.error = error.response.data
+            this.working = false
          })
       },
 
@@ -138,7 +172,7 @@ export const useAdminStore = defineStore('admin', {
          //       this.commit("setSubmissionDetail", modified, { root: true })
          //       resolve()
          //    }).catch((error) => {
-         //       useSystemStore.setError(error.response.data)
+         //       useSystemStore().setError(error.response.data)
          //       reject(error)
          //    })
          // })
