@@ -148,6 +148,47 @@ export const useAdminStore = defineStore('admin', {
          })
       },
 
+      async addNews(newTitle, newContent) {
+         const system = useSystemStore()
+         this.working = true
+         this.error = ""
+         let data = { title: newTitle, content: newContent }
+         axios.post("/api/admin/news/", data).then((response) => {
+            system.news.unshift(response.data)
+            this.working = false
+         }).catch((error) => {
+            this.error = error.response.data
+            this.working = false
+         })
+      },
+      async updateNews(id, title, content) {
+         const system = useSystemStore()
+         let newsRec = system.news.find( n=>n.id = id)
+         if ( !newsRec ) {
+            this.error = "Unable to find news record "+id
+            return
+         }
+         newsRec.title = title
+         newsRec.content = content
+         this.working = true
+         this.error = ""
+         console.log(newsRec)
+         await axios.put("/api/admin/news/" + id, newsRec).catch((error) => {
+            this.error = error.response.data
+         }).finally( () =>  this.working = false )
+      },
+      async deleteNews(id) {
+         const system = useSystemStore()
+         return axios.delete("/api/admin/news/" + id).then(() => {
+            let delIdx = system.news.findIndex( n => n.id == id)
+            if (delIdx > -1) {
+               system.news.splice(delIdx, 1)
+            }
+         }).catch((error) => {
+            this.error = "Unable to delete news: "+error.response.data
+         })
+      },
+
       updateSubmission(modified) {
          // FIXME
          // // update wants tags to be a list of IDs, but currently has names...
@@ -178,13 +219,58 @@ export const useAdminStore = defineStore('admin', {
          // })
       },
 
-      // getNews() {
-      //    axios.get("/api/admin/news").then((response) => {
-      //       this.commit('setNews', response.data)
+      // getPedagogyDocuments() {
+      //    this.loading = true
+      //    this.pedagogy.list = []
+      //    axios.get(`/api/admin/pedagogy`).then((response) => {
+      //       response.data.forEach( doc => {
+      //          doc.createdAt = doc.createdAt.split("T")[0]
+      //          this.pedagogy.list.push( doc )
+      //       })
       //    }).catch((error) => {
-      //       this.commit('setNews', [])
-      //       this.commit('setError', "Unable to get news: " + error.response.data)
+      //       this.setError("Unable to get pedagogy: " + error.response.data)
+      //    }).finally( ()=>{
+      //       this.loading = false
+      //    })
+      // // },
+      // deleteDocument( key ) {
+      //    const system = useSystemStore()
+      //    system.loading = true
+      //    axios.delete(`/api/admin/pedagogy/${key}`).then((_response) => {
+      //       let idx = this.list.findIndex( d => d.key == key)
+      //       if ( idx > -1) {
+      //          this.list.splice(idx,1)
+      //       }
+      //    }).catch((error) => {
+      //       ctx.commit("setError", error, {root: true})
+      //    }).finally( ()=>{
+      //       system.loading = false
       //    })
       // },
+
+      // updateDocument( doc ) {
+      //    const system = useSystemStore()
+      //    system.loading = true
+      //    let docIdx = this.list.findIndex( d => d.id == doc.id)
+      //    return axios.put(`/api/admin/pedagogy/${this.list[docIdx].key}`, doc).then((response) => {
+      //       this.list[docIdx] = doc
+      //    }).catch((error) => {
+      //       system.setError(error)
+      //    }).finally( ()=>{
+      //       system.loading = false
+      //    })
+      // },
+
+      // addDocument( doc ) {
+      //    const system = useSystemStore()
+      //    system.loading = true
+      //    return axios.post(`/api/admin/pedagogy`, doc).then((response) => {
+      //       this.list.push( response.data )
+      //    }).catch((error) => {
+      //       system.setError(error)
+      //    }).finally( ()=>{
+      //       system.loading = false
+      //    })
+      // }
    }
 })

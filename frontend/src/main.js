@@ -22,9 +22,6 @@ import VueImageZoomer from 'vue-image-zoomer'
 import 'vue-image-zoomer/dist/style.css'
 app.use(VueImageZoomer)
 
-// Styles
-import '@fortawesome/fontawesome-free/css/all.css'
-
 // Primevue setup
 import PrimeVue from 'primevue/config'
 import BookTraces from '@/assets/theme/booktraces'

@@ -18,7 +18,7 @@
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>
          <span @click="showSearchClick" class="search">
-            <i v-bind:class="{selected: submissionsStore.showSearch}" class="fas fa-search"></i>
+            <i v-bind:class="{selected: submissionsStore.showSearch}" class="pi pi-search"></i>
          </span>
       </div>
       <div v-else class="pure-menu pure-menu-horizontal menubar">
@@ -31,7 +31,7 @@
          </ul>
       </div>
       <div  v-if="!system.adminMode" class="hmenu">
-         <div @click="toggleHMenu" class="hmenu-button"><i class="fas fa-bars"></i></div>
+         <div @click="toggleHMenu" class="hmenu-button"><i class="pi pi-bars"></i></div>
          <ul id="hmenu" class="hmenu-items hidden">
             <li @click="adminClicked" v-bind:class="{active: system.adminMode}" class="admin">Admin</li>
             <li @click="toggleHMenu"><router-link to="/" exact>Home</router-link></li>

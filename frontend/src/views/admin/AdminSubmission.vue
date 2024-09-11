@@ -13,7 +13,7 @@
       <template v-else>
          <div class="actions">
             <router-link to="/admin">
-               <i class="fas fa-arrow-left"></i>&nbsp;Back to Submissions
+               <i class="pi pi-arrow-left"></i>&nbsp;Back to Submissions
             </router-link>
             <div v-if="!edit" class="buttons">
                <button @click="editClicked" class="admin pure-button edit pure-button-primary">Edit</button>
@@ -159,7 +159,7 @@
                      <span class="tag" v-for="(tag,idx) in editDetails.tags"
                         :key="idx" @click="removeTag">
                         {{tag}}
-                        <i class="fas fa-times-circle"></i>
+                        <i class="pi pi-trash"></i>
                      </span>
                   </td>
                </tr>

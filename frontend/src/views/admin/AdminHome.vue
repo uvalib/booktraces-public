@@ -28,7 +28,7 @@
          >
             <Column field="id" header="ID" />
             <Column field="title" header="Title" />
-            <Column field="author" header="Author" class="nowrap"/>
+            <Column field="author" header="Author"/>
             <Column header="Tags" >
                <template #body="slotProps">
                   <div class="tags">
@@ -195,6 +195,7 @@ h2 {
    flex-flow: row wrap;
    justify-content: space-between;
    align-items: flex-start;
+   margin-bottom: 15px;
    .left {
       display: flex;
       flex-flow: row nowrap;

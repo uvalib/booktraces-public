@@ -1,7 +1,7 @@
 <template>
    <div class="content events">
       <h2>News</h2>
-      <div class="news-item" v-for="item in newsStore.published" >
+      <div class="news-item" v-for="item in system.publishedNews" >
          <h3>{{item.title}}<span class="date">{{formatDate(item.createdAt)}}</span></h3>
          <div class="text" v-html="item.content"></div>
       </div>
@@ -10,12 +10,12 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useNewsStore } from "@/stores/news"
+import { useSystemStore } from "@/stores/system"
 
-const newsStore = useNewsStore()
+const system = useSystemStore()
 
 onMounted(() => {
-   newsStore.getAll()
+   system.getNews()
 })
 
 const formatDate = ((date) => {
@@ -23,7 +23,7 @@ const formatDate = ((date) => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .news-item {
    margin: 10px 0 25px 0;
    padding: 0px;
@@ -37,9 +37,9 @@ h3 {
 }
 div.text {
    padding: 10px;
-}
-div.text >>> p {
-   margin: 0 0;
+   :deep(p) {
+      margin: 0 0;
+   }
 }
 span.date {
    position: absolute;

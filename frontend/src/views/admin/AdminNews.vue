@@ -1,105 +1,156 @@
 <template>
    <div class="admin">
-      <!-- <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
+      <h2>
+         <span>System Admin Panel</span>
+         <span class="login">
+            <b>Logged in as:</b>{{admin.loginName}}
+         </span>
+      </h2>
       <div>
-         <h3>News <span @click="addNewsClick" class="add pure-button pure-button-primary">Add News Item</span></h3>
-         <div class="error">{{error}}</div>
-         <div class="news-item" v-for="(item,idx) in news" :key="item.id">
-            <div class="controls">
-               <template v-if="!editingItem(item.id)">
-                  <i :data-id="item.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-                  <i :data-id="item.id" title="Edit" class="action fa fa-edit" @click="editClicked"></i>
-               </template>
-               <template v-else>
-                  <i class="action cancel fas fa-times-circle" @click="cancelClicked"></i>
-                  <i class="action save fas fa-check-circle" @click="saveClicked"></i>
-               </template>
-            </div>
-            <template v-if="editingItem(item.id)">
-               <div><label>Title:</label><input class="title" type="text" v-model="editDetails.title"></div>
-               <vue-editor v-model="editDetails.content"></vue-editor>
-            </template>
-            <template v-else>
-               <div class="title">{{item.title}}</div>
-               <div class="date">{{formatDate(item.createdAt)}}</div>
-               <div @click="togglePublication(idx)" title="Toggle publication status" class="published">{{publishedText(item)}}</div>
-               <div class="text" v-html="item.content"></div>
-            </template>
+         <h3>News</h3>
+         <div class="ctls">
+            <Button label="Add News" @click="addNewsClicked" size = "small"/>
          </div>
-      </div> -->
+         <div class="error" v-if="admin.error">{{admin.error}}</div>
+         <div class="news">
+            <Panel v-for="item in system.news" :key="item.id">
+               <template #header>
+                  <div class="header">
+                     <div class="left" v-if="editID != item.id">
+                        <span class="title">{{item.title}}</span>
+                        <span class="date">{{ item.createdAt.split("T")[0] }}</span>
+                        <div class="published">
+                           <label>
+                              <Checkbox v-model="item.published" :binary="true" @update:modelValue="publicToggled(item)" />
+                              <span>Published</span>
+                           </label>
+                        </div>
+                     </div>
+                     <div class="edit-title" v-else-if="editID == item.id" >
+                        <label>Title:</label>
+                        <InputText v-model="editTitle" />
+                     </div>
+                     <div class="ctls">
+                        <template v-if="editID == item.id">
+                           <Button label="Cancel" severity="secondary" size="small" @click="cancelEdit"  />
+                           <Button label="Save" severity="primart" size="small" @click="saveEdit" />
+                        </template>
+                        <template v-else>
+                           <Button rounded icon="pi pi-trash" severity="secondary" size="small" :disabled="editID != 0" @click="deleteNews(item)" />
+                           <Button rounded icon="pi pi-file-edit" severity="secondary" size="small" :disabled="editID != 0"  @click="editNews(item) "/>
+                        </template>
+                     </div>
+                  </div>
+               </template>
+               <div class="text" v-html="item.content" v-if="editID != item.id" />
+               <Editor v-else v-model="editContent" editorStyle="height: 200px" />
+            </Panel>
+         </div>
+      </div>
    </div>
+   <Dialog v-model:visible="showAdd" :style="{width: '450px'}" header="Add News" :modal="true" position="top">
+      <div class="add-form">
+         <div class="row">
+            <label for="new-title">Title</label>
+            <InputText id="new-title" v-model="editTitle" />
+         </div>
+         <Editor v-model="editContent" editorStyle="height: 200px" />
+      </div>
+      <template #footer>
+         <Button label="Cancel" severity="secondary" @click="showAdd = false" />
+         <Button label="Add News"  @click="addNews" autofocus :disabled="editTitle == '' || editContent=='' || admin.working"/>
+      </template>
+   </Dialog>
 </template>
 
-<script>
-// import { mapState } from 'vuex'
-// import { mapGetters } from 'vuex'
-// import { VueEditor } from 'vue2-editor'
-// export default {
-//    name: "admin-news",
-//    components: {
-//       "vue-editor": VueEditor
-//    },
-//    data: function () {
-//       return {
-//          edit: false,
-//          editDetails: null,
-//          addingNew: false,
-//       }
-//    },
-//    computed: {
-//       ...mapState({
-//          error: state => state.error,
-//          loading: state => state.loading,
-//          news: state => state.news.list,
-//       }),
-//       ...mapGetters({
-//          loginName: 'admin/loginName',
-//       })
-//    },
-//    methods: {
+<script setup>
+import { onMounted, ref } from 'vue'
+import { useSystemStore } from "@/stores/system"
+import { useAdminStore } from "@/stores/admin"
+import Panel from 'primevue/panel'
+import Checkbox from 'primevue/checkbox'
+import InputText from 'primevue/inputtext'
+import Editor from 'primevue/editor'
+import Dialog from 'primevue/dialog'
+import { useConfirm } from "primevue/useconfirm"
+
+const admin = useAdminStore()
+const system = useSystemStore()
+const confirm = useConfirm()
+
+const showAdd = ref(false)
+const editID = ref(0)
+const editTitle = ref("")
+const editContent = ref("")
+
+onMounted(() => {
+   system.getNews()
+})
+
+const publicToggled = ((item) => {
+   admin.updateNews(item.id, item.title, item.content)
+})
+
+const deleteNews = ((item) => {
+   confirm.require({
+      message: `Delete '${item.title}' All data will be permanently lost. Are you sure?`,
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: () => {
+         admin.deleteNews(item.id)
+      }
+   })
+})
+
+const addNewsClicked = (() => {
+   editID.value = 0
+   editTitle.value = ""
+   editContent.value = ""
+   showAdd.value = true
+})
+
+const addNews = ( async () => {
+   await admin.addNews( editTitle.value, editContent.value )
+   if ( admin.error == "" ) {
+      editID.value = 0
+      editTitle.value = ""
+      editContent.value = ""
+      showAdd.value = false
+   }
+})
+
+const editNews = ( (item) => {
+   editTitle.value = item.title
+   editContent.value = item.content
+   editID.value = item.id
+})
+
+const cancelEdit = ( () => {
+   editID.value = 0
+   editTitle.value = ""
+   editContent.value = ""
+})
+
+const saveEdit = ( async () => {
+   await admin.updateNews(editID.value, editTitle.value, editContent.value)
+   if ( admin.error == "" ) {
+      editID.value = 0
+      editTitle.value = ""
+      editContent.value = ""
+   }
+})
+</script>
 //       togglePublication(idx) {
 //          this.$store.dispatch("news/togglePublication", idx)
 //       },
-//       publishedText( item ) {
-//          if (item.published) return "Published"
-//          return "Not Published"
-//       },
-//       formatDate(date) {
-//          return date.split("T")[0]
-//       },
-//       addNewsClick() {
-//          this.$store.commit("news/addPlaceholder")
-//          this.editDetails = Object.assign({}, this.news[0])
-//          this.edit = true
-//          this.addingNew = true
-//       },
-//       cancelClicked() {
-//          this.edit = false
-//          this.editDetails = null
-//          if (this.addingNew) {
-//             this.addingNew = false
-//             this.$store.commit("news/cancelAdd")
-//          }
-//       },
-//       saveClicked() {
-//          if (this.addingNew) {
-//             this.$store.dispatch('news/addNews',this.editDetails).then((/*response*/) => {
-//                this.edit=false
-//                this.editDetails = null
-//                this.addingNew = false
-//             })
-//          } else {
-//             this.$store.dispatch('news/updateNews',this.editDetails).then((/*response*/) => {
-//                this.edit=false
-//                this.editDetails = null
-//                this.addingNew = false
-//             })
-//          }
-//       },
-//       editingItem(id) {
-//          if (this.edit == false) return false
-//          return this.editDetails.id == id
-//       },
+
 //       deleteClicked(event) {
 //          let tgt = event.currentTarget
 //          let newsID = tgt.dataset.id
@@ -108,120 +159,106 @@
 //              this.$store.dispatch('news/deleteNews', newsID)
 //          }
 //       },
-//       editClicked(event) {
-//          let tgt = event.currentTarget
-//          var newsID = tgt.dataset.id
-//          var tgtIdx = -1
-//          this.news.some( function(e,idx) {
-//           if (e.id == newsID) {
-//             tgtIdx = idx
-//             return true
-//           }
-//           return false
-//         })
-//         if (tgtIdx > -1) {
-//            this.editDetails = Object.assign({}, this.news[tgtIdx])
-//            this.edit = true
-//         }
-//       },
-//    },
-//    created() {
-//       this.$store.dispatch('news/getAll')
-//    },
-// };
-</script>
 
-<style scoped>
-i.action.cancel, .error {
-   color: firebrick;
-}
-i.action.save {
-   color: green;
-}
-i.action {
-   color: #666;
-   opacity: 0.6;
-   margin: 0 5px;
-}
-i.action:hover {
-   cursor: pointer;
-   opacity: 1;
-}
-span.login {
-   font-family: sans-serif;
-   font-size: 0.5em;
-   float: right;
-   font-weight: 100;
-}
-span.login b {
-   margin-right: 5px;
-}
-h2 {
-  font-size: 1.5em;
-  font-weight: bold;
-  border-bottom: 1px dashed #666;
-  font-family: 'Special Elite', cursive;
-  padding-bottom: 5px;
-  margin-bottom: 15px;
-}
+<style scoped lang="scss">
 div.admin {
    padding: 15px 25px;
    min-height: 600px;
    background: white;
    color: #444;
+   h3 {
+      margin-bottom: 10px;
+   }
+   h2 {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 1.5em;
+      font-weight: bold;
+      border-bottom: 1px dashed #666;
+      font-family: 'Special Elite', cursive;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      .login {
+         color: #999;
+         font-family: sans-serif;
+         font-size: 0.8em;
+         float: right;
+         font-weight: normal;
+         b {
+            color: #444;
+            margin-right: 10px;
+         }
+      }
+   }
+   .ctls {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 10px;
+      justify-content: flex-end;
+   }
+   :deep(p) {
+      margin: 0 0;
+   }
+   :deep(a) {
+      color: #24890d !important;
+   }
+   .news {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      .text {
+         padding-top: 10px;
+      }
+      .header {
+         display: flex;
+         flex-flow: row nowrap;
+         justify-content: space-between;
+         align-items: center;
+         gap: 20px;
+         width: 100%;
+         .edit-title {
+            width: 100%;
+            display: flex;
+            flex-flow: row nowrap;
+            gap: 5px;
+            align-items: center;
+            input {
+               flex:1;
+            }
+         }
+         .left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            .title {
+               font-weight: bold;
+            }
+            .date {
+               color: #aaa;
+               font-size: 0.9em;
+            }
+            .published label{
+               display: flex;
+               flex-flow: row nowrap;
+               gap: 10px;
+            }
+         }
+      }
+   }
 }
-h3 {
-   position: relative;
-}
-h3 span.pure-button.add {
-   font-size: 0.6em;
-   font-weight: 100;
-   position: absolute;
-   right: 0;
-   bottom:0;
-}
-.news-item {
-   margin: 10px 0 25px 0;
-   padding: 15px;
-   border:1px solid #ccc;
-   position: relative;
-}
-div.text {
-   margin-top: 15px;
-}
-div.published {
-   font-weight: bold;
-   color: cornflowerblue;
-}
-div.published:hover {
-   text-decoration: underline;
-   cursor: pointer;
-}
-div.controls {
-   position: absolute;
-   right: 15px;
-   top: 15px;
-}
-div.text >>> p {
-   margin: 0px 0;
-}
-div.title {
-   color: #444;
-   font-weight: bold;
-}
-div.date {
-   font-weight: 100;
-   font-size: 0.9em;
-}
-label {
-   display: inline-block;
-   font-weight: bold;
-   color: #555;
-   text-align: right;
-   margin-right: 15px;
-}
-input.title {
-   width: 800px;
-   margin-bottom: 10px;
+.add-form {
+   display:flex;
+   flex-direction: column;
+   gap: 15px;
+   .row {
+      display:flex;
+      flex-direction: column;
+      gap: 5px;
+   }
 }
 </style>

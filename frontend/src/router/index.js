@@ -129,9 +129,10 @@ const router = createRouter({
 
 router.beforeEach(to => {
    const system = useSystemStore()
+   const admin = useAdminStore()
    if (to.meta.requiresAuth == true) {
       console.log("AUTH REQUIRED")
-      const admin = useAdminStore()
+
       system.adminMode = true
       if (admin.isAuthenticated == false) {
          console.log("NOT AUTHENTICATED")
@@ -152,6 +153,7 @@ router.beforeEach(to => {
       }
    } else {
       system.adminMode = false
+      admin.clearUser()
    }
 })
 

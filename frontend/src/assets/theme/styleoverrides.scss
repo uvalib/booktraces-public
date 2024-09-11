@@ -4,7 +4,7 @@
    }
 
    div.p-panel-header {
-      border-bottom: 1px solid var(--uvalib-grey-light);
+      border-bottom: 1px solid #ccc;
       margin-bottom: 10px;
    }
 }
@@ -12,8 +12,8 @@
 .p-dialog-mask {
    .p-dialog {
       .p-dialog-header {
-         background: var(--uvalib-teal-lightest);
-         border-bottom: 1px solid var(--uvalib-teal-light);
+         background: #C8F2F4;
+         border-bottom: 1px solid #5BD7DE;
          border-radius: 4px 4px 0 0;
          margin-bottom: 15px;
       }

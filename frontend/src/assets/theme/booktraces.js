@@ -81,6 +81,12 @@ const BookTraces = definePreset(Aura, {
             }
          }
       },
+      checkbox: {
+         root: {
+            checkedBackground: '{blue.600}',
+            checkedHoverBackground: '{blue.800}',
+         }
+      },
       datatable: {
          paginatorTop: {
             borderColor: '#f1f1f1',

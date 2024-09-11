@@ -6,6 +6,8 @@ export const useSystemStore = defineStore('system', {
       tags: [],
       institutions: [],
       events: [],
+      news: [],
+      document: null,
       error: null,
       loading: true,
       adminMode: false,
@@ -14,6 +16,10 @@ export const useSystemStore = defineStore('system', {
    getters: {
       hasError: state => {
          return state.error != null
+      },
+      publishedNews: state => {
+         let out = state.news.filter(news => news.published)
+         return out
       }
    },
    actions: {
@@ -49,6 +55,46 @@ export const useSystemStore = defineStore('system', {
          }).catch((error) => {
             this.setError("Unable to get events: " + error.response.data)
             this.loading = true
+         })
+      },
+      getNews() {
+         this.loading = true
+         this.news = []
+         axios.get("/api/news").then((response) => {
+            this.news = response.data
+            this.loading = false
+         }).catch((error) => {
+            this.setError("Unable to get news: " + error.response.data)
+            this.loading = false
+         })
+      },
+      async getPedagogyDocument( key ) {
+         this.loading = true
+         this.document = null
+         return axios.get(`/api/pedagogy/${key}`).then((response) => {
+            let doc = response.data
+            let content = doc.content
+            let idx = content.indexOf("$DOC[")
+            while (idx > -1) {
+               let idx2 = content.indexOf("]", idx)
+               if (idx2 == -1) {
+                  break
+               }
+               let substr = content.substring(idx+5,idx2)
+               let data = substr.split("::")
+               let label = data[1]
+               var fakeDoc = new DOMParser().parseFromString(label, 'text/html');
+               let cleanLabel =  fakeDoc.body.textContent || "";
+               let url = `<span class="pedagogy-link" data-link="${data[0]}">${cleanLabel}</span>`
+               content = content.substring(0,idx) + url + content.substring(idx2+1)
+               idx = content.indexOf("$DOC[")
+            }
+            doc.content = content
+            this.document = doc
+         }).catch((error) => {
+            this.setError("Unable to get pedagogy dicument: " + error.response.data)
+         }).finally( ()=>{
+            this.loading = false
          })
       },
       async addInstitution(name) {

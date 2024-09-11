@@ -2,15 +2,15 @@
    <div class="content pedagogy">
       <h2>
          <span>Pedagogy</span>
-         <span v-if="system.loading==false && pedagogy.document.key != 'index'" class="back-link">
-            <router-link to="/pedagogy"><i class="fas fa-arrow-left"></i>Back</router-link>
+         <span v-if="system.loading==false && system.document.key != 'index'" class="back-link">
+            <router-link to="/pedagogy"><i class="pi pi-arrow-left"></i>Back</router-link>
          </span>
       </h2>
       <BTSpinner v-if="system.loading==true" message="Loading pedagogy content..." />
       <div v-else class="pedagogy-content">
-         <template v-if="pedagogy.document != null">
-            <h3 v-if="pedagogy.document.key != 'index'">{{pedagogy.document.title}}</h3>
-            <div @click="docClicked" class="text" v-html="pedagogy.document.content"></div>
+         <template v-if="system.document != null">
+            <h3 v-if="system.document.key != 'index'">{{system.document.title}}</h3>
+            <div @click="docClicked" class="text" v-html="system.document.content"></div>
          </template>
          <div class="not-found" v-else>
             <h4>Page Not Found!</h4>
@@ -24,18 +24,14 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { usePedagogyStore } from "@/stores/pedagogy"
 import { useSystemStore } from "@/stores/system"
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 
 const system = useSystemStore()
-const pedagogy = usePedagogyStore()
 const route = useRoute()
 const router = useRouter()
 
 onBeforeRouteUpdate( async ( to ) => {
-   // this is needed to load details when a grouped image thumb has been clicked; new content
-   // needs to be loaded, but the page remains the same (create not called)
    await getDocument( to.params.id)
 })
 
@@ -47,7 +43,7 @@ const getDocument = ( async (docKey) => {
    if (!docKey) {
       docKey = "index"
    }
-   await pedagogy.getDocument( docKey )
+   await system.getPedagogyDocument( docKey )
 })
 
 const docClicked = ((event) => {
