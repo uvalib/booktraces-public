@@ -48,13 +48,17 @@ const archiveClicked = ((tgtDate) => {
       display:none;
    }
 }
+@media only screen and (min-width: 1050px) {
+   .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+   }
+}
 div.sidebar {
    padding: 10px;
    background-color: #222;
    color: #dadada;
-   display: flex;
-   flex-direction: column;
-   gap: 25px;
    a, .recent-link, .archive-date {
       color: #dadada;
       text-decoration: none;
@@ -66,6 +70,7 @@ div.sidebar {
    }
    .recent, .archive {
       margin: 0 0 10px 15px;
+      font-size: 0.9rem;
    }
    .recent p {
       margin:0;
@@ -76,10 +81,9 @@ div.sidebar {
       padding:0;
       font-family: 'Special Elite', cursive;
       font-weight: 500;
-      font-size: 1.1em;
    }
    .subtitle.pad {
-      margin-bottom: 5px;
+      margin-bottom: 10px;
    }
 }
 </style>
