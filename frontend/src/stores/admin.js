@@ -70,13 +70,13 @@ export const useAdminStore = defineStore('admin', {
          })
       },
 
-      updatePublicationStatus(id, published) {
+      async updatePublicationStatus(id, published) {
          let url = "/api/admin/submissions/" + id + "/publish"
          if (!published) {
             url = "/api/admin/submissions/" + id + "/unpublish"
          }
          this.working = true
-         axios.post(url).then(() => {
+         await axios.post(url).then(() => {
             let idx = this.submissions.hits.findIndex( sub => sub.id == id)
             if (idx > -1) {
                this.submissions.hits[idx].published = published
@@ -88,9 +88,9 @@ export const useAdminStore = defineStore('admin', {
          })
       },
 
-      deleteSubmission( subID ) {
+      async deleteSubmission( subID ) {
          this.working = true
-         axios.delete("/api/admin/submissions/" + subID).then(() => {
+         await axios.delete("/api/admin/submissions/" + subID).then(() => {
             let idx = this.submissions.hits.findIndex( sub => sub.id == subID)
             if (idx > -1) {
                this.submissions.hits.splice(idx, 1)

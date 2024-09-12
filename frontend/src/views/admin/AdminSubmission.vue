@@ -15,9 +15,8 @@
             <div class="buttons">
                <template v-if="!edit">
                   <Button size="small" label="Edit" @click="editClicked" severity="info"/>
-                  <Button  v-if="!details.submission.published" size="small" label="Publish" @click="publishClicked" severity="info"/>
-                  <Button  v-else size="small" label="Unpublish" @click="unpublishClicked" severity="info"/>
-                  <Button size="small" label="Delete" @click="deleteClicked" severity="danger"/>
+                  <Button @click="togglePublish" size="small" :severity="publishSeverity" :label="publishLabel"/>
+                  <Button size="small" label="Delete" @click="deleteSubmission" severity="danger"/>
                </template>
                <template v-else>
                   <Button size="small" label="Cancel" @click="cancelClicked" severity="secondary"/>
@@ -228,7 +227,9 @@ import { useAdminStore } from "@/stores/admin"
 import { useSystemStore } from "@/stores/system"
 import { useDetailsStore } from "@/stores/details"
 import { useRoute, useRouter } from 'vue-router'
+import { useConfirm } from "primevue/useconfirm"
 
+const confirm = useConfirm()
 const system = useSystemStore()
 const admin = useAdminStore()
 const details = useDetailsStore()
@@ -254,6 +255,14 @@ const submissionTagCSV = computed(() => {
 const description = computed(() => {
    return details.submission.description.replace(/\r|\r\n/gm, "\n").replace(/\n+/gm, "<br/><br/>")
 })
+const publishLabel = computed(() => {
+   if ( details.submission.published) return "Unpublish"
+   return  "Publish"
+ })
+ const publishSeverity = computed(() => {
+   if ( details.submission.published) return "secondary"
+   return  "primary"
+ })
 
 onMounted(() => {
    console.log("ID "+route.params.id )
@@ -261,8 +270,51 @@ onMounted(() => {
    system.getTags()
    system.getInstitutions()
 })
+
+const togglePublish = ( () => {
+   let act = "Publish"
+   if (details.submission.published) {
+      act = "Unpublish"
+   }
+   confirm.require({
+      message: `${act} this submission?`,
+      header: `Confirm ${act}`,
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: act
+      },
+      accept: async () => {
+         await admin.updatePublicationStatus(details.submission.id, !details.submission.published )
+         details.submission.published = !details.submission.published
+      }
+   })
+})
+
+const deleteSubmission = ( () => {
+   confirm.require({
+      message: 'Delete this submission?<br/>All data and unloaded files will be permanently lost.<br/><br/>Are you sure?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: async () => {
+         await admin.deleteSubmission(details.submission.id)
+         router.push("/admin/submissions")
+      }
+   })
+})
+
 const nextTran = (( image ) => {
-   if (transcriptionIdx.value == f.transcriptions.length -1) {
+   if (transcriptionIdx.value == image.transcriptions.length -1) {
       return
    }
    transcriptionIdx.value++
@@ -376,17 +428,6 @@ const getTranscribeStatus = ((f) => {
 //       addTagClicked() {
 //          this.showTagList = true;
 //       },
-//       deleteClicked() {
-//          let resp = confirm(
-//             "Delete this submission? All data and unloaded files will be permanently lost. Are you sure?"
-//          );
-//          if (resp) {
-//             this.$store.dispatch("admin/deleteSubmission", {
-//                id: details.submission.id,
-//                backToIndex: true
-//             });
-//          }
-//       },
 //       editClicked() {
 //          this.editDetails = Object.assign({}, this.details);
 //          this.edit = true;
@@ -411,31 +452,9 @@ const getTranscribeStatus = ((f) => {
 //       cancelClicked() {
 //          this.edit = false;
 //       },
-//       publishClicked() {
-//          this.$store.dispatch("admin/updatePublicationStatus", {
-//             id: details.submission.id,
-//             public: true
-//          });
-//       },
-//       unpublishClicked() {
-//          this.$store.dispatch("admin/updatePublicationStatus", {
-//             id: details.submission.id,
-//             public: false
-//          });
-//       }
 </script>
 
 <style scoped lang="scss">
-@media only screen and (min-width: 768px) {
-   .admin-submission {
-      padding: 15px 25px;
-   }
-}
-@media only screen and (max-width: 768px) {
-   .admin-submission {
-      padding: 10px;
-   }
-}
 div.admin-submission {
    min-height: 600px;
    background: white;
@@ -579,17 +598,7 @@ table {
       white-space:  nowrap;
    }
 }
-// td input {
-//    border: 1px solid #ccc;
-//    width: 100%;
-//    outline: none;
-//    box-sizing: border-box;
-// }
-// td textarea {
-//    display: block;
-//    border: 1px solid #ccc;
-//    width: 90%;
-// }
+
 @media only screen and (min-width: 768px) {
    .zoom-wrap {
       flex-basis: 50%;
@@ -598,6 +607,9 @@ table {
    div.transcription-panel {
       flex-basis: 50%;
    }
+   .admin-submission {
+      padding: 15px 25px;
+   }
 }
 @media only screen and (max-width: 768px) {
    .zoom-wrap {
@@ -605,6 +617,9 @@ table {
    }
    div.transcription-panel {
       flex-basis: 100%;
+   }
+   .admin-submission {
+      padding: 10px;
    }
 }
 </style>
