@@ -8,20 +8,14 @@
       </h2>
       <BTSpinner v-if="system.loading==true" message="Loading details..." />
       <template v-else>
-         <div class="actions">
+         <div class="actions" v-if="!edit">
             <router-link to="/admin">
                <i class="pi pi-arrow-left"></i>&nbsp;Back to Submissions
             </router-link>
             <div class="buttons">
-               <template v-if="!edit">
-                  <Button size="small" label="Edit" @click="editClicked" severity="info"/>
-                  <Button @click="togglePublish" size="small" :severity="publishSeverity" :label="publishLabel"/>
-                  <Button size="small" label="Delete" @click="deleteSubmission" severity="danger"/>
-               </template>
-               <template v-else>
-                  <Button size="small" label="Cancel" @click="cancelClicked" severity="secondary"/>
-                  <Button size="small" label="Save" @click="saveClicked" severity="info"/>
-               </template>
+               <Button size="small" label="Edit" @click="edit=true" severity="info"/>
+               <Button @click="togglePublish" size="small" :severity="publishSeverity" :label="publishLabel"/>
+               <Button size="small" label="Delete" @click="deleteSubmission" severity="danger"/>
             </div>
          </div>
          <div class="error" v-if="admin.error">{{admin.error}}</div>
@@ -79,7 +73,7 @@
                   <div class="transcription-panel">
                      <div class="head">Transcriptions</div>
                      <div v-if="file.transcriptions.length == 0" class="none">None</div>
-                     <tempate v-else>
+                     <template v-else>
                         <div class="transcribe-acts">
                            <div class="buttons">
                               <Button v-if="file.transcriptions[transcriptionIdx].approved==false" aria-label="approve transcription"
@@ -124,99 +118,12 @@
                               <pre class="transcription">{{file.transcriptions[transcriptionIdx].text}}</pre>
                            </template>
                         </div>
-                     </tempate>
+                     </template>
                   </div>
                </div>
             </div>
          </div>
-         <!-- <div v-else class="edit details  pure-form">
-            <table style="width:75%; margin: 0 auto;">
-               <tr>
-                  <td class="label">Visible to public:</td>
-                  <td class="value">{{published}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Title:</td>
-                  <td class="value">
-                     <input id="title" type="text" v-model="editDetails.title" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Author:</td>
-                  <td class="value">
-                     <input id="author" type="text" v-model="editDetails.author" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Publication details:</td>
-                  <td class="value">
-                     <input id="publication" type="text" v-model="editDetails.publication" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Institution:</td>
-                  <td class="value">
-                     <multiselect v-model="selectedInstitution" class="folders"
-                        placeholder="Select or create an institution"
-                        :showLabels="false"
-                        :searchable="true"
-                        :taggable="true"
-                        track-by="id" label="name"
-                        tagPlaceholder="Press enter to create a new institution"
-                        @tag="addInstitution"
-                        :options="institutions">
-                     </multiselect>
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Call number:</td>
-                  <td class="value">
-                     <input id="callNumber" type="text" v-model="editDetails.callNumber" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Submitted by:</td>
-                  <td class="value">
-                     <input id="submitter" type="text" v-model="editDetails.submitter" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Submitted on:</td>
-                  <td class="value">{{submitDate}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Tags:</td>
-                  <td class="value" style="position:relative;">
-                     <div v-if="showTagList" class="source-tags">
-                        <p class="head">Available Tags</p>
-                        <div class="list">
-                           <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">
-                              {{tag.name}}
-                           </p>
-                        </div>
-                        <span @click="closeTagList" class="add-tag pure-button pure-button-primary">
-                           Done
-                        </span>
-                     </div>
-                     <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">
-                        Add
-                     </span>
-                     <span class="tag" v-for="(tag,idx) in editDetails.tags"
-                        :key="idx" @click="removeTag">
-                        {{tag}}
-                        <i class="pi pi-trash"></i>
-                     </span>
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Description:</td>
-                  <td class="value">
-                     <textarea rows="5" id="description" v-model="editDetails.description"></textarea>
-                  </td>
-               </tr>
-            </table>
-
-         </div> -->
+         <AdminEditSubmission v-else  @cancel="edit=false"  @save="saveEdits" />
       </template>
    </div>
 </template>
@@ -228,6 +135,7 @@ import { useSystemStore } from "@/stores/system"
 import { useDetailsStore } from "@/stores/details"
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from "primevue/useconfirm"
+import AdminEditSubmission from "@/components/AdminEditSubmission.vue"
 
 const confirm = useConfirm()
 const system = useSystemStore()
@@ -269,6 +177,19 @@ onMounted(() => {
    details.getSubmission( route.params.id )
    system.getTags()
    system.getInstitutions()
+})
+
+const saveEdits = (( edits ) => {
+   // TODO
+//          this.editDetails.institution_id = this.selectedInstitution.id
+//          this.editDetails.institution = this.selectedInstitution.name
+//          this.$store
+//             .dispatch("admin/updateSubmission", this.editDetails)
+//             .then((/*response*/) => {
+//                this.edit = false;
+//                this.editDetails = null;
+//             });
+   console.log(edits)
 })
 
 const togglePublish = ( () => {
@@ -379,55 +300,14 @@ const getTranscribeStatus = ((f) => {
 //          }
 //       },
 
-//       addInstitution(newInstitutionName) {
-//          this.$store
-//             .dispatch("addInstitution", newInstitutionName)
-//             .then(() => {
-//                this.institutions.some(i => {
-//                   if (i.name == newInstitutionName) {
-//                      this.selectedInstitution = i
-//                      return true;
-//                   }
-//                   return false;
-//                })
-//             })
-//             .catch(error => {
-//                // TODO something else maybe?
-//                alert(error)
-//             });
-//       },
 
-//       addTag(event) {
-//          let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-//          if (this.editDetails.tags.includes(addTag)) {
-//             return;
-//          }
-//          this.editDetails.tags.push(addTag);
-//       },
-//       closeTagList() {
-//          this.showTagList = false;
-//       },
-//       removeTag(event) {
-//          let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-//          var delIdx = -1;
-//          this.editDetails.tags.some(function(tag, idx) {
-//             if (tag == delTag) {
-//                delIdx = idx;
-//                return true;
-//             }
-//             return false;
-//          });
-//          this.editDetails.tags.splice(delIdx, 1);
-//       },
 //       rotateClicked(imgURL) {
 //          this.$store.dispatch("admin/rotateImage", {
 //             submissionID: details.submission.id,
 //             imgURL: imgURL
 //          });
 //       },
-//       addTagClicked() {
-//          this.showTagList = true;
-//       },
+
 //       editClicked() {
 //          this.editDetails = Object.assign({}, this.details);
 //          this.edit = true;
@@ -439,19 +319,7 @@ const getTranscribeStatus = ((f) => {
 //             return false
 //          })
 //       },
-//       saveClicked() {
-//          this.editDetails.institution_id = this.selectedInstitution.id
-//          this.editDetails.institution = this.selectedInstitution.name
-//          this.$store
-//             .dispatch("admin/updateSubmission", this.editDetails)
-//             .then((/*response*/) => {
-//                this.edit = false;
-//                this.editDetails = null;
-//             });
-//       },
-//       cancelClicked() {
-//          this.edit = false;
-//       },
+
 </script>
 
 <style scoped lang="scss">
