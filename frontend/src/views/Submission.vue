@@ -179,7 +179,8 @@ div.details {
       border-bottom: 1px solid #ccc;
       display: flex;
       flex-flow: row wrap;
-      align-content: flex-start;
+      align-items: stretch;
+      justify-content: flex-start;
       gap: 15px;
       div.zoom-wrap {
          display: flex;
@@ -187,7 +188,6 @@ div.details {
          justify-content: stretch;
          align-items: stretch;
          gap: 15px;
-         width: 100%;
          background: #fafafa;
          border: 1px solid #ddd;
          padding: 10px;
@@ -204,8 +204,9 @@ div.details {
          margin: 15% auto;
       }
       .head {
-         background: #dadada;
+         background: #fafafa;
          padding: 5px 10px;
+         border-bottom: 1px solid #ccc;
       }
       .transcription {
          padding: 5px 10px;
@@ -230,10 +231,11 @@ div.tags {
 
 @media only screen and (min-width: 768px) {
    .zoom-wrap {
-      flex-basis: 45%;
+      flex-basis: 55%;
+      max-width: 55%;
    }
    div.transcription-wrap {
-      flex-basis: 50%;
+      flex-basis: 42%;
    }
 }
 @media only screen and (max-width: 768px) {
