@@ -24,7 +24,7 @@ type Pedagogy struct {
 func (svc *ServiceContext) GetPedagogyDocuments(c *gin.Context) {
 	log.Printf("INFO: get all pedagogy documents")
 	var docs []Pedagogy
-	q := svc.DB.NewQuery(`select * from pedagogy order by title asc`)
+	q := svc.DB.NewQuery(`select * from pedagogy order by id asc`)
 	err := q.All(&docs)
 	if err != nil {
 		log.Printf("ERROR: Unable to get pedagogy documents: %s", err.Error())

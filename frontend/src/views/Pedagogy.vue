@@ -2,10 +2,9 @@
    <div class="content pedagogy">
       <h2>
          <span>Pedagogy</span>
-         <span v-if="system.loading==false && system.document.key != 'index'" class="back-link">
-            <router-link to="/pedagogy"><i class="pi pi-arrow-left"></i>Back</router-link>
-         </span>
       </h2>
+      <Button v-if="system.loading==false && system.document != null && system.document.key != 'index'" rounded
+         text icon="pi pi-arrow-left" label="Back" class="back" @click="backClicked" />
       <BTSpinner v-if="system.loading==true" message="Loading pedagogy content..." />
       <div v-else class="pedagogy-content">
          <template v-if="system.document != null">
@@ -25,15 +24,11 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useSystemStore } from "@/stores/system"
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const system = useSystemStore()
 const route = useRoute()
 const router = useRouter()
-
-onBeforeRouteUpdate( async ( to ) => {
-   await getDocument( to.params.id)
-})
 
 onMounted( async () => {
    await getDocument( route.params.id)
@@ -46,11 +41,17 @@ const getDocument = ( async (docKey) => {
    await system.getPedagogyDocument( docKey )
 })
 
+const backClicked = (() => {
+   getDocument( 'index' )
+   router.replace('/pedagogy')
+})
+
 const docClicked = ((event) => {
    if (event.target.className == 'pedagogy-link') {
-      let docID = event.target.dataset.link
-      if (docID) {
-         router.push(`/pedagogy/${docID}`)
+      let docKey = event.target.dataset.link
+      if (docKey) {
+         getDocument( docKey )
+         router.replace(`/pedagogy/${docKey}`)
       }
    }
 })
@@ -59,14 +60,15 @@ const docClicked = ((event) => {
 
 <style lang="scss" scoped>
 .content.pedagogy {
+   .back {
+      position: absolute;
+      right: 5px;
+   }
    h2 {
       display: flex;
       flex-flow: row wrap;
       justify-content: space-between ;
       align-content: center;
-      .back-link {
-         font-size: 0.6em;;
-      }
       span {
          display: inline-block;
       }
@@ -130,5 +132,15 @@ const docClicked = ((event) => {
 }
 :deep(.ql-indent-5) {
    margin-left: 100px;
+}
+@media only screen and (min-width: 768px) {
+   .back {
+      top: 10px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .back {
+      top: 2px;
+   }
 }
 </style>

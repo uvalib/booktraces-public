@@ -100,7 +100,7 @@ span.search.small {
    position: absolute;
    right: 15px;
    z-index: 1000;
-   background: black;
+   background: #222;
    width: 100px;
    list-style: none;
    padding: 10px 10px;
@@ -162,7 +162,7 @@ span.search.small {
    opacity: 1;
 }
 div.bt-header {
-   background-color: black;
+   background-color: #222;
    color: white;
    padding:15px;
    position: relative;

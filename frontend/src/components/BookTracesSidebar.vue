@@ -42,60 +42,44 @@ const archiveClicked = ((tgtDate) => {
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 @media only screen and (max-width: 1050px) {
    .sidebar {
       display:none;
    }
 }
-@media only screen and (max-width: 1150px) {
-   #tfeed {
-      display:none;
-   }
-}
-div.recent .recent-link:hover {
-   cursor:pointer;
-   color: #34991d !important;
-}
-div.section {
-   margin-top: 20px;
-   position: relative;
-}
-.recent, .archive {
-   font-size: 0.9em;
-   margin: 0 0 5px 8px;
-}
-.recent p {
-   margin:0;
-}
-.recent p.title {
-   font-weight: bold;
-   font-style: italic;
-}
 div.sidebar {
-   padding: 0 15px 15px 15px;
-   background-color: black;
-   color: #ccc;
-   font-size: 0.9em;
-}
-#app div.sidebar a {
-  color: #ccc;
-  text-decoration: none;
-}
-.subtitle {
-   margin:0;
-   padding:0;
-   font-family: 'Special Elite', cursive;
-   font-weight: 500;
-}
-.subtitle.pad {
-   margin-bottom: 5px;
-}
-.archive-date {
-   cursor:pointer;
-}
-.archive-date:hover {
-   font-weight: bold;
-   text-decoration: underline;
+   padding: 10px;
+   background-color: #222;
+   color: #dadada;
+   display: flex;
+   flex-direction: column;
+   gap: 25px;
+   a, .recent-link, .archive-date {
+      color: #dadada;
+      text-decoration: none;
+      &:hover {
+         text-decoration: underline;
+         color: #34991d !important;
+         cursor: pointer;
+      }
+   }
+   .recent, .archive {
+      margin: 0 0 10px 15px;
+   }
+   .recent p {
+      margin:0;
+   }
+
+   .subtitle {
+      margin:0;
+      padding:0;
+      font-family: 'Special Elite', cursive;
+      font-weight: 500;
+      font-size: 1.1em;
+   }
+   .subtitle.pad {
+      margin-bottom: 5px;
+   }
 }
 </style>

@@ -132,7 +132,6 @@ router.beforeEach(to => {
    const admin = useAdminStore()
    if (to.meta.requiresAuth == true) {
       console.log("AUTH REQUIRED")
-
       system.adminMode = true
       if (admin.isAuthenticated == false) {
          console.log("NOT AUTHENTICATED")
@@ -148,8 +147,6 @@ router.beforeEach(to => {
             window.location.href = authURL
             return false
          }
-      } else {
-         system.adminMode = false
       }
    } else {
       system.adminMode = false

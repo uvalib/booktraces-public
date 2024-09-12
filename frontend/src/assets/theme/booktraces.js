@@ -15,7 +15,7 @@ const BookTraces = definePreset(Aura, {
    },
    semantic: {
       primary: {
-         50: '#24890d',
+         50:  '#24890d',
          100: '#24890d',
          200: '#24890d',
          300: '#24890d',
@@ -77,6 +77,12 @@ const BookTraces = definePreset(Aura, {
                   hoverBorderColor: '808080',
                   borderColor: '#dadada',
                   color: '#333',
+               },
+               text: {
+                  primary: {
+                     hoverBackground: '#e4fadd',
+                     activeBackground: '#24890d',
+                 },
                },
             }
          }

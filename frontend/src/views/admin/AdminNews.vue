@@ -147,23 +147,9 @@ const saveEdit = ( async () => {
    }
 })
 </script>
-//       togglePublication(idx) {
-//          this.$store.dispatch("news/togglePublication", idx)
-//       },
-
-//       deleteClicked(event) {
-//          let tgt = event.currentTarget
-//          let newsID = tgt.dataset.id
-//          let resp = confirm("Delete this news item? All data will be permanently lost. Continue?")
-//          if (resp) {
-//              this.$store.dispatch('news/deleteNews', newsID)
-//          }
-//       },
 
 <style scoped lang="scss">
 div.admin {
-   padding: 15px 25px;
-   min-height: 600px;
    background: white;
    color: #444;
    h3 {
@@ -259,6 +245,16 @@ div.admin {
       display:flex;
       flex-direction: column;
       gap: 5px;
+   }
+}
+@media only screen and (min-width: 768px) {
+   .admin {
+      padding: 15px 25px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .admin {
+      padding: 10px;
    }
 }
 </style>

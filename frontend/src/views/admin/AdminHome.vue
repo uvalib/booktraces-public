@@ -96,7 +96,6 @@ const onPageClicked = ((event) => {
 })
 
 const tagClicked = ((tag) => {
-   event.stopPropagation()
    admin.submissions.tagFilter = tag
    admin.getSubmissions()
 })
@@ -162,8 +161,6 @@ const deleteSubmisson = ( (submission) => {
 
 <style scoped lang="scss">
 div.admin {
-   padding: 15px 25px;
-   min-height: 600px;
    background: white;
    color: #444;
 }
@@ -236,5 +233,15 @@ h2 {
    display: flex;
    flex-flow: row wrap;
    gap: 5px;
+}
+@media only screen and (min-width: 768px) {
+   .admin {
+      padding: 15px 25px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .admin {
+      padding: 10px;
+   }
 }
 </style>

@@ -1,5 +1,12 @@
 <template>
-   <ConfirmDialog position="top" :closable="false"/>
+   <ConfirmDialog position="top" :closable="false">
+      <template #message="slotProps">
+         <div class="confirm">
+            <i :class="slotProps.message.icon" class="warn"></i>
+            <div v-html="slotProps.message.message"></div>
+         </div>
+      </template>
+   </ConfirmDialog>
    <BookTracesHeader/>
    <template v-if="system.adminMode">
       <router-view/>
@@ -40,7 +47,7 @@ body {
    margin: 0;
    padding: 0;
    /* background-image: url(./assets/main-bkg.jpg); */
-   background-color: black;
+   background-color: #222;
 }
 #app .main {
    padding-top:0;
@@ -49,8 +56,8 @@ body {
    font-family: "Avenir", Helvetica, Arial, sans-serif;
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
-   background-color: black;
-   border-right: 1px solid black;
+   background-color: #222;
+   border-right: 1px solid #222;
 }
 #app h2 {
    margin: 0;
@@ -83,7 +90,7 @@ div.bkg {
    background: white;
    font-weight: 400;
    color: #444;
-   border: 1px solid black;
+   border: 1px solid #222;
    /* width: 80%; */
    margin: 25px;
 }
@@ -97,6 +104,18 @@ div.bkg {
 }
 td.nowrap {
    white-space: nowrap;
+}
+.confirm {
+   display: flex;
+   flex-flow: row nowrap;
+   justify-content: flex-start;
+   align-items: flex-start;
+   gap: 20px;
+   .warn {
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+   }
 }
 </style>
 

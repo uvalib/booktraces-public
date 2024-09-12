@@ -14,6 +14,7 @@ export const useAdminStore = defineStore('admin', {
       },
       user: null,
       error: "",
+      pedagogy: []
    }),
    getters: {
       isAuthenticated: state => {
@@ -172,7 +173,6 @@ export const useAdminStore = defineStore('admin', {
          newsRec.content = content
          this.working = true
          this.error = ""
-         console.log(newsRec)
          await axios.put("/api/admin/news/" + id, newsRec).catch((error) => {
             this.error = error.response.data
          }).finally( () =>  this.working = false )
@@ -219,58 +219,51 @@ export const useAdminStore = defineStore('admin', {
          // })
       },
 
-      // getPedagogyDocuments() {
-      //    this.loading = true
-      //    this.pedagogy.list = []
-      //    axios.get(`/api/admin/pedagogy`).then((response) => {
-      //       response.data.forEach( doc => {
-      //          doc.createdAt = doc.createdAt.split("T")[0]
-      //          this.pedagogy.list.push( doc )
-      //       })
-      //    }).catch((error) => {
-      //       this.setError("Unable to get pedagogy: " + error.response.data)
-      //    }).finally( ()=>{
-      //       this.loading = false
-      //    })
-      // // },
-      // deleteDocument( key ) {
-      //    const system = useSystemStore()
-      //    system.loading = true
-      //    axios.delete(`/api/admin/pedagogy/${key}`).then((_response) => {
-      //       let idx = this.list.findIndex( d => d.key == key)
-      //       if ( idx > -1) {
-      //          this.list.splice(idx,1)
-      //       }
-      //    }).catch((error) => {
-      //       ctx.commit("setError", error, {root: true})
-      //    }).finally( ()=>{
-      //       system.loading = false
-      //    })
-      // },
-
-      // updateDocument( doc ) {
-      //    const system = useSystemStore()
-      //    system.loading = true
-      //    let docIdx = this.list.findIndex( d => d.id == doc.id)
-      //    return axios.put(`/api/admin/pedagogy/${this.list[docIdx].key}`, doc).then((response) => {
-      //       this.list[docIdx] = doc
-      //    }).catch((error) => {
-      //       system.setError(error)
-      //    }).finally( ()=>{
-      //       system.loading = false
-      //    })
-      // },
-
-      // addDocument( doc ) {
-      //    const system = useSystemStore()
-      //    system.loading = true
-      //    return axios.post(`/api/admin/pedagogy`, doc).then((response) => {
-      //       this.list.push( response.data )
-      //    }).catch((error) => {
-      //       system.setError(error)
-      //    }).finally( ()=>{
-      //       system.loading = false
-      //    })
-      // }
+      getPedagogyDocuments() {
+         this.working = true
+         this.error = ""
+         this.pedagogy = []
+         axios.get(`/api/admin/pedagogy`).then((response) => {
+            this.pedagogy = response.data
+         }).catch((error) => {
+            this.error = "Unable to get pedagogy: " + error.response.data
+         }).finally( ()=>{
+            this.working = false
+         })
+      },
+      deleteDocument( key ) {
+         this.working = true
+         axios.delete(`/api/admin/pedagogy/${key}`).then(() => {
+            let idx = this.pedagogy.findIndex( d => d.key == key)
+            if ( idx > -1) {
+               this.pedagogy.splice(idx,1)
+            }
+         }).catch((error) => {
+            this.error = error
+         }).finally( ()=>{
+            this.working = false
+         })
+      },
+      async updateDocument( doc ) {
+         this.working = true
+         let docIdx = this.pedagogy.findIndex( d => d.id == doc.id)
+         await axios.put(`/api/admin/pedagogy/${this.pedagogy[docIdx].key}`, doc).then(() => {
+            this.pedagogy[docIdx] = doc
+         }).catch((error) => {
+            this.error = error
+         }).finally( ()=>{
+            this.working = false
+         })
+      },
+      async addDocument( doc ) {
+         this.working = true
+         await axios.post(`/api/admin/pedagogy`, doc).then((response) => {
+            this.pedagogy.push( response.data )
+         }).catch((error) => {
+            this.error = error
+         }).finally( ()=>{
+            this.working = false
+         })
+      }
    }
 })
