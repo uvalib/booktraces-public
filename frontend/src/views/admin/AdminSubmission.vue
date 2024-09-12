@@ -1,76 +1,64 @@
 <template>
-   <!-- <div class="admin-submission">
+   <div class="admin-submission">
       <h2>
-         System Admin Panel
+         <span>System Admin Panel</span>
          <span class="login">
-            <b>Logged in as:</b>
-            {{loginName}}
+            <b>Logged in as:</b>{{admin.loginName}}
          </span>
       </h2>
-      <template v-if="loading">
-         <h1>Loading Details...</h1>
-      </template>
+      <BTSpinner v-if="system.loading==true" message="Loading details..." />
       <template v-else>
          <div class="actions">
             <router-link to="/admin">
                <i class="pi pi-arrow-left"></i>&nbsp;Back to Submissions
             </router-link>
-            <div v-if="!edit" class="buttons">
-               <button @click="editClicked" class="admin pure-button edit pure-button-primary">Edit</button>
-               <button
-                  v-if="!details.published"
-                  @click="publishClicked"
-                  class="admin pure-button publish pure-button-primary"
-               >Publish</button>
-               <button
-                  v-else
-                  @click="unpublishClicked"
-                  class="admin pure-button unpublish pure-button-primary"
-               >Unpublish</button>
-               <button
-                  @click="deleteClicked"
-                  class="admin pure-button delete pure-button-primary"
-               >Delete</button>
-            </div>
-            <div v-else class="buttons">
-               <button @click="saveClicked" class="admin pure-button pure-button-primary">Save</button>
-               <button @click="cancelClicked" class="admin pure-button pure-button-primary">Cancel</button>
+            <div class="buttons">
+               <template v-if="!edit">
+                  <Button size="small" label="Edit" @click="editClicked" severity="info"/>
+                  <Button  v-if="!details.published" size="small" label="Publish" @click="publishClicked" severity="info"/>
+                  <Button  v-else size="small" label="Unpublish" @click="unpublishClicked" severity="info"/>
+                  <Button size="small" label="Delete" @click="deleteClicked" severity="danger"/>
+               </template>
+               <template v-else>
+                  <Button size="small" label="Cancel" @click="cancelClicked" severity="secondary"/>
+                  <Button size="small" label="Save" @click="saveClicked" severity="info"/>
+               </template>
             </div>
          </div>
-         <div class="error">{{error}}</div>
+         <div class="error" v-if="admin.error">{{admin.error}}</div>
          <div v-if="!edit" class="details">
             <table>
                <tr>
                   <td class="label">Visible to public:</td>
-                  <td class="value">{{published}}</td>
+                  <td class="value">{{ published }}</td>
                </tr>
                <tr>
                   <td class="label">Title:</td>
-                  <td class="value">{{details.title}}</td>
+                  <td class="value">{{details.submission.title}}</td>
                </tr>
                <tr>
                   <td class="label">Author:</td>
-                  <td class="value">{{details.author}}</td>
+                  <td class="value">{{details.submission.author}}</td>
                </tr>
                <tr>
                   <td class="label">Publication details:</td>
-                  <td class="value">{{details.publication}}</td>
+                  <td class="value">{{details.submission.publication}}</td>
                </tr>
                <tr>
                   <td class="label">Institution:</td>
-                  <td class="value">{{details.institution}}</td>
+                  <td class="value">{{details.submission.institution}}</td>
                </tr>
                <tr>
                   <td class="label">Call number:</td>
-                  <td class="value">{{details.callNumber}}</td>
+                  <td class="value">{{details.submission.callNumber}}</td>
                </tr>
                <tr>
                   <td class="label">Submitted by:</td>
-                  <td class="value">{{details.submitter}} ( {{details.email}} )</td>
+                  <td class="value">{{details.submission.submitter}} ( {{details.submission.email}} )</td>
                </tr>
                <tr>
                   <td class="label">Submitted on:</td>
-                  <td class="value">{{submitDate}}</td>
+                  <td class="value">{{ details.submission.submittedAt.split("T")[0] }}</td>
                </tr>
                <tr>
                   <td class="label">Tags:</td>
@@ -79,12 +67,12 @@
                <tr>
                   <td class="label">Description:</td>
                   <td class="value">
-                     <span v-html="formatDescription(details.description)"></span>
+                     <span v-html="description"></span>
                   </td>
                </tr>
             </table>
          </div>
-         <div v-else class="edit details  pure-form">
+         <!-- <div v-else class="edit details  pure-form">
             <table style="width:75%; margin: 0 auto;">
                <tr>
                   <td class="label">Visible to public:</td>
@@ -223,20 +211,49 @@
                   </div>
                </div>
             </div>
-         </div>
+         </div> -->
       </template>
-   </div> -->
+   </div>
 </template>
 
-<script>
-// import { mapState } from "vuex";
-// import { mapGetters } from "vuex";
-// import Multiselect from "vue-multiselect";
-// export default {
-//    name: "admin-submission",
-//    components: {
-//       Multiselect
-//    },
+<script setup>
+import { onMounted, ref, computed } from 'vue'
+import { useAdminStore } from "@/stores/admin"
+import { useSystemStore } from "@/stores/system"
+import { useDetailsStore } from "@/stores/details"
+import { useRoute, useRouter } from 'vue-router'
+
+const system = useSystemStore()
+const admin = useAdminStore()
+const details = useDetailsStore()
+const route = useRoute()
+const router = useRouter()
+
+const edit = ref(false)
+
+const published = computed(() => {
+   if (details.submission.published) return "YES"
+   return "NO"
+})
+
+const submissionTagCSV = computed(() => {
+   if (details.submission.tags) {
+      return details.submission.tags.join(", ")
+   }
+   return ""
+})
+
+const description = computed(() => {
+   return details.submission.description.replace(/\r|\r\n/gm, "\n").replace(/\n+/gm, "<br/><br/>")
+})
+
+onMounted(() => {
+   console.log("ID "+route.params.id )
+   details.getSubmission( route.params.id )
+   system.getTags()
+   system.getInstitutions()
+})
+
 //    data: function() {
 //       return {
 //          editTrans: false,
@@ -256,25 +273,10 @@
 //          tags: state => state.tags,
 //          institutions: state => state.institutions
 //       }),
-//       ...mapGetters({
-//          loginName: "admin/loginName"
-//       }),
-//       submitDate() {
-//          return this.details.submittedAt.split("T")[0];
-//       },
-//       hasError() {
-//          return this.$store.getters.hasError;
-//       },
-//       published() {
-//          if (this.details.published) {
-//             return "YES";
-//          } else {
-//             return "NO";
-//          }
-//       },
+
 //       submissionTagCSV() {
-//          if (this.details.tags) {
-//             return this.details.tags.join(", ");
+//          if (details.submission.tags) {
+//             return details.submission.tags.join(", ");
 //          }
 //          return "";
 //       }
@@ -285,7 +287,7 @@
 //          this.workingTrans = ""
 //       },
 //       async submitEdit(f) {
-//          let data = {submissionID: this.details.id,
+//          let data = {submissionID: details.submission.id,
 //             fileID: f.id,
 //             transcriptionID: f.transcriptions[this.transcriptionIdx].id,
 //             transcription: this.workingTrans}
@@ -358,12 +360,7 @@
 //                alert(error)
 //             });
 //       },
-//       formatDescription(desc) {
-//          let out = desc
-//             .replace(/\r|\r\n/gm, "\n")
-//             .replace(/\n+/gm, "<br/><br/>");
-//          return out;
-//       },
+
 //       addTag(event) {
 //          let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
 //          if (this.editDetails.tags.includes(addTag)) {
@@ -388,7 +385,7 @@
 //       },
 //       rotateClicked(imgURL) {
 //          this.$store.dispatch("admin/rotateImage", {
-//             submissionID: this.details.id,
+//             submissionID: details.submission.id,
 //             imgURL: imgURL
 //          });
 //       },
@@ -401,7 +398,7 @@
 //          );
 //          if (resp) {
 //             this.$store.dispatch("admin/deleteSubmission", {
-//                id: this.details.id,
+//                id: details.submission.id,
 //                backToIndex: true
 //             });
 //          }
@@ -432,26 +429,87 @@
 //       },
 //       publishClicked() {
 //          this.$store.dispatch("admin/updatePublicationStatus", {
-//             id: this.details.id,
+//             id: details.submission.id,
 //             public: true
 //          });
 //       },
 //       unpublishClicked() {
 //          this.$store.dispatch("admin/updatePublicationStatus", {
-//             id: this.details.id,
+//             id: details.submission.id,
 //             public: false
 //          });
 //       }
-//    },
-//    created() {
-//       this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
-//       this.$store.dispatch("getTags")
-//       this.$store.dispatch("getInstitutions")
-//    }
-// };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@media only screen and (min-width: 768px) {
+   .admin-submission {
+      padding: 15px 25px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .admin-submission {
+      padding: 10px;
+   }
+}
+div.admin-submission {
+   min-height: 600px;
+   background: white;
+   color: #444;
+
+   h3 {
+      margin-bottom: 10px;
+   }
+   h2 {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 1.5em;
+      font-weight: bold;
+      border-bottom: 1px dashed #666;
+      font-family: 'Special Elite', cursive;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      .login {
+         color: #999;
+         font-family: sans-serif;
+         font-size: 0.8em;
+         float: right;
+         font-weight: normal;
+         b {
+            color: #444;
+            margin-right: 10px;
+         }
+      }
+   }
+   .error {
+      color: firebrick;
+      padding: 5px 10px;
+      background-color: #ffeded;
+      border: 2px solid firebrick;
+      border-radius: 5px;
+      margin: 10px 0 20px 0;
+   }
+   div.actions {
+      padding: 10px 0;
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-content: center;
+      gap: 20px;
+      .buttons {
+         display: flex;
+         flex-flow: row wrap;
+         justify-content: flex-start;
+         align-items: flex-start;
+         gap: 5px;
+      }
+   }
+   div.details {
+      margin: 0 25px 0 25px;
+   }
+}
 .edit-trans {
    box-sizing: border-box;
    width: 100%;
@@ -497,40 +555,6 @@
    border-radius: 5px;
    background: white;
 }
-span.login {
-   font-family: sans-serif;
-   font-size: 0.5em;
-   float: right;
-   font-weight: 100;
-}
-span.login b {
-   margin-right: 5px;
-}
-h2 {
-   font-size: 1.5em;
-   font-weight: bold;
-   border-bottom: 1px dashed #666;
-   font-family: "Special Elite", cursive;
-   padding-bottom: 5px;
-}
-div.admin-submission {
-   padding: 15px 25px;
-   min-height: 600px;
-   background: white;
-   color: #444;
-   position: relative;
-}
-div.details {
-   margin: 20px 25px 0 25px;
-}
-div.details div {
-   margin-bottom: 3px;
-}
-div.details .value {
-   font-weight: 200;
-   color: #444;
-   vertical-align: text-top;
-}
 img.thumb {
    max-width: 250px;
    max-height: 250px;
@@ -546,32 +570,6 @@ div.thumb {
    margin-top: 20px;
    border-top: 1px solid #ccc;
    padding-top: 20px;
-}
-div.actions {
-   position: relative;
-   padding: 5px 0;
-   font-size: 0.9em;
-}
-div.actions button.admin.pure-button {
-   padding: 2px 10px;
-   margin: 0 4px;
-   opacity: 0.6;
-}
-div.actions button.admin.pure-button:hover {
-   opacity: 1;
-}
-div.actions button.admin.pure-button.delete {
-   background-color: firebrick;
-}
-div.buttons {
-   position: absolute;
-   right: 0;
-   top: 8px;
-}
-.error {
-   margin: 5px 0 10px 0;
-   color: firebrick;
-   font-style: italic;
 }
 table {
    width: 100%;
