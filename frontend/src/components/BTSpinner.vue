@@ -19,20 +19,18 @@
    </div>
 </template>
 
-<script>
-export default {
-   name: "BTSpinner",
-   props: {
-      message: {
-         type: String,
-         default: "",
-      },
-      overlay: {
-         type: Boolean,
-         default: false,
-      },
+<script setup>
+
+const props = defineProps({
+   message: {
+      type: String,
+      default: "",
    },
-};
+   overlay: {
+      type: Boolean,
+      default: false,
+   },
+})
 </script>
 
 <style lang="scss" scoped>

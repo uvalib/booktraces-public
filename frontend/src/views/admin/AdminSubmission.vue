@@ -1,76 +1,56 @@
 <template>
    <div class="admin-submission">
       <h2>
-         System Admin Panel
+         <span>System Admin Panel</span>
          <span class="login">
-            <b>Logged in as:</b>
-            {{loginName}}
+            <b>Logged in as:</b>{{admin.loginName}}
          </span>
       </h2>
-      <template v-if="loading">
-         <h1>Loading Details...</h1>
-      </template>
+      <BTSpinner v-if="system.loading==true" message="Loading details..." />
       <template v-else>
-         <div class="actions">
+         <div class="actions" v-if="!edit">
             <router-link to="/admin">
-               <i class="fas fa-arrow-left"></i>&nbsp;Back to Submissions
+               <i class="pi pi-arrow-left"></i>&nbsp;Back to Submissions
             </router-link>
-            <div v-if="!edit" class="buttons">
-               <button @click="editClicked" class="admin pure-button edit pure-button-primary">Edit</button>
-               <button
-                  v-if="!details.published"
-                  @click="publishClicked"
-                  class="admin pure-button publish pure-button-primary"
-               >Publish</button>
-               <button
-                  v-else
-                  @click="unpublishClicked"
-                  class="admin pure-button unpublish pure-button-primary"
-               >Unpublish</button>
-               <button
-                  @click="deleteClicked"
-                  class="admin pure-button delete pure-button-primary"
-               >Delete</button>
-            </div>
-            <div v-else class="buttons">
-               <button @click="saveClicked" class="admin pure-button pure-button-primary">Save</button>
-               <button @click="cancelClicked" class="admin pure-button pure-button-primary">Cancel</button>
+            <div class="buttons">
+               <AdminEditSubmission @save="saveEdits" :details="details.submission" />
+               <Button @click="togglePublish" size="small" :severity="publishSeverity" :label="publishLabel"/>
+               <Button size="small" label="Delete" @click="deleteSubmission" severity="danger"/>
             </div>
          </div>
-         <div class="error">{{error}}</div>
          <div v-if="!edit" class="details">
-            <table>
+            <table class="submit-info">
                <tr>
                   <td class="label">Visible to public:</td>
-                  <td class="value">{{published}}</td>
+                  <td class="value">{{ published }}</td>
                </tr>
                <tr>
                   <td class="label">Title:</td>
-                  <td class="value">{{details.title}}</td>
+                  <td class="value">{{details.submission.title}}</td>
                </tr>
                <tr>
                   <td class="label">Author:</td>
-                  <td class="value">{{details.author}}</td>
+                  <td class="value">{{details.submission.author}}</td>
                </tr>
                <tr>
                   <td class="label">Publication details:</td>
-                  <td class="value">{{details.publication}}</td>
+                  <td class="value">{{details.submission.publication}}</td>
                </tr>
                <tr>
                   <td class="label">Institution:</td>
-                  <td class="value">{{details.institution}}</td>
+                  <td class="value">{{details.submission.institution}}</td>
                </tr>
                <tr>
                   <td class="label">Call number:</td>
-                  <td class="value">{{details.callNumber}}</td>
+                  <td class="value">{{details.submission.callNumber}}</td>
                </tr>
                <tr>
                   <td class="label">Submitted by:</td>
-                  <td class="value">{{details.submitter}} ( {{details.email}} )</td>
+                  <td class="value">{{details.submission.submitter}} ( {{details.submission.email}} )</td>
                </tr>
                <tr>
                   <td class="label">Submitted on:</td>
-                  <td class="value">{{submitDate}}</td>
+                  <td class="value">{{ details.submission.submittedAt.split("T")[0] }}</td>
                </tr>
                <tr>
                   <td class="label">Tags:</td>
@@ -79,145 +59,62 @@
                <tr>
                   <td class="label">Description:</td>
                   <td class="value">
-                     <span v-html="formatDescription(details.description)"></span>
+                     <span v-html="description"></span>
                   </td>
                </tr>
             </table>
-         </div>
-         <div v-else class="edit details  pure-form">
-            <table style="width:75%; margin: 0 auto;">
-               <tr>
-                  <td class="label">Visible to public:</td>
-                  <td class="value">{{published}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Title:</td>
-                  <td class="value">
-                     <input id="title" type="text" v-model="editDetails.title" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Author:</td>
-                  <td class="value">
-                     <input id="author" type="text" v-model="editDetails.author" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Publication details:</td>
-                  <td class="value">
-                     <input id="publication" type="text" v-model="editDetails.publication" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Institution:</td>
-                  <td class="value">
-                     <multiselect v-model="selectedInstitution" class="folders"
-                        placeholder="Select or create an institution"
-                        :showLabels="false"
-                        :searchable="true"
-                        :taggable="true"
-                        track-by="id" label="name"
-                        tagPlaceholder="Press enter to create a new institution"
-                        @tag="addInstitution"
-                        :options="institutions">
-                     </multiselect>
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Call number:</td>
-                  <td class="value">
-                     <input id="callNumber" type="text" v-model="editDetails.callNumber" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Submitted by:</td>
-                  <td class="value">
-                     <input id="submitter" type="text" v-model="editDetails.submitter" />
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Submitted on:</td>
-                  <td class="value">{{submitDate}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Tags:</td>
-                  <td class="value" style="position:relative;">
-                     <div v-if="showTagList" class="source-tags">
-                        <p class="head">Available Tags</p>
-                        <div class="list">
-                           <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">
-                              {{tag.name}}
-                           </p>
-                        </div>
-                        <span @click="closeTagList" class="add-tag pure-button pure-button-primary">
-                           Done
-                        </span>
-                     </div>
-                     <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">
-                        Add
-                     </span>
-                     <span class="tag" v-for="(tag,idx) in editDetails.tags"
-                        :key="idx" @click="removeTag">
-                        {{tag}}
-                        <i class="fas fa-times-circle"></i>
-                     </span>
-                  </td>
-               </tr>
-               <tr>
-                  <td class="label">Description:</td>
-                  <td class="value">
-                     <textarea rows="5" id="description" v-model="editDetails.description"></textarea>
-                  </td>
-               </tr>
-            </table>
-         </div>
-         <div class="thumbs" v-if="edit == false">
-            <div class="thumb" v-for="(f,idx) in details.files" :key="idx">
-               <div class="zoom-wrap">
-                  <pinch-zoom v-bind:limitZoom="200">
-                     <img class="thumb" :src="`${f.url}?v=${Math.floor(Math.random() * 1000)}`" />
-                  </pinch-zoom>
-                  <p @click="rotateClicked(f.url)" class="pure-button rotate">Rotate Right</p>
-               </div>
-               <div class="transcriptions">
-                  <div class="transcription-title">
-                     <span class="head">Transcriptions</span>
-                     <span class="paging" v-if="f.transcriptions.length == 0">None</span>
-                     <span v-else class="paging">
-                        <i  @click="priorTran(f)" class="paging fas fa-chevron-left" :class="{disabled: transcriptionIdx == 0}"></i>
-                        <span>{{transcriptionIdx+1}} of {{f.transcriptions.length}}</span>
-                        <i @click="nextTran(f)" class="paging fas fa-chevron-right" :class="{disabled: transcriptionIdx == f.transcriptions.length-1}"></i>
-                     </span>
+            <div class="thumbs">
+               <div class="thumb" v-for="file in details.submission.files">
+                  <div class="zoom-wrap">
+                     <vue-image-zoomer :regular="file.url" :zoom-amount="4"/>
+                     <Button severity="info" label="Rotate Right" @click="rotateClicked(file.url)" />
                   </div>
-                  <div class="transcription-info" v-if="f.transcriptions.length > 0">
-                     <div>
-                        <label>Date:</label>
-                        <span class="data">{{getTranscribeDate(f)}}</span>
-                     </div>
-                     <div>
-                        <label>Submitter:</label>
-                        <span class="data">{{getTranscriber(f)}}</span>
-                     </div>
-                     <template v-if="editTrans">
-                        <textarea class="edit-trans" rows="3" v-model="workingTrans"></textarea>
-                        <div v-if="error" class="error">{{error}}</div>
-                        <div class="actions">
-                           <span class="buttons">
-                              <span @click="cancelEdit" class="pure-button trans">Cancel</span>
-                              <span @click="submitEdit(f)" class="pure-button trans">Submit</span>
+                  <div class="transcription-panel">
+                     <div class="head">Transcriptions</div>
+                     <div v-if="file.transcriptions.length == 0" class="none">None</div>
+                     <template v-else>
+                        <div class="transcribe-acts">
+                           <div class="buttons">
+                              <Button v-if="file.transcriptions[transcriptionIdx].approved==false" aria-label="approve transcription"
+                                 icon="pi pi-check-circle"  size="small" @click="approveTranscription(file)"/>
+                              <Button icon="pi pi-file-edit"  severity="secondary" size="small" @click="editTranscription(file)"/>
+                              <Button icon="pi pi-trash"  severity="danger" size="small" @click="deleteTranscription(file)"/>
+                           </div>
+                           <span class="paging">
+                              <Button icon="pi pi-chevron-left" rounded severity="secondary" size="small"
+                                 :disabled="transcriptionIdx == 0" @click="priorTran()"/>
+                              <span>{{transcriptionIdx+1}} of {{file.transcriptions.length}}</span>
+                              <Button icon="pi pi-chevron-right" rounded severity="secondary" size="small"
+                                 :disabled="transcriptionIdx == file.transcriptions.length-1" @click="nextTran(file)"/>
                            </span>
                         </div>
-                     </template>
-                     <template v-else>
-                        <pre class="transcription">{{f.transcriptions[transcriptionIdx].text}}</pre>
-                        <div class="actions">
-                           <span class="status">{{getTranscribeStatus(f)}}</span>
-                           <span class="buttons">
-                              <span @click="deleteTranscription(f)" class="pure-button trans">Delete</span>
-                              <span @click="editTranscription(f)" class="pure-button trans">Edit</span>
-                              <span v-if="f.transcriptions[transcriptionIdx].approved==false" @click="approveTranscription(f)"
-                                 class="pure-button trans">Approve</span>
-                           </span>
+                        <div class="transcription-info" v-if="file.transcriptions.length > 0">
+                           <table>
+                              <tr>
+                                 <td class="label">Date:</td>
+                                 <td>{{ getTranscribeDate(file) }}</td>
+                              </tr>
+                              <tr>
+                                 <td class="label">Submitter:</td>
+                                 <td>{{ getTranscriber(file) }}</td>
+                              </tr>
+                              <tr>
+                                 <td class="label">Status:</td>
+                                 <td>{{ getTranscribeStatus(file) }}</td>
+                              </tr>
+                           </table>
+                           <div class="edit-trans" v-if="editTrans">
+                              <Textarea id="description" v-model="workingTrans" rows="4" />
+                              <div class="actions">
+                                 <span class="buttons">
+                                    <Button severity="secondary" label="Cancel" @click="cancelEditTranscription" />
+                                    <Button severity="info" label="Submit" @click="submitEditTranscription(file)" />
+                                 </span>
+                              </div>
+                           </div>
+                           <template v-else>
+                              <pre class="transcription">{{file.transcriptions[transcriptionIdx].text}}</pre>
+                           </template>
                         </div>
                      </template>
                   </div>
@@ -228,481 +125,379 @@
    </div>
 </template>
 
-<script>
-import { mapState } from "vuex";
-import { mapGetters } from "vuex";
-import Multiselect from "vue-multiselect";
-export default {
-   name: "admin-submission",
-   components: {
-      Multiselect
-   },
-   data: function() {
-      return {
-         editTrans: false,
-         workingTrans: "",
-         edit: false,
-         editDetails: null,
-         showTagList: false,
-         selectedInstitution: null,
-         transcriptionIdx: 0
-      };
-   },
-   computed: {
-      ...mapState({
-         details: state => state.submissionDetail,
-         loading: state => state.loading,
-         error: state => state.error,
-         tags: state => state.tags,
-         institutions: state => state.institutions
-      }),
-      ...mapGetters({
-         loginName: "admin/loginName"
-      }),
-      submitDate() {
-         return this.details.submittedAt.split("T")[0];
-      },
-      hasError() {
-         return this.$store.getters.hasError;
-      },
-      published() {
-         if (this.details.published) {
-            return "YES";
-         } else {
-            return "NO";
-         }
-      },
-      submissionTagCSV() {
-         if (this.details.tags) {
-            return this.details.tags.join(", ");
-         }
-         return "";
-      }
-   },
-   methods: {
-      cancelEdit() {
-         this.editTrans = false
-         this.workingTrans = ""
-      },
-      async submitEdit(f) {
-         let data = {submissionID: this.details.id,
-            fileID: f.id,
-            transcriptionID: f.transcriptions[this.transcriptionIdx].id,
-            transcription: this.workingTrans}
-         await this.$store.dispatch("transcribe/update", data)
-         if (this.error == "" || this.error == null) {
-            this.editTrans = false
-            this.workingTrans = ""
-         }
-      },
-      approveTranscription(f) {
-         let t = f.transcriptions[this.transcriptionIdx]
-         this.$store.dispatch("transcribe/approve", t.id)
-      },
-      editTranscription(f) {
-         this.editTrans = true
-         this.workingTrans = f.transcriptions[this.transcriptionIdx].text
-      },
-      deleteTranscription(f) {
-         let resp = confirm("Are you sure you want to delete this transcrption?")
-         if (resp) {
-            let t = f.transcriptions[this.transcriptionIdx]
-            this.$store.dispatch("transcribe/delete", t.id)
-            this.transcriptionIdx = 0
-         }
-      },
-      getTranscribeStatus(f) {
-         if (f.transcriptions.length == 0) return ""
-         let t = f.transcriptions[this.transcriptionIdx]
-         if (t.approved) {
-            return "Approved"
-         }
-         return "Pending"
-      },
-      getTranscribeDate(f) {
-         if (f.transcriptions.length == 0) return ""
-         let t = f.transcriptions[this.transcriptionIdx]
-         return t.transcribed_at.split("T")[0]
-      },
-      getTranscriber(f) {
-         if (f.transcriptions.length == 0) return ""
-         let t = f.transcriptions[this.transcriptionIdx]
-         return `${t.transcriber_email} (${t.transcriber})`
-      },
-      nextTran(f) {
-         if (this.transcriptionIdx == f.transcriptions.length -1) {
-            return
-         }
-         this.transcriptionIdx++
-      },
-      priorTran(_f) {
-         if (this.transcriptionIdx == 0) {
-            return
-         }
-         this.transcriptionIdx--
-      },
-      addInstitution(newInstitutionName) {
-         this.$store
-            .dispatch("addInstitution", newInstitutionName)
-            .then(() => {
-               this.institutions.some(i => {
-                  if (i.name == newInstitutionName) {
-                     this.selectedInstitution = i
-                     return true;
-                  }
-                  return false;
-               })
-            })
-            .catch(error => {
-               // TODO something else maybe?
-               alert(error)
-            });
-      },
-      formatDescription(desc) {
-         let out = desc
-            .replace(/\r|\r\n/gm, "\n")
-            .replace(/\n+/gm, "<br/><br/>");
-         return out;
-      },
-      addTag(event) {
-         let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-         if (this.editDetails.tags.includes(addTag)) {
-            return;
-         }
-         this.editDetails.tags.push(addTag);
-      },
-      closeTagList() {
-         this.showTagList = false;
-      },
-      removeTag(event) {
-         let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-         var delIdx = -1;
-         this.editDetails.tags.some(function(tag, idx) {
-            if (tag == delTag) {
-               delIdx = idx;
-               return true;
-            }
-            return false;
-         });
-         this.editDetails.tags.splice(delIdx, 1);
-      },
-      rotateClicked(imgURL) {
-         this.$store.dispatch("admin/rotateImage", {
-            submissionID: this.details.id,
-            imgURL: imgURL
-         });
-      },
-      addTagClicked() {
-         this.showTagList = true;
-      },
-      deleteClicked() {
-         let resp = confirm(
-            "Delete this submission? All data and unloaded files will be permanently lost. Are you sure?"
-         );
-         if (resp) {
-            this.$store.dispatch("admin/deleteSubmission", {
-               id: this.details.id,
-               backToIndex: true
-            });
-         }
-      },
-      editClicked() {
-         this.editDetails = Object.assign({}, this.details);
-         this.edit = true;
-         this.institutions.some(i => {
-            if (i.name == this.editDetails.institution) {
-               this.selectedInstitution = i
-               return true
-            }
-            return false
-         })
-      },
-      saveClicked() {
-         this.editDetails.institution_id = this.selectedInstitution.id
-         this.editDetails.institution = this.selectedInstitution.name
-         this.$store
-            .dispatch("admin/updateSubmission", this.editDetails)
-            .then((/*response*/) => {
-               this.edit = false;
-               this.editDetails = null;
-            });
-      },
-      cancelClicked() {
-         this.edit = false;
-      },
-      publishClicked() {
-         this.$store.dispatch("admin/updatePublicationStatus", {
-            id: this.details.id,
-            public: true
-         });
-      },
-      unpublishClicked() {
-         this.$store.dispatch("admin/updatePublicationStatus", {
-            id: this.details.id,
-            public: false
-         });
-      }
-   },
-   created() {
-      this.$store.dispatch("getSubmissionDetail", this.$route.params.id)
-      this.$store.dispatch("getTags")
-      this.$store.dispatch("getInstitutions")
+<script setup>
+import { onMounted, ref, computed } from 'vue'
+import { useAdminStore } from "@/stores/admin"
+import { useSystemStore } from "@/stores/system"
+import { useDetailsStore } from "@/stores/details"
+import { useRoute, useRouter } from 'vue-router'
+import { useConfirm } from "primevue/useconfirm"
+import AdminEditSubmission from "@/components/AdminEditSubmission.vue"
+import Textarea from 'primevue/textarea'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
+const confirm = useConfirm()
+const system = useSystemStore()
+const admin = useAdminStore()
+const details = useDetailsStore()
+const route = useRoute()
+const router = useRouter()
+
+const edit = ref(false)
+const editTrans = ref(false)
+const workingTrans = ref("")
+const transcriptionIdx = ref(0)
+
+const published = computed(() => {
+   if (details.submission.published) return "YES"
+   return "NO"
+})
+
+const submissionTagCSV = computed(() => {
+   if (details.submission.tags) {
+      return details.submission.tags.join(", ")
    }
-};
+   return ""
+})
+
+const description = computed(() => {
+   return details.submission.description.replace(/\r|\r\n/gm, "\n").replace(/\n+/gm, "<br/><br/>")
+})
+const publishLabel = computed(() => {
+   if ( details.submission.published) return "Unpublish"
+   return  "Publish"
+ })
+ const publishSeverity = computed(() => {
+   if ( details.submission.published) return "secondary"
+   return  "primary"
+ })
+
+onMounted(() => {
+   details.getSubmission( route.params.id )
+   system.getTags()
+   system.getInstitutions()
+})
+
+const saveEdits = ( async ( edits ) => {
+   await admin.updateSubmission( details.submission.id, edits )
+   details.getSubmission( details.submission.id )
+})
+
+const togglePublish = ( () => {
+   let act = "Publish"
+   if (details.submission.published) {
+      act = "Unpublish"
+   }
+   confirm.require({
+      message: `${act} this submission?`,
+      header: `Confirm ${act}`,
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: act
+      },
+      accept: async () => {
+         await admin.updatePublicationStatus(details.submission.id, !details.submission.published )
+         details.submission.published = !details.submission.published
+      }
+   })
+})
+
+const deleteSubmission = ( () => {
+   confirm.require({
+      message: 'Delete this submission?<br/>All data and unloaded files will be permanently lost.<br/><br/>Are you sure?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: async () => {
+         await admin.deleteSubmission(details.submission.id)
+         router.push("/admin/submissions")
+      }
+   })
+})
+
+const rotateClicked = ( async (imgURL) => {
+   await admin.rotateImage( details.submission.id, imgURL)
+   toast.add({
+      severity: 'success', summary: 'Rotate Success',
+      detail: 'The image has been rotated, but is cached in your browser. Wait a few seconds, clear the cache and reload the page to see the rotated image.' })
+})
+
+const nextTran = (( image ) => {
+   transcriptionIdx.value++
+})
+const priorTran = (() => {
+   transcriptionIdx.value--
+})
+const getTranscribeDate = ((f) => {
+   if (f.transcriptions.length == 0) return ""
+   let t = f.transcriptions[transcriptionIdx.value]
+   return t.transcribed_at.split("T")[0]
+})
+const getTranscriber = ((f) => {
+   if (f.transcriptions.length == 0) return ""
+   let t = f.transcriptions[transcriptionIdx.value]
+   return `${t.transcriber_email} (${t.transcriber})`
+})
+const getTranscribeStatus = ((f) => {
+   if (f.transcriptions.length == 0) return ""
+   let t = f.transcriptions[transcriptionIdx.value]
+   if (t.approved) {
+      return "Approved"
+   }
+   return "Pending"
+})
+const editTranscription = ((image) => {
+   editTrans.value = true
+   workingTrans.value = image.transcriptions[transcriptionIdx.value].text
+})
+const cancelEditTranscription = (() => {
+   editTrans.value = false
+   workingTrans.value = ""
+})
+const submitEditTranscription = ( async (image) => {
+   let trans = image.transcriptions[transcriptionIdx.value]
+   await admin.updateTranscription(details.submission.id, trans.id, workingTrans.value)
+   if (admin.error != "" ) {
+      toast.add( {severity: 'error', summary: 'Updae failed',
+         detail: `Unable to update transcription: ${admin.error}`})
+   } else {
+      editTrans.value = false
+      trans.text = workingTrans.value
+      workingTrans.value = ""
+      toast.add( {severity: 'success', summary: 'Updated',
+                  detail: `Transcription has been updated`, life: 3000})
+   }
+})
+const deleteTranscription = ((image) => {
+   confirm.require({
+      message: 'Delete this transcription?<br/>All data will be permanently lost.<br/><br/>Are you sure?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: async () => {
+         let transcription = image.transcriptions[transcriptionIdx.value]
+         if ( transcription ) {
+            await admin.deleteTranscription(details.submission.id, transcription.id)
+            if ( admin.error == "") {
+               image.transcriptions.splice(transcriptionIdx.value, 1)
+               transcriptionIdx.value = 0
+               toast.add( {severity: 'success', summary: 'Updated',
+                  detail: `Transcription has been deleted`, life: 3000})
+            } else {
+               toast.add( {severity: 'error', summary: 'Delete failed',
+                  detail: `Unable to delete transcription: ${admin.error}`})
+            }
+         }
+      }
+   })
+})
+
+const approveTranscription = ( async (image) => {
+   let t = image.transcriptions[transcriptionIdx.value]
+   await admin.approveTranscription(details.submission.id, t.id)
+   if ( admin.error == "") {
+      image.transcriptions.forEach(trans => trans.approved = false)
+      t.approved = true
+      toast.add( {severity: 'success', summary: 'Approved',
+         detail: `Transcription has been approved and will be visisble to the public`, life: 3000})
+   } else {
+      toast.add( {severity: 'error', summary: 'Delete failed',
+         detail: `Unable to approve transcription: ${admin.error}`})
+   }
+})
 </script>
 
-<style scoped>
-.edit-trans {
-   box-sizing: border-box;
-   width: 100%;
-   border-color: #ccc;
-}
-.source-tags {
-   position: absolute;
-   left: -100px;
-   top: -100px;
-   width: 175px;
-   font-size: 0.9em;
-   border: 1px solid #cccc;
-   display: inline-block;
-   box-shadow: 2px 2px 10px #aaa;
-   border-radius: 10px;
-   text-align: center;
-   background: #efefef;
-   padding-bottom: 10px;
-}
-.source-tags p.head {
-   padding: 4px 20px;
-   font-weight: bold;
-   margin: 0;
-   background: #888;
-   border-radius: 10px 10px 0 0;
-   text-align: center;
-   color: white;
-}
-.source-tags p {
-   margin: 2px 0;
-}
-.source-tags p:hover {
-   cursor: pointer;
-   text-decoration: underline;
-}
-.source-tags .list {
-   margin: 10px;
-   max-height: 150px;
-   overflow: scroll;
-   text-align: left;
-   border: 1px solid #ccc;
-   padding: 5px;
-   border-radius: 5px;
-   background: white;
-}
-span.login {
-   font-family: sans-serif;
-   font-size: 0.5em;
-   float: right;
-   font-weight: 100;
-}
-span.login b {
-   margin-right: 5px;
-}
-h2 {
-   font-size: 1.5em;
-   font-weight: bold;
-   border-bottom: 1px dashed #666;
-   font-family: "Special Elite", cursive;
-   padding-bottom: 5px;
-}
+<style scoped lang="scss">
 div.admin-submission {
-   padding: 15px 25px;
    min-height: 600px;
    background: white;
    color: #444;
-   position: relative;
+
+   h3 {
+      margin-bottom: 10px;
+   }
+   h2 {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 1.5em;
+      font-weight: bold;
+      border-bottom: 1px dashed #666;
+      font-family: 'Special Elite', cursive;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      .login {
+         color: #999;
+         font-family: sans-serif;
+         font-size: 0.8em;
+         float: right;
+         font-weight: normal;
+         b {
+            color: #444;
+            margin-right: 10px;
+         }
+      }
+   }
+   .edit-trans {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+   }
+   .error {
+      color: firebrick;
+      padding: 5px 10px;
+      background-color: #ffeded;
+      border: 2px solid firebrick;
+      border-radius: 5px;
+      margin: 10px 0 20px 0;
+   }
+   .buttons {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 10px;
+   }
+   div.actions, .transcribe-acts {
+      padding: 10px;
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-content: center;
+      gap: 20px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 15px;
+   }
+   .paging {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      gap: 10px;
+   }
+   div.details {
+      margin: 0 25px 0 25px;
+   }
+   .thumbs {
+      border-top: 1px solid #ddd;
+      margin-top: 20px;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      div.thumb {
+         padding-bottom: 20px;
+         border-bottom: 1px solid #ccc;
+         display: flex;
+         flex-flow: row wrap;
+         align-items: stretch;
+         justify-content: flex-start;
+         gap: 15px;
+         div.zoom-wrap {
+            flex:1;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: stretch;
+            align-items: stretch;
+            gap: 15px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+         }
+      }
+      div.transcription-panel {
+         flex:1;
+         margin: 0;
+         border: 1px solid #ddd;
+         border-radius: 4px;
+         .none {
+            font-size: 1.3em;
+            text-align: center;
+            margin: 15% auto;
+         }
+         .head {
+            background: #fafafa;
+            padding: 5px 10px;
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #ccc;
+            border-radius: 4px 4px 0 0;
+         }
+      }
+   }
 }
-div.details {
-   margin: 20px 25px 0 25px;
-}
-div.details div {
-   margin-bottom: 3px;
-}
-div.details .value {
-   font-weight: 200;
-   color: #444;
-   vertical-align: text-top;
-}
-img.thumb {
-   max-width: 250px;
-   max-height: 250px;
-   display: block;
-}
-div.thumb {
-   display: block;
-   margin: 5px 10px;
-   display: flex;
-   flex-flow: row wrap;
-}
-.thumbs {
-   margin-top: 20px;
-   border-top: 1px solid #ccc;
-   padding-top: 20px;
-}
-div.actions {
-   position: relative;
-   padding: 5px 0;
-   font-size: 0.9em;
-}
-div.actions button.admin.pure-button {
-   padding: 2px 10px;
-   margin: 0 4px;
-   opacity: 0.6;
-}
-div.actions button.admin.pure-button:hover {
-   opacity: 1;
-}
-div.actions button.admin.pure-button.delete {
-   background-color: firebrick;
-}
-div.buttons {
-   position: absolute;
-   right: 0;
-   top: 8px;
-}
-.error {
-   margin: 5px 0 10px 0;
-   color: firebrick;
-   font-style: italic;
-}
-table {
-   width: 100%;
-}
-td {
-   padding: 2px 0;
-}
-td.label {
-   width: 150px;
-   text-align: right;
-   font-weight: bold;
-   color: #444;
-   padding: 0 10px 0 0;
-   vertical-align: text-top;
-}
-td input {
-   border: 1px solid #ccc;
-   width: 100%;
-   outline: none;
-   box-sizing: border-box;
-}
-td textarea {
-   display: block;
-   border: 1px solid #ccc;
-   width: 90%;
-}
-span.add-tag.pure-button {
-   margin-right: 10px;
-   padding: 1px 20px 0px 20px;
-   font-size: 0.9em;
-}
-span.tag {
-   cursor: pointer;
-   padding: 1px 4px 0px 12px;
-   display: inline-block;
-   border: 1px solid #ccc;
-   border-radius: 20px;
-   margin-right: 5px;
-   font-size: 0.9em;
-}
-i.fas.fa-times-circle {
-   color: firebrick;
-   margin-left: 5px;
-}
-p.pure-button.rotate {
-   padding: 4px 20px;
-   margin: 5px 0 0 0;
-   width: 100%;
-}
-div.transcriptions {
-   margin-left: 10px;
-   border: 1px solid #ccc;
-   position: relative;
-}
-div.transcription-title{
-   margin:0 0 10px 0;
-   padding: 4px 8px;
-   border-bottom: 1px solid #ccc;
-   display: flex;
-   flex-flow: row nowrap;
-}
-div.transcription-title .head {
-   font-size: 1.15em;
-   font-weight: bold;
-}
-.transcription-info {
-   margin: 10px;
-   padding-bottom: 50px;
-}
-.transcription-info .actions {
-   padding: 5px 5px 5px 10px;
-   border-top: 1px solid #ccc;
-   display: flex;
-   flex-flow: row nowrap;
-   position: absolute;
-   bottom:0;
-   left:0;
-   right:0;
-   align-items: center;;
-}
-.transcription-info .buttons {
-   margin-left: auto;
-}
-.transcription-info .buttons {
-   margin-left: auto;
-}
-.transcription-info .buttons .trans {
-   margin-left: 10px;
-}
-.transcription-info label {
-   font-weight: bold;
-   margin-right: 10px;
-}
-i.paging {
-   margin: 0 10px;
-   cursor: pointer;
-}
-i.paging.disabled {
-   opacity: 0.2;
-   cursor: default;
-}
-.paging {
-   margin-left: auto;
-}
-pre {
-   font-size: 0.9em;
-   font-family: sans-serif;
+
+pre.transcription  {
+   margin: 15px;
+   padding: 20px;
+   border: 1px solid #ddd;
+   border-radius: 4px;
    white-space: pre-wrap;       /* Since CSS 2.1 */
    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
    white-space: -pre-wrap;      /* Opera 4-6 */
    white-space: -o-pre-wrap;    /* Opera 7 */
-}@media only screen and (min-width: 768px) {
-   .zoom-wrap {
-      flex-basis: 45%;
-      max-width: 45%;
-      margin-right: 15px;
+   word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+table {
+   width: 100%;
+   td {
+      padding: 2px 0;
    }
-   div.transcriptions {
-      flex-basis: 50%;
+   td.label {
+      width: 150px;
+      text-align: right;
+      font-weight: bold;
+      color: #444;
+      padding: 0 10px 0 0;
+      vertical-align: text-top;
+      white-space:  nowrap;
+   }
+}
+
+@media only screen and (min-width: 768px) {
+   .zoom-wrap {
       max-width: 50%;
+   }
+   div.transcription-panel {
+      max-width: 50%;
+   }
+   .admin-submission {
+      padding: 15px 25px;
    }
 }
 @media only screen and (max-width: 768px) {
    .zoom-wrap {
-      flex-basis: 95%;
-      max-width: 95%;
-      margin-bottom: 15px;
+      max-width: 100%;
    }
-   div.transcriptions {
-      flex-basis: 95%;
-      max-width: 95%;
+   div.transcription-panel {
+      max-width: 100%;
+   }
+   .admin-submission {
+      padding: 10px;
    }
 }
 </style>

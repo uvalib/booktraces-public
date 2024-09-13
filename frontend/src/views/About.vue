@@ -110,11 +110,7 @@
    </div>
 </template>
 
-<script>
-export default {
-   name: "about",
-   methods: {}
-};
+<script setup>
 </script>
 
 <style scoped>

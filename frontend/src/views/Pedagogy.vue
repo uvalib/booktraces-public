@@ -2,15 +2,14 @@
    <div class="content pedagogy">
       <h2>
          <span>Pedagogy</span>
-         <span v-if="loading==false && document.key != 'index'" class="back-link">
-            <router-link to="/pedagogy"><i class="fas fa-arrow-left"></i>Back</router-link>
-         </span>
       </h2>
-      <BTSpinner v-if="loading==true" message="Loading pedagogy content..." />
+      <Button v-if="system.loading==false && system.document != null && system.document.key != 'index'" rounded
+         text icon="pi pi-arrow-left" label="Back" class="back" @click="backClicked" />
+      <BTSpinner v-if="system.loading==true" message="Loading pedagogy content..." />
       <div v-else class="pedagogy-content">
-         <template v-if="document != null">
-            <h3 v-if="document.key != 'index'">{{document.title}}</h3>
-            <div @click="docClicked" class="text" v-html="document.content"></div>
+         <template v-if="system.document != null">
+            <h3 v-if="system.document.key != 'index'">{{system.document.title}}</h3>
+            <div @click="docClicked" class="text" v-html="system.document.content"></div>
          </template>
          <div class="not-found" v-else>
             <h4>Page Not Found!</h4>
@@ -22,56 +21,54 @@
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-export default {
-   name: "pedagogy",
-   computed: {
-      ...mapState({
-         document: state => state.pedagogy.document,
-         loading: state => state.loading
-      })
-   },
-   watch: {
-        $route() {
-           // this is needed to load details when a grouped image thumb has been clicked; new content
-           // needs to be loaded, but the page remains the same (create not called)
-           this.getDocument()
-        }
-   },
-   methods: {
-      async getDocument() {
-         let docKey = this.$route.params.id
-         if (!docKey) {
-            docKey = "index"
-         }
-         await this.$store.dispatch('pedagogy/get', docKey)
-      },
-      docClicked(event) {
-         if (event.target.className == 'pedagogy-link') {
-            let docID = event.target.dataset.link
-            if (docID) {
-               this.$router.push(`/pedagogy/${docID}`)
-            }
-         }
+<script setup>
+import { onMounted } from 'vue'
+import { useSystemStore } from "@/stores/system"
+import { useRoute, useRouter } from 'vue-router'
+
+const system = useSystemStore()
+const route = useRoute()
+const router = useRouter()
+
+onMounted( async () => {
+   await getDocument( route.params.id)
+})
+
+const getDocument = ( async (docKey) => {
+   if (!docKey) {
+      docKey = "index"
+   }
+   await system.getPedagogyDocument( docKey )
+})
+
+const backClicked = (() => {
+   getDocument( 'index' )
+   router.replace('/pedagogy')
+})
+
+const docClicked = ((event) => {
+   if (event.target.className == 'pedagogy-link') {
+      let docKey = event.target.dataset.link
+      if (docKey) {
+         getDocument( docKey )
+         router.replace(`/pedagogy/${docKey}`)
       }
-   },
-   mounted() {
-      this.getDocument()
-   },
-};
+   }
+})
+
 </script>
 
 <style lang="scss" scoped>
 .content.pedagogy {
+   .back {
+      position: absolute;
+      right: 5px;
+   }
    h2 {
       display: flex;
       flex-flow: row wrap;
       justify-content: space-between ;
       align-content: center;
-      .back-link {
-         font-size: 0.6em;;
-      }
       span {
          display: inline-block;
       }
@@ -87,51 +84,63 @@ export default {
       padding: 10px;
    }
 }
-::v-deep p,  ::v-deep ul{
+:deep(p),  :deep(ul){
    margin: 0 0;
 }
-::v-deep div.text  a {
-   color: #24890d !important;
-   font-weight: 500 !important;
-   text-decoration: none !important;
-   cursor: pointer !important;
-}
-::v-deep div.text  .pedagogy-link {
-   color: #24890d !important;
-   font-weight: 500 !important;
-   text-decoration: none !important;
-   cursor: pointer !important;
-   &:hover {
+:deep(div.text) {
+   .pedagogy-link {
+      color: #24890d !important;
+      font-weight: 500 !important;
+      text-decoration: none !important;
+      cursor: pointer !important;
+      &:hover {
+         text-decoration: underline !important;
+      }
+   }
+   a {
+      color: #24890d !important;
+      font-weight: 500 !important;
+      text-decoration: none !important;
+      cursor: pointer !important;
+   }
+   a:hover {
       text-decoration: underline !important;
    }
 }
-::v-deep div.text  a:hover {
-   text-decoration: underline !important;
-}
-::v-deep .ql-align-center {
+:deep(.ql-align-center) {
    text-align: center;
 }
-::v-deep .ql-align-right {
+:deep(.ql-align-right) {
    text-align: right;
 }
-::v-deep blockquote {
+:deep(blockquote) {
   border-left: 6px solid #ccc;
   margin: 0;
   padding-left: 25px;
 }
-::v-deep .ql-indent-1 {
+:deep(.ql-indent-1) {
    margin-left: 20px;
 }
-::v-deep .ql-indent-2 {
+:deep(.ql-indent-2) {
    margin-left: 40px;
 }
-::v-deep .ql-indent-3 {
+:deep(.ql-indent-3) {
    margin-left: 60px;
 }
-::v-deep .ql-indent-4 {
+:deep(.ql-indent-4) {
    margin-left: 80px;
 }
-::v-deep .ql-indent-5 {
+:deep(.ql-indent-5) {
    margin-left: 100px;
+}
+@media only screen and (min-width: 768px) {
+   .back {
+      top: 10px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .back {
+      top: 2px;
+   }
 }
 </style>

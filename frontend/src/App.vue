@@ -1,63 +1,55 @@
 <template>
-   <div id="app">
-      <BookTracesHeader/>
-      <template v-if="adminMode">
-         <router-view/>
-      </template>
-      <template v-else>
-         <div class="main pure-g">
-            <div class="pure-u-1-6">
-               <BookTracesSidebar/>
-            </div>
-            <div class="pure-u-5-6 bkg">
-               <BookTracesSearch/>
-               <router-view/>
-            </div>
+   <ConfirmDialog position="top" :closable="false">
+      <template #message="slotProps">
+         <div class="confirm">
+            <i :class="slotProps.message.icon" class="warn"></i>
+            <div v-html="slotProps.message.message"></div>
          </div>
       </template>
-      <BookTracesFooter/>
-   </div>
+   </ConfirmDialog>
+   <Toast position="top-center" />
+   <BookTracesHeader/>
+   <template v-if="system.adminMode">
+      <router-view/>
+   </template>
+   <template v-else>
+      <div class="main">
+         <div class="pure-u-1-6">
+            <BookTracesSidebar/>
+         </div>
+         <div class="pure-u-5-6 bkg">
+            <BookTracesSearch/>
+            <router-view/>
+         </div>
+      </div>
+   </template>
+   <BookTracesFooter/>
 </template>
 
+<script setup>
+import BookTracesSearch from "@/components/BookTracesSearch.vue"
+import BookTracesSidebar from "@/components/BookTracesSidebar.vue"
+import BookTracesHeader from "@/components/BookTracesHeader.vue"
+import BookTracesFooter from "@/components/BookTracesFooter.vue"
+import { useSystemStore } from "@/stores/system"
+import Toast from 'primevue/toast'
 
-<script>
-import BookTracesSearch from "@/components/BookTracesSearch"
-import BookTracesSidebar from "@/components/BookTracesSidebar"
-import BookTracesHeader from "@/components/BookTracesHeader"
-import BookTracesFooter from "@/components/BookTracesFooter"
-import { mapGetters } from "vuex"
-import { mapState } from 'vuex'
+const system = useSystemStore()
 
-export default {
-   components: {
-      BookTracesSearch,
-      BookTracesHeader,
-      BookTracesSidebar,
-      BookTracesFooter
-   },
-   computed: {
-      ...mapGetters({
-         isAuthenticated: "admin/isAuthenticated"
-      }),
-      ...mapState({
-         adminMode: state => state.adminMode,
-      })
-   },
-   data: function() {
-      return {}
-   },
-};
 </script>
 
 <style>
-.tweet-not-found {
-   color: #fe6d6d;
-   font-size: 0.9em;
-   padding: 2px 5px 2px 10px;
-}
 @media only screen and (max-width: 1050px) {
    #app .main div.pure-u-5-6.bkg {
       width: 100%;
+   }
+   #app div.content {
+      margin: 25px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   #app div.content {
+      margin: 0 !important;
    }
 }
 html,
@@ -65,17 +57,17 @@ body {
    margin: 0;
    padding: 0;
    /* background-image: url(./assets/main-bkg.jpg); */
-   background-color: black;
+   background-color: #222;
 }
-#app .main { 
+#app .main {
    padding-top:0;
 }
 #app {
    font-family: "Avenir", Helvetica, Arial, sans-serif;
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
-   background-color: black;
-   border-right: 1px solid black;
+   background-color: #222;
+   border-right: 1px solid #222;
 }
 #app h2 {
    margin: 0;
@@ -108,8 +100,7 @@ div.bkg {
    background: white;
    font-weight: 400;
    color: #444;
-   border: 1px solid black;
-   /* width: 80%; */
+   border: 1px solid #222;
    margin: 25px;
 }
 #app .content h2 {
@@ -120,22 +111,20 @@ div.bkg {
    padding-bottom: 5px;
    margin-bottom: 15px;
 }
-#customdropzone .dz-preview {
-   display: inline-block;
-   background: transparent;
-   margin: 5px;
+td.nowrap {
+   white-space: nowrap;
 }
-#customdropzone .dz-preview .dz-details {
-   background-color: rgba(64, 64, 64, 0.5);
-   transition: none;
-}
-#customdropzone .dz-preview .dz-image {
-   width: 150px;
-   height: 150px;
-   border-radius: 50%;
-}
-#app a.dz-remove {
-   color: white;
+.confirm {
+   display: flex;
+   flex-flow: row nowrap;
+   justify-content: flex-start;
+   align-items: flex-start;
+   gap: 20px;
+   .warn {
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+   }
 }
 </style>
 

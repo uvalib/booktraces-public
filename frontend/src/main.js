@@ -1,21 +1,49 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import { createApp, markRaw } from 'vue'
+import { createPinia } from 'pinia'
+import App from '@/App.vue'
+import router from '@/router'
 
-import BTSpinner from "@/components/BTSpinner"
-Vue.component('BTSpinner', BTSpinner)
+const app = createApp(App)
 
-import PinchZoom from 'vue-pinch-zoom'
-Vue.component('pinch-zoom', PinchZoom)
+const pinia = createPinia()
+pinia.use(({ store }) => {
+   // all stores can access router with this.router
+   store.router = markRaw(router)
+})
 
-import VueCookies from 'vue-cookies'
-Vue.use(VueCookies)
+// bind store and router to all componens as $store and $router
+app.use(pinia)
+app.use(router)
 
-Vue.config.productionTip = false
+import BTSpinner from "@/components/BTSpinner.vue"
+app.component('BTSpinner', BTSpinner)
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+import VueImageZoomer from 'vue-image-zoomer'
+import 'vue-image-zoomer/dist/style.css'
+app.use(VueImageZoomer)
+
+// Primevue setup
+import PrimeVue from 'primevue/config'
+import BookTraces from '@/assets/theme/booktraces'
+import 'primeicons/primeicons.css'
+import Button from 'primevue/button'
+import ConfirmationService from 'primevue/confirmationservice'
+import ToastService from 'primevue/toastservice'
+import ConfirmDialog from 'primevue/confirmdialog'
+
+app.use(ToastService)
+app.use(ConfirmationService)
+app.component("Button", Button)
+app.component("ConfirmDialog", ConfirmDialog)
+
+app.use(PrimeVue, {
+   theme: {
+      preset: BookTraces,
+      options: {
+         prefix: 'p',
+         darkModeSelector: '.bt-dark'
+      }
+   }
+})
+
+app.mount('#app')

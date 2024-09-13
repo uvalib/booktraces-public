@@ -1,0 +1,21 @@
+#app {
+   button.p-button {
+      white-space: nowrap;
+   }
+
+   div.p-panel-header {
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 10px;
+   }
+}
+
+.p-dialog-mask {
+   .p-dialog {
+      .p-dialog-header {
+         background: #C8F2F4;
+         border-bottom: 1px solid #5BD7DE;
+         border-radius: 4px 4px 0 0;
+         margin-bottom: 15px;
+      }
+   }
+}

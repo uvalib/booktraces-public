@@ -5,9 +5,9 @@
             <span class="site-name">Book Traces</span>
          </router-link>
       </div>
-      <div v-if="!adminMode" class="pure-menu pure-menu-horizontal menubar">
+      <div v-if="!system.adminMode" class="pure-menu pure-menu-horizontal menubar">
          <ul class="pure-menu-list">
-            <li @click="adminClicked" v-bind:class="{active: adminMode}" class="pure-menu-item admin">Admin</li>
+            <li @click="adminClicked" v-bind:class="{active: system.adminMode}" class="pure-menu-item admin">Admin</li>
             <li class="pure-menu-item"><router-link to="/" exact>Home</router-link></li>
             <li class="pure-menu-item"><router-link to="/about">About</router-link></li>
             <li class="pure-menu-item"><router-link to="/press">Press</router-link></li>
@@ -18,7 +18,7 @@
             <li class="pure-menu-item"><router-link to="/submit">Submit a Book</router-link></li>
          </ul>
          <span @click="showSearchClick" class="search">
-            <i v-bind:class="{selected: showSearch}" class="fas fa-search"></i>
+            <i v-bind:class="{selected: submissionsStore.showSearch}" class="pi pi-search"></i>
          </span>
       </div>
       <div v-else class="pure-menu pure-menu-horizontal menubar">
@@ -30,10 +30,10 @@
             <li class="pure-menu-item"><router-link to="/admin/pedagogy">Pedagogy</router-link></li>
          </ul>
       </div>
-      <div  v-if="!adminMode" class="hmenu">
-         <div @click="toggleHMenu" class="hmenu-button"><i class="fas fa-bars"></i></div>
+      <div  v-if="!system.adminMode" class="hmenu">
+         <div @click="toggleHMenu" class="hmenu-button"><i class="pi pi-bars"></i></div>
          <ul id="hmenu" class="hmenu-items hidden">
-            <li @click="adminClicked" v-bind:class="{active: adminMode}" class="admin">Admin</li>
+            <li @click="adminClicked" v-bind:class="{active: system.adminMode}" class="admin">Admin</li>
             <li @click="toggleHMenu"><router-link to="/" exact>Home</router-link></li>
             <li @click="toggleHMenu"><router-link to="/about">About</router-link></li>
             <li @click="toggleHMenu"><router-link to="/press">Press</router-link></li>
@@ -45,43 +45,51 @@
             <li><span @click="showSearchClick" class="search small">Search</span></li>
          </ul>
       </div>
+      <div v-else class="hmenu">
+         <div @click="toggleHMenu" class="hmenu-button"><i class="pi pi-bars"></i></div>
+         <ul id="hmenu" class="hmenu-items hidden">
+            <li class="public pure-menu-item"><router-link to="/">Public</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/submissions">Submissions</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/events">Events</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/news">News</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/pedagogy">Pedagogy</router-link></li>
+         </ul>
+      </div>
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-export default {
-   computed: {
-      ...mapState({
-         showSearch: state => state.public.showSearch,
-         adminMode: state => state.adminMode
-      }),
-   },
-   methods: {
-      adminClicked() {
-         window.location.href = "/authenticate?url=/admin/submissions"
-         this.hideHMenu()
-      },
-      showSearchClick() {
-         this.$store.commit('public/showSearch', !this.showSearch )
-         this.hideHMenu()
-      },
-      hideHMenu() {
-         let items = document.getElementById("hmenu")
-         if (!items.classList.contains("hidden")) {
-            items.classList.add("hidden")
-         }
-      },
-      toggleHMenu() {
-         let items = document.getElementById("hmenu")
-         if (items.classList.contains("hidden")) {
-            items.classList.remove("hidden")
-         } else {
-            items.classList.add("hidden")
-         }
-      }
+<script setup>
+import { useSystemStore } from "@/stores/system"
+import { useSubmissionsStore } from "@/stores/submissions"
+
+const system = useSystemStore()
+const submissionsStore = useSubmissionsStore()
+
+const adminClicked = (() => {
+   window.location.href = "/authenticate?url=/admin/submissions"
+   hideHMenu()
+})
+
+const showSearchClick = (() => {
+   submissionsStore.showSearch = !submissionsStore.showSearch
+   hideHMenu()
+})
+
+const hideHMenu = (() => {
+   let items = document.getElementById("hmenu")
+   if (!items.classList.contains("hidden")) {
+      items.classList.add("hidden")
    }
-}
+})
+
+const toggleHMenu = (() => {
+   let items = document.getElementById("hmenu")
+   if (items.classList.contains("hidden")) {
+      items.classList.remove("hidden")
+   } else {
+      items.classList.add("hidden")
+   }
+})
 </script>
 
 <style scoped>
@@ -100,10 +108,10 @@ span.search.small {
 }
 .hmenu-items {
    position: absolute;
-   right: 15px;
+   right: 0;
    z-index: 1000;
-   background: black;
-   width: 100px;
+   background: #222;
+   width: 145px;
    list-style: none;
    padding: 10px 10px;
    margin: 0;
@@ -164,7 +172,7 @@ span.search.small {
    opacity: 1;
 }
 div.bt-header {
-   background-color: black;
+   background-color: #222;
    color: white;
    padding:15px;
    position: relative;

@@ -1,8 +1,8 @@
 <template>
    <div class="institutions">
-      <select @change="doInstitutionSearch" v-model="targetInstitution">
+      <select @change="doInstitutionSearch" v-model="submissionsStore.targetInstitution">
          <option value="" disabled>Browse by institution</option>
-         <option v-for="(institution) in institutions"
+         <option v-for="(institution) in system.institutions"
             :key="institution.id" :value="institution.id">
             {{ institution.name }}
          </option>
@@ -10,30 +10,26 @@
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { mapFields } from 'vuex-map-fields'
-export default {
-   computed: {
-      ...mapState({
-         institutions: state => state.institutions,
-      }),
-      ...mapFields('public',[
-           'targetInstitution'
-      ]),
-   },
-   methods: {
-      doInstitutionSearch() {
-         this.$store.dispatch("public/searchInstitutions" )
-         let curr = this.$router.currentRoute 
-         if (curr.name != "results") {
-            this.$router.push("/results")   
-         }
-      }
-   }
-}
+<script setup>
+import { useSubmissionsStore } from "@/stores/submissions"
+import { useSystemStore } from "@/stores/system"
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const submissionsStore = useSubmissionsStore()
+const system = useSystemStore()
+
+const doInstitutionSearch = (() => {
+   submissionsStore.searchInstitutions()
+   router.push("/results")
+})
+
 </script>
 
 <style scoped>
-
+select {
+   padding: 5px 10px;
+   border-color: #999;
+   border-radius: 4px;
+}
 </style>

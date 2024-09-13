@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -29,58 +28,34 @@ func (svc *ServiceContext) UploadFile(c *gin.Context) {
 		return
 	}
 
-	log.Printf("INFO: identifier received. Create upload directory.")
 	pendingDir := fmt.Sprintf("%s/%s", svc.UploadDir, "pending")
 	uploadDir := fmt.Sprintf("%s/%s", pendingDir, uploadID)
-	os.MkdirAll(uploadDir, 0777)
-
-	// when chunking is being used, there will be additional form params:
-	// dzchunkindex,  dztotalfilesize, dzchunksize,  dztotalchunkcount
-	// All sizes are in bytes
-	chunkIdx := c.PostForm("dzchunkindex")
-	if chunkIdx != "" {
-		// this is a chunked file; open in append mode and write to it
-		file, header, err := c.Request.FormFile("file")
-		if err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("Unable to get form file: %s", err.Error()))
-			return
-		}
-		filename := header.Filename
-		log.Printf("INFO: received CHUNKED request to upload %s, chunk %s size %s", filename, chunkIdx, c.PostForm("dzchunksize"))
-		dest := fmt.Sprintf("%s/%s", uploadDir, filename)
-		if chunkIdx == "0" {
-			if _, err = os.Stat(dest); err == nil {
-				log.Printf("WARNING: File %s already exists; removing", dest)
-				os.Remove(dest)
-			}
-		}
-		outFile, err := os.OpenFile(dest, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
-		if err != nil {
-			c.String(http.StatusInternalServerError, fmt.Sprintf("unable to receive file %s", err.Error()))
-		}
-		defer outFile.Close()
-		_, _ = io.Copy(outFile, file)
-	} else {
-		// not chunked; just save the file in the temp dir
-		file, err := c.FormFile("file")
-		if err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
-			return
-		}
-		filename := filepath.Base(file.Filename)
-		dest := fmt.Sprintf("%s/%s", uploadDir, filename)
-		if _, err := os.Stat(dest); err == nil {
-			log.Printf("WARNING: File %s already exists; removing", dest)
-			os.Remove(dest)
-		}
-		log.Printf("INFO: receiving non-chunked file %s", filename)
-		if err := c.SaveUploadedFile(file, dest); err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
-			return
-		}
-		log.Printf("INFO: done receiving %s", filename)
-		c.String(http.StatusOK, "Submitted")
+	log.Printf("INFO: identifier received. Create upload directory %s", uploadDir)
+	err := os.MkdirAll(uploadDir, 0777)
+	if err != nil {
+		log.Printf("ERROR: unable to create %s: %s", uploadDir, err.Error())
+		return
 	}
+
+	file, err := c.FormFile("uploadimage")
+	if err != nil {
+		log.Printf("ERROR: unable to get uploadimage from form: %s", err.Error())
+		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+		return
+	}
+	filename := filepath.Base(file.Filename)
+	dest := fmt.Sprintf("%s/%s", uploadDir, filename)
+	if _, err := os.Stat(dest); err == nil {
+		log.Printf("WARNING: File %s already exists; removing", dest)
+		os.Remove(dest)
+	}
+	log.Printf("INFO: receiving %s", filename)
+	if err := c.SaveUploadedFile(file, dest); err != nil {
+		c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+		return
+	}
+	log.Printf("INFO: done receiving %s", filename)
+	c.String(http.StatusOK, "Submitted")
 }
 
 // DeleteUploadedFile will remove a temporary upload file

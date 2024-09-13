@@ -21,7 +21,7 @@ darwin:
 
 web:
 	mkdir -p bin/
-	cd frontend/; yarn install; yarn build
+	cd frontend/; npm install; npm build
 	rm -rf bin/public
 	mv frontend/dist bin/public
 	rm -rf bin/templates
@@ -36,7 +36,7 @@ clean:
 	rm -rf bin
 
 dep:
-	cd frontend && yarn upgrade 
+	cd frontend && npm upgrade
 	$(GOGET) -u ./backend/btsrv/...
 	$(GOMOD) tidy
 	$(GOMOD) verify

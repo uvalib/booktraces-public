@@ -66,7 +66,7 @@ func main() {
 			admin.PUT("/submissions/:id/rotate", svc.AuthMiddleware, svc.RotateImage)
 			admin.POST("/submissions/:id/publish", svc.AuthMiddleware, svc.PublishSubmission)
 			admin.POST("/submissions/:id/unpublish", svc.AuthMiddleware, svc.UnpublishSubmission)
-			admin.POST("/submissions/:id", svc.AuthMiddleware, svc.UpdateSubmission)
+			admin.PUT("/submissions/:id", svc.AuthMiddleware, svc.UpdateSubmission)
 			admin.POST("/submissions/:id/transcription/:tid/approve", svc.ApproveTranscription)
 			admin.DELETE("/submissions/:id/transcription/:tid", svc.DeleteTranscription)
 			admin.PUT("/submissions/:id/transcription/:tid", svc.UpdateTranscription)

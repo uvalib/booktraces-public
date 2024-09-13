@@ -1,110 +1,145 @@
 <template>
    <div class="transcribe">
-      <div class="pure-form transcription">
-         <div class="image">
-            <UVAViewer :url="transcribeFile.url" :height="400"/>
-         </div>
-         <textarea rows="5" v-model="transcription"></textarea>
+      <div id="view-ctls">
+         <Button id="rotate-left" icon="pi pi-undo" rounded size="large" severity="secondary"/>
+         <Button id="rotate-right" icon="pi pi-undo" class="rotated" rounded size="large" severity="secondary"/>
+         <Button id="zoom-in" icon="pi pi-search-plus" rounded size="large" severity="secondary"/>
+         <Button id="zoom-out" icon="pi pi-search-minus" rounded size="large" severity="secondary"/>
       </div>
-      <div class="pure-form">
-         <div class="pure-u-1-1 gap">
-          <label for="submitter">Transcribed By<span class="required">(required)</span></label>
-          <input v-model="name"  class="pure-u-1-1" type="text">
-        </div>
-        <div class="pure-u-1-1 gap">
-          <label for="email">Email Address<span class="required">(required)</span></label>
-          <input v-model="email" class="pure-u-1-1" type="email">
-          <p class="note">We will keep your email address private and will only use if if we need to contact you about your transcription.</p>
-        </div>
+      <div id="dragon"></div>
+      <textarea rows="5" v-model="transcription"></textarea>
+      <div class="row">
+         <label for="submitter">Transcribed By<span class="required">(required)</span></label>
+         <input v-model="name"  class="pure-u-1-1" type="text">
       </div>
-      <p class="error">{{transcribeError}}</p>
+      <div class="row">
+         <label for="email">Email Address<span class="required">(required)</span></label>
+         <input v-model="email" class="pure-u-1-1" type="email">
+         <p class="note">We will keep your email address private and will only use if if we need to contact you about your transcription.</p>
+      </div>
       <div class="controls">
-         <span @click="cancelClicked" class="cancel pure-button pure-button-primary">Cancel</span>
-         <span @click="submitClicked" :class="{disabled: submitting}" class="pure-button pure-button-primary">Submit</span>
+         <Button @click="cancelClicked" severity="secondary" label="Cancel"/>
+         <Button @click="submitClicked" label="Submit" :disabled="!canSubmit" />
       </div>
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import UVAViewer from "@/components/UVAViewer"
-export default {
-   components: {
-      UVAViewer
-   },
-   computed: {
-      ...mapState({
-         submitting: state => state.transcribe.submitting,
-         transcribeFile: state => state.transcribe.file,
-         transcribeError: state => state.transcribe.error,
-      }),
-   },
-   data: function () {
-      return {
-         transcription: "",
-         name: "",
-         email: "",
-         zoomProp: {
-            zoomControlScale: 10
-         }
-      }
-   },
-   methods: {
-      cancelClicked() {
-         this.$store.commit("transcribe/cancel")
-      },
-      submitClicked() {
-         this.$store.dispatch("transcribe/submit", {transcription: this.transcription,
-            name: this.name, email: this.email})
-      }
-   }
-}
-</script>
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useDetailsStore } from "@/stores/details"
+import OpenSeadragon from "openseadragon"
+import { useToast } from 'primevue/usetoast'
 
-<style scoped>
-.error {
-   font-style: italic;
-   color: firebrick;
-}
-div.transcription {
+const toast = useToast()
+const details = useDetailsStore()
+
+const transcription = ref("")
+const name = ref("")
+const email = ref("")
+const viewer = ref()
+
+const canSubmit = computed(() => {
+   if (details.working) return false
+   return transcription.value != "" && name.value != "" && email.value != ""
+})
+
+onMounted(() => {
+   viewer.value = OpenSeadragon({
+      id: "dragon",
+      animationTime: 0.1,
+      autoResize: true,
+      constrainDuringPan: true,
+      imageSmoothingEnabled: true,
+      smoothTileEdgesMinZoom: Infinity,
+      maxZoomPixelRatio: 10.0,
+      showSequenceControl: false,
+      zoomInButton:   "zoom-in",
+      zoomOutButton:  "zoom-out",
+      showNavigator: true,
+      showRotationControl: true,
+      rotateLeftButton: "rotate-left",
+      rotateRightButton: "rotate-right",
+      tileSources: {
+         type: 'image',
+         url:  details.transcribeFile.url
+      },
+   });
+})
+
+const cancelClicked = (() => {
+   details.cancelTranscription()
+})
+
+const submitClicked = (async () => {
+   await details.submitTranscription(transcription.value, name.value, email.value)
+   if (details.transcribeError == "" ) {
+      toast.add( {
+         severity: 'success', summary: 'Transcription Submitted',
+         detail: `The transcription has been submitted. It will appear online after it has been reviewd and approved. Check back later.`
+      })
+   } else {
+      toast.add( {
+         severity: 'error', summary: 'Transcription Error',
+         detail: `Transcription submission failed: ${details.transcribeError}`
+      })
+   }
+})
+</script>
+<style scoped lang="scss">
+.transcribe {
+   margin-top: 20px;
    display: flex;
    flex-direction: column;
-}
-.transcription .image {
-   overflow: hidden;
-   margin-bottom: 10px;
-}
-.transcribe {
-   padding: 15px;
-}
-.controls {
-   margin-top: 10px;
-   display: flex;
-   flex-flow: row wrap;
-   justify-content: flex-end;
-}
-.controls .pure-button.pure-button-primary {
-   margin-left: 10px;
-}
-.controls .pure-button.pure-button-primary.disabled {
-   cursor: default;
-   opacity: 0.2;
-}
-.controls .pure-button.pure-button-primary.cancel  {
-   background-color: #999;
-}
-.gap {
-   margin-top: 10px;
-}
-.required {
-   font-size: 0.8em;
-   font-weight: 100;
-   margin-left: 10px;
-}
-p.note {
-   padding:0;
-   margin:2px 15px;
-   font-size: 0.8em;
-   font-weight: 100;
+   gap: 15px;
+   #view-ctls {
+      margin-top:10px;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 5px;
+      button {
+         display: inherit !important;
+      }
+      .rotated {
+         transform: scaleX(-1);
+      }
+   }
+   #dragon {
+      height: 450px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+   }
+   textarea, input {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+   }
+   .row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      .required {
+         display: inline-block;
+         margin-left: 5px;
+         color: #aaa;
+      }
+   }
+   .note {
+      padding: 0;
+      margin: 0;
+      color: #aaa;
+   }
+   .error {
+      font-style: italic;
+      color: firebrick;
+   }
+   .controls {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-end;
+      gap: 10px;
+   }
 }
 </style>

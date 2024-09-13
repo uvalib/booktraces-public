@@ -1,256 +1,251 @@
 <template>
    <div class="admin">
-      <h2>System Admin Panel <span class="login"><b>Logged in as:</b>{{loginName}}</span></h2>
+      <h2>
+         <span>System Admin Panel</span>
+         <span class="login">
+            <b>Logged in as:</b>{{admin.loginName}}
+         </span>
+      </h2>
       <div>
          <h3>Submissions</h3>
-         <div class="error">{{error}}</div>
          <div class="list-controls">
-            <div class="search pure-button-group" role="group">
-               <input @input="updateSearchQuery" @keyup.enter="searchClicked" type="text" id="search" :value="queryStr">
-               <button @click="searchClicked" class="search pure-button pure-button-primary">Search</button>
+            <div class="left">
+               <div class="search">
+                  <input v-model="admin.submissions.query">
+                  <Button @click="admin.getSubmissions()" size="small" label="Search"/>
+               </div>
+               <Button v-if="admin.submissions.tagFilter" @click="removeFilter" size="small" severity="secondary"
+                  outlined rounded icon="pi pi-times-circle"
+                  :label="`Items Tagged: ${admin.submissions.tagFilter}`"/>
             </div>
-            <span class="tag-filter" v-if="tgtTag.length > 0">
-               <b>Items Tagged:</b> {{tgtTag}} <i @click="removeFilter" class="unfilter fas fa-times-circle"></i>
-            </span>
-            <AdminPager/>
          </div>
-         <table class="pure-table">
-            <thead>
-               <th>ID</th>
-               <th>Title</th>
-               <th style="width:200px;">Author</th>
-               <th style="width:200px;">Tags</th>
-               <th style="width:75px;">Submitted</th>
-               <th class="checkbox">Public</th>
-               <th style="width:35px;"></th>
-            </thead>
-            <tr v-for="sub in submissions" :key="sub.id" :data-id="sub.id" @click="submissionClicked">
-               <td>{{ sub.id }}</td>
-               <td>{{ sub.title }}</td>
-               <td>{{ sub.author }}</td>
-               <td>
-                  <span class="tag" v-for="(tag,idx) in tagList(sub)" :key="idx" @click="tagClicked">{{tag}}</span>   
-               </td>
-               <td style="text-align:center;">{{ sub.submittedAt.split("T")[0] }}</td>
-               <td class="centered">
-                  <span @click="togglePublishClicked" :data-id="sub.id" :data-published="isPublished(sub)" v-html="publishIcon(sub)"></span>
-               </td>
-               <td class="centered">
-                  <i :data-id="sub.id" title="Delete" class="action fas fa-trash-alt" @click="deleteClicked"></i>
-               </td>
-            </tr>
-         </table>
+         <DataTable :value="admin.submissions.hits" ref="adminSubTable" dataKey="id"
+            stripedRows showGridlines responsiveLayout="scroll" :loading="admin.working"
+            :lazy="true" :paginator="true" @page="onPageClicked($event)"
+            :rows="50" :totalRecords="admin.submissions.total"
+            paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+            :first="admin.submissions.start" currentPageReportTemplate="{first} - {last} of {totalRecords}" paginatorPosition="top"
+         >
+            <Column field="id" header="ID" />
+            <Column field="title" header="Title" />
+            <Column field="author" header="Author"/>
+            <Column header="Tags" >
+               <template #body="slotProps">
+                  <div class="tags">
+                     <Button v-for="tag in tagsList(slotProps.data)" :key="tag"
+                        size="small" severity="info" :label="tag" @click="tagClicked(tag)"/>
+                  </div>
+               </template>
+            </Column>
+            <Column field="submittedAt" header="Submitted" class="nowrap" >
+               <template #body="slotProps">
+                  {{ slotProps.data.submittedAt.split("T")[0] }}
+               </template>
+            </Column>
+            <Column header="Actions" class="icon" >
+               <template #body="slotProps">
+                  <div class="acts">
+                     <Button @click="viewSubmission(slotProps.data)" size="small" severity="info" label="View" />
+                     <Button @click="togglePublish(slotProps.data)" size="small"
+                        :severity="publishSeverity(slotProps.data)"
+                        :label="publishLabel(slotProps.data)"/>
+                     <Button @click="deleteSubmisson(slotProps.data)" size="small" severity="danger" label="Delete" />
+                  </div>
+               </template>
+            </Column>
+         </DataTable>
       </div>
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { mapGetters } from 'vuex'
-import AdminPager from "@/components/AdminPager"
-export default {
-   name: "admin",
-   components: {
-      AdminPager
-   },
-   computed: {
-      ...mapState({
-         total: state => state.admin.totalSubmissions,
-         submissions: state => state.admin.submissions,
-         error: state => state.error,
-         loading: state => state.loading,
-         tgtTag: state => state.admin.tgtTag,
-         queryStr: state => state.admin.queryStr,
-      }),
-      ...mapGetters({
-         loginName: 'admin/loginName',
-      })
-   },
-   methods: {
-      tagList( sub ) {
-         if (sub.tags) {
-            return sub.tags.split(",")
-         } 
-         return []
+<script setup>
+import { onMounted } from 'vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import { useSystemStore } from "@/stores/system"
+import { useAdminStore } from "@/stores/admin"
+import { useRouter } from 'vue-router'
+import { useConfirm } from "primevue/useconfirm"
+
+const system = useSystemStore()
+const admin = useAdminStore()
+const router = useRouter()
+const confirm = useConfirm()
+
+onMounted(() => {
+   system.getInstitutions()
+   system.getTags()
+   admin.getSubmissions()
+})
+
+const tagsList = ( (sub) => {
+   if ( sub.tags) {
+      return sub.tags.split(',')
+   }
+   return []
+})
+
+const removeFilter = (() => {
+   admin.submissions.tagFilter = ""
+   admin.getSubmissions()
+})
+
+const onPageClicked = ((event) => {
+   admin.submissions.start = event.first
+   admin.getSubmissions()
+})
+
+const tagClicked = ((tag) => {
+   admin.submissions.tagFilter = tag
+   admin.getSubmissions()
+})
+
+const publishLabel = ( (submission) => {
+   if (submission.published) {
+      return "Unpublish"
+   }
+   return  "Publish"
+ })
+
+ const publishSeverity = ( (submission) => {
+   if (submission.published) {
+      return "secondary"
+   }
+   return  "primary"
+})
+
+const viewSubmission = ( (submission) => {
+   router.push("/admin/submissions/" + submission.id)
+})
+
+const togglePublish = ( (submission) => {
+   let act = "Publish"
+   if (submission.published) {
+      act = "Unpublish"
+   }
+   confirm.require({
+      message: `${act} this submission?`,
+      header: `Confirm ${act}`,
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
       },
-      updateSearchQuery(e) {
-         this.$store.commit('admin/updateSearchQuery', e.target.value)
+      acceptProps: {
+         label: act
       },
-      searchClicked() {
-         this.$store.dispatch("admin/getSubmissions")
-      },
-      isPublished(sub) {
-         return sub.published
-      },
-      publishIcon(sub) {
-         if (sub.published) {
-            return '<i class="published fas fa-check-circle"></i>'
-         } else {
-            return '<i class="unpublished fas fa-times-circle"></i>'
-         }
-      },
-      submissionClicked(event) {
-         let tgt = event.currentTarget
-         let subID = tgt.dataset.id
-         this.$router.push("/admin/submissions/" + subID)
-      },
-      deleteClicked(event) {
-         event.stopPropagation()
-         let resp = confirm("Delete this submission? All data and unloaded files will be permanently lost. Are you sure?")
-         if (resp) {
-            let id = event.currentTarget.dataset.id
-            this.$store.dispatch("admin/deleteSubmission", {id:id})
-         }
-      },
-      togglePublishClicked(event) {
-         event.stopPropagation()
-         let published = event.currentTarget.dataset.published
-         if (published ) {
-            let resp = confirm("Unpublish this submission?")
-            if (!resp) {
-               return
-            }
-         } else {
-            let resp = confirm("Publish this submission?")
-            if (!resp) {
-               return
-            }
-         }
-         let id = event.currentTarget.dataset.id
-         this.$store.dispatch("admin/updatePublicationStatus", {id:id, public: !published})
-      },
-      tagClicked(event) {
-         event.stopPropagation()
-         // textContent may return whitepace before/after tag. Strip it
-         let tag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, '')
-         this.$store.commit('admin/setTagFilter', tag)
-         this.$store.dispatch("admin/getSubmissions")
-      },
-      removeFilter() {
-         this.$store.commit('admin/setTagFilter', "")
-         this.$store.dispatch("admin/getSubmissions")
+      accept: () => {
+         admin.updatePublicationStatus(submission.id, !submission.published )
       }
-   },
-   created() {
-      this.$store.commit("clearSubmissionDetail")
-      this.$store.dispatch("admin/getSubmissions")
-   },
-};
+   })
+})
+
+const deleteSubmisson = ( (submission) => {
+   confirm.require({
+      message: 'Delete this submission? All data and unloaded files will be permanently lost. Are you sure?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: () => {
+         admin.deleteSubmission(submission.id)
+      }
+   })
+})
 </script>
 
-<style scoped>
-.tag-filter {
-   font-size: 0.8em;
-   border: 1px solid #ccc;
-   padding: 2px 4px 0 10px;
-   border-radius: 20px;
-   cursor: pointer;
-}
-span.tag {
-   display: inline-block;
-   margin: 0 4px 4px 0;
-   font-size: 0.9em;
-   background: #0078e7;
-   color: white;
-   padding: 2px 10px 2px 10px;
-   font-weight: 500;
-   opacity: 0.6;
-}
-span.tag:hover {
-   cursor: pointer;
-   opacity: 1;
-}
-i.fas.unfilter {
-   color: firebrick;
-   margin-left: 5px;
-   opacity: 0.6;
-}
-i.fas.unfilter:hover {
-   cursor: pointer;
-   opacity: 1;
-}
-td span >>> .published {
-   color:green;font-size:1.25em;
-   opacity: 0.5;
-}
-td span >>> .published:hover,td span >>> .unpublished:hover {
-   opacity: 1;
-   cursor: pointer;
-}
-td span >>> .unpublished {
-   color:firebrick;font-size:1.25em;
-   opacity: 0.5;
-}
-div.list-controls {
-  position:relative;
-  margin: 25px 0 5px 0;
-}
-div.search {
-  font-size: 14px;
-  display: inline-block;
-  margin-right: 10px;
-}
-#search {
-   border: 1px solid #ccc;
-   padding: 2px 4px;
-   outline: none;
-}
-div.search button.search.pure-button {
-  padding: 3px 15px;
-}
-div.search input {
-  width:300px;
-  outline:none;
-}
-span.login {
-   font-family: sans-serif;
-   font-size: 0.5em;
-   float: right;
-   font-weight: 100;
-}
-span.login b {
-   margin-right: 5px;
-}
-i.fas.action.disabled {
-   cursor: default;
-   opacity: 0.2;
-}
-i.fas.action {
-   cursor: pointer;
-   opacity: 0.5;
-   margin: 0 5px;
-   font-size: 1.1em;
-}
-i.fas:hover {
-   opacity: 1;
-}
-h2 {
-  font-size: 1.5em;
-  font-weight: bold;
-  border-bottom: 1px dashed #666;
-  font-family: 'Special Elite', cursive;
-  padding-bottom: 5px;
-  margin-bottom: 15px;
-}
+<style scoped lang="scss">
 div.admin {
-   padding: 15px 25px;
-   min-height: 600px;
    background: white;
    color: #444;
 }
-table {
-   width: 100%;
-   font-size: 0.85em;
-   color: #444;
+h2 {
+   display: flex;
+   flex-flow: row wrap;
+   justify-content: space-between;
+   align-items: flex-start;
+   font-size: 1.5em;
+   font-weight: bold;
+   border-bottom: 1px dashed #666;
+   font-family: 'Special Elite', cursive;
+   padding-bottom: 5px;
+   margin-bottom: 15px;
+   .login {
+      color: #999;
+      font-family: sans-serif;
+      font-size: 0.8em;
+      float: right;
+      font-weight: normal;
+      b {
+         color: #444;
+         margin-right: 10px;
+      }
+   }
 }
-table tr:hover {
-   cursor: pointer;
-   background: #f5f5f5;
+.list-controls {
+   display: flex;
+   flex-flow: row wrap;
+   justify-content: space-between;
+   align-items: flex-start;
+   margin-bottom: 15px;
+   .left {
+      flex:1;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-start;
+      gap: 15px;
+      .search {
+         flex:1;
+         display: flex;
+         flex-flow: row nowrap;
+         align-items: stretch;
+         justify-content: flex-start;
+         gap: 10px;
+         input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+         }
+      }
+      .tag-filter {
+         font-size: 0.8em;
+         border: 1px solid #ccc;
+         padding: 2px 4px 0 10px;
+         border-radius: 20px;
+         cursor: pointer;
+      }
+   }
 }
-th.checkbox {
-   width: 40px;
-}
-td.centered {
+:deep(td.icon) {
    text-align: center;
+}
+.acts {
+   display: flex;
+   flex-flow: row nowrap;
+   justify-content: space-between;
+   gap: 5px;
+   button {
+      flex: 1;
+   }
+}
+.tags {
+   display: flex;
+   flex-flow: row wrap;
+   gap: 5px;
+}
+@media only screen and (min-width: 768px) {
+   .admin {
+      padding: 15px 25px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   .admin {
+      padding: 10px;
+   }
 }
 </style>

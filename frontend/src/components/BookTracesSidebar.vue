@@ -3,27 +3,17 @@
       <p class="subtitle">Find unique copies of old library books</p>
       <div class="section">
          <p class="subtitle pad">Recent Submissions</p>
-         <div class="recent" v-for="recent in recents" :key="recent.id">
+         <div class="recent" v-for="recent in submissionsStore.recents" :key="recent.id">
             <div @click="recentClicked(recent.id)" class="recent-link">
                <p class="title">{{recent.title}}</p>
                <p>{{recent.submittedAt}}</p>
             </div>
          </div>
       </div>
-      <div id="tfeed" class="section">
-         <p class="subtitle pad">Recent Tweets</p>
-
-         <Timeline id="booktracesuva" sourceType="profile" 
-            :options="{ height: 400, theme: 'dark', chrome: 'noheader,transparent,nofooter', dnt: true }"
-            error-message="Timeline could not be loaded. If using an ad-blocker, try whitelisting this site." 
-            error-message-class="tweet-not-found" />
-
-      </div>
-
       <div class="section">
          <p class="subtitle pad">Archives</p>
-         <div class="archive" v-for="(archive,idx) in archives" :key="idx">
-            <span @click="archiveClicked" :data-date="archive.internalDate" class="archive-date">
+         <div class="archive" v-for="archive in submissionsStore.archives">
+            <span @click="archiveClicked(archive.internalDate)" class="archive-date">
                {{archive.displayDate}}
             </span>
          </div>
@@ -31,90 +21,69 @@
    </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import {Timeline} from 'vue-tweet-embed'
-export default {
-   components: {
-      Timeline,
-   },
-   computed: {
-      ...mapState({
-         recents: state => state.public.recents,
-         archives: state => state.public.archives,
-      }),
-   },
-    methods: {
-      recentClicked(id) {
-         this.$router.push("/submissions/" + id)
-         this.$store.dispatch("getSubmissionDetail", id)
-      },
-      thumbURL(id) {
-         return "/submissions/"+id
-      },
-      archiveClicked(event) {
-         let tgtDate = event.currentTarget.dataset.date 
-         this.$store.dispatch("public/getArchive", tgtDate)
-         this.$router.push("/results")
-      }
-    }
-}
+<script setup>
+import { useSubmissionsStore } from "@/stores/submissions"
+import { useDetailsStore } from "@/stores/details"
+import { useRouter } from 'vue-router'
+
+const details = useDetailsStore()
+const submissionsStore = useSubmissionsStore()
+const router = useRouter()
+
+const recentClicked = ((id) => {
+   router.push("/submissions/" + id)
+   details.getSubmission(id)
+})
+
+const archiveClicked = ((tgtDate) => {
+   submissionsStore.getArchive(tgtDate)
+   router.push("/results")
+})
+
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 @media only screen and (max-width: 1050px) {
    .sidebar {
       display:none;
    }
 }
-@media only screen and (max-width: 1150px) {
-   #tfeed {
-      display:none;
+@media only screen and (min-width: 1050px) {
+   .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
    }
 }
-div.recent .recent-link:hover {
-   cursor:pointer;
-   color: #34991d !important;
-}
-div.section {
-   margin-top: 20px;
-   position: relative;
-}
-.recent, .archive {
-   font-size: 0.9em; 
-   margin: 0 0 5px 8px;
-}
-.recent p {
-   margin:0;
-}
-.recent p.title {
-   font-weight: bold;
-   font-style: italic;
-}
 div.sidebar {
-   padding: 0 15px 15px 15px;
-   background-color: black;
-   color: #ccc;
-   font-size: 0.9em;
-}
-#app div.sidebar a {
-  color: #ccc;
-  text-decoration: none;
-}
-.subtitle {
-   margin:0;
-   padding:0;
-   font-family: 'Special Elite', cursive;
-   font-weight: 500;
-}
-.subtitle.pad {
-   margin-bottom: 5px;
-}
-.archive-date {
-   cursor:pointer;
-}
-.archive-date:hover {
-   font-weight: bold;
-   text-decoration: underline;
+   padding: 10px;
+   background-color: #222;
+   color: #dadada;
+   a, .recent-link, .archive-date {
+      color: #dadada;
+      text-decoration: none;
+      &:hover {
+         text-decoration: underline;
+         color: #34991d !important;
+         cursor: pointer;
+      }
+   }
+   .recent, .archive {
+      margin: 0 0 10px 15px;
+      font-size: 0.9rem;
+   }
+   .recent p {
+      margin:0;
+   }
+
+   .subtitle {
+      margin:0;
+      padding:0;
+      font-family: 'Special Elite', cursive;
+      font-weight: 500;
+   }
+   .subtitle.pad {
+      margin-bottom: 10px;
+   }
 }
 </style>

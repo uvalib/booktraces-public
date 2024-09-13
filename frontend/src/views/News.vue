@@ -1,34 +1,29 @@
 <template>
    <div class="content events">
       <h2>News</h2>
-      <div class="news-item" v-for="item in news" :key="item.id">
+      <div class="news-item" v-for="item in system.publishedNews" >
          <h3>{{item.title}}<span class="date">{{formatDate(item.createdAt)}}</span></h3>
          <div class="text" v-html="item.content"></div>
       </div>
    </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
-export default {
-   name: "news",
-   computed: {
-      ...mapGetters({
-         news: "news/published"
-      })
-   },
-   created: function () {
-      this.$store.dispatch('news/getAll')
-   },
-   methods: {
-      formatDate(date) {
-         return date.split("T")[0]
-      },
-   }
-};
+<script setup>
+import { onMounted } from 'vue'
+import { useSystemStore } from "@/stores/system"
+
+const system = useSystemStore()
+
+onMounted(() => {
+   system.getNews()
+})
+
+const formatDate = ((date) => {
+   return date.split("T")[0]
+})
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .news-item {
    margin: 10px 0 25px 0;
    padding: 0px;
@@ -42,9 +37,9 @@ h3 {
 }
 div.text {
    padding: 10px;
-}
-div.text >>> p {
-   margin: 0 0;
+   :deep(p) {
+      margin: 0 0;
+   }
 }
 span.date {
    position: absolute;
