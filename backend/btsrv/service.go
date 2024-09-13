@@ -154,9 +154,9 @@ func generateThumbnails(srcDir string) error {
 		args := []string{"-quiet", "-resize", "150x150^", "-extent", "150x150", "-gravity", "center", origFn, thumbFn}
 		log.Printf("INFO: convert args: %+v", args)
 		cmd := exec.Command("convert", args...)
-		err := cmd.Run()
+		thumbOut, err := cmd.CombinedOutput()
 		if err != nil {
-			return err
+			return fmt.Errorf("thumb generate failed [%s]: %s", thumbOut, err.Error())
 		}
 		os.Chmod(thumbFn, 0666)
 		log.Printf("INFO: thunbnail %s generated", thumbFn)

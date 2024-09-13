@@ -344,7 +344,7 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 
 	err = generateThumbnails(tgtDir)
 	if err != nil {
-		log.Printf("ERROR: Unable to generate thumbnails %s", err.Error())
+		log.Printf("ERROR: %s", err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
