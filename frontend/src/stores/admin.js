@@ -242,6 +242,32 @@ export const useAdminStore = defineStore('admin', {
          }).finally( ()=>{
             this.working = false
          })
-      }
+      },
+      async updateTranscription(submissionID, transID, text) {
+         this.error = ""
+         this.working = true
+         await axios.put(`/api/admin/submissions/${submissionID}/transcription/${transID}`, {transcription: text}).catch((error) => {
+            this.error = error
+         }).finally( ()=>{
+            this.working = false
+         })
+      },
+      deleteTranscription(submissionID, transcriptionID) {
+         this.working = true
+         this.error = ""
+         axios.delete(`/api/admin/submissions/${submissionID}/transcription/${transcriptionID}`).catch ( err => {
+            this.error =  err.response.data
+         }).finally( ()=>{
+            this.working = false
+         })
+      },
+     async approveTranscription(submissionID, transID) {
+         this.working = true
+         await axios.post(`/api/admin/submissions/${submissionID}/transcription/${transID}/approve`).catch ( err => {
+            this.error =  err.response.data
+         }).finally( ()=>{
+            this.working = false
+         })
+      },
    }
 })

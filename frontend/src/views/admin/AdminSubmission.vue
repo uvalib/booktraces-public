@@ -18,7 +18,6 @@
                <Button size="small" label="Delete" @click="deleteSubmission" severity="danger"/>
             </div>
          </div>
-         <div class="error" v-if="admin.error">{{admin.error}}</div>
          <div v-if="!edit" class="details">
             <table class="submit-info">
                <tr>
@@ -104,16 +103,15 @@
                                  <td>{{ getTranscribeStatus(file) }}</td>
                               </tr>
                            </table>
-                           <template v-if="editTrans">
-                              <!-- <textarea class="edit-trans" rows="3" v-model="workingTrans"></textarea>
-                              <div v-if="error" class="error">{{error}}</div>
+                           <div class="edit-trans" v-if="editTrans">
+                              <Textarea id="description" v-model="workingTrans" rows="4" />
                               <div class="actions">
                                  <span class="buttons">
-                                    <span @click="cancelEdit" class="pure-button trans">Cancel</span>
-                                    <span @click="submitEdit(f)" class="pure-button trans">Submit</span>
+                                    <Button severity="secondary" label="Cancel" @click="cancelEditTranscription" />
+                                    <Button severity="info" label="Submit" @click="submitEditTranscription(file)" />
                                  </span>
-                              </div> -->
-                           </template>
+                              </div>
+                           </div>
                            <template v-else>
                               <pre class="transcription">{{file.transcriptions[transcriptionIdx].text}}</pre>
                            </template>
@@ -135,6 +133,7 @@ import { useDetailsStore } from "@/stores/details"
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from "primevue/useconfirm"
 import AdminEditSubmission from "@/components/AdminEditSubmission.vue"
+import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
@@ -147,6 +146,7 @@ const router = useRouter()
 
 const edit = ref(false)
 const editTrans = ref(false)
+const workingTrans = ref("")
 const transcriptionIdx = ref(0)
 
 const published = computed(() => {
@@ -234,15 +234,9 @@ const rotateClicked = ( async (imgURL) => {
 })
 
 const nextTran = (( image ) => {
-   if (transcriptionIdx.value == image.transcriptions.length -1) {
-      return
-   }
    transcriptionIdx.value++
 })
 const priorTran = (() => {
-   if (transcriptionIdx.value == 0) {
-      return
-   }
    transcriptionIdx.value--
 })
 const getTranscribeDate = ((f) => {
@@ -263,39 +257,71 @@ const getTranscribeStatus = ((f) => {
    }
    return "Pending"
 })
+const editTranscription = ((image) => {
+   editTrans.value = true
+   workingTrans.value = image.transcriptions[transcriptionIdx.value].text
+})
+const cancelEditTranscription = (() => {
+   editTrans.value = false
+   workingTrans.value = ""
+})
+const submitEditTranscription = ( async (image) => {
+   let trans = image.transcriptions[transcriptionIdx.value]
+   await admin.updateTranscription(details.submission.id, trans.id, workingTrans.value)
+   if (admin.error != "" ) {
+      toast.add( {severity: 'error', summary: 'Updae failed',
+         detail: `Unable to update transcription: ${admin.error}`})
+   } else {
+      editTrans.value = false
+      trans.text = workingTrans.value
+      workingTrans.value = ""
+      toast.add( {severity: 'success', summary: 'Updated',
+                  detail: `Transcription has been updated`, life: 3000})
+   }
+})
+const deleteTranscription = ((image) => {
+   confirm.require({
+      message: 'Delete this transcription?<br/>All data will be permanently lost.<br/><br/>Are you sure?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+         label: 'Cancel',
+         severity: 'secondary'
+      },
+      acceptProps: {
+         label: 'Delete'
+      },
+      accept: async () => {
+         let transcription = image.transcriptions[transcriptionIdx.value]
+         if ( transcription ) {
+            await admin.deleteTranscription(details.submission.id, transcription.id)
+            if ( admin.error == "") {
+               image.transcriptions.splice(transcriptionIdx.value, 1)
+               transcriptionIdx.value = 0
+               toast.add( {severity: 'success', summary: 'Updated',
+                  detail: `Transcription has been deleted`, life: 3000})
+            } else {
+               toast.add( {severity: 'error', summary: 'Delete failed',
+                  detail: `Unable to delete transcription: ${admin.error}`})
+            }
+         }
+      }
+   })
+})
 
-//    methods: {
-//       cancelEdit() {
-//          this.editTrans = false
-//          this.workingTrans = ""
-//       },
-//       async submitEdit(f) {
-//          let data = {submissionID: details.submission.id,
-//             fileID: f.id,
-//             transcriptionID: f.transcriptions[transcriptionIdx.value].id,
-//             transcription: this.workingTrans}
-//          await this.$store.dispatch("transcribe/update", data)
-//          if (this.error == "" || this.error == null) {
-//             this.editTrans = false
-//             this.workingTrans = ""
-//          }
-//       },
-//       approveTranscription(f) {
-//          let t = f.transcriptions[transcriptionIdx.value]
-//          this.$store.dispatch("transcribe/approve", t.id)
-//       },
-//       editTranscription(f) {
-//          this.editTrans = true
-//          this.workingTrans = f.transcriptions[transcriptionIdx.value].text
-//       },
-//       deleteTranscription(f) {
-//          let resp = confirm("Are you sure you want to delete this transcrption?")
-//          if (resp) {
-//             let t = f.transcriptions[transcriptionIdx.value]
-//             this.$store.dispatch("transcribe/delete", t.id)
-//             transcriptionIdx.value = 0
-//          }
-//       },
+const approveTranscription = ( async (image) => {
+   let t = image.transcriptions[transcriptionIdx.value]
+   await admin.approveTranscription(details.submission.id, t.id)
+   if ( admin.error == "") {
+      image.transcriptions.forEach(trans => trans.approved = false)
+      t.approved = true
+      toast.add( {severity: 'success', summary: 'Approved',
+         detail: `Transcription has been approved and will be visisble to the public`, life: 3000})
+   } else {
+      toast.add( {severity: 'error', summary: 'Delete failed',
+         detail: `Unable to approve transcription: ${admin.error}`})
+   }
+})
 </script>
 
 <style scoped lang="scss">
@@ -329,6 +355,12 @@ div.admin-submission {
             margin-right: 10px;
          }
       }
+   }
+   .edit-trans {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
    }
    .error {
       color: firebrick;

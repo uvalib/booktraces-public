@@ -28,15 +28,12 @@
             <div class="thumb" v-for="file in submission.files">
                <div class="zoom-wrap">
                   <vue-image-zoomer :regular="file.url" />
-                  <Button severity="info" @click="transcribeClicked(file)" :disabled="hasPendingTranscription(file)" label="Transcribe"/>
+                  <Button severity="info" @click="transcribeClicked(file)" label="Transcribe"/>
                </div>
                <div class="transcription-wrap">
                   <div class="head">Transcription</div>
                   <div class="transcription">
-                     <div class="pending" v-if="hasPendingTranscription(file)">
-                        Transcription under review.<br/>Please check back in a few days.
-                     </div>
-                     <pre v-else>{{transcription(file)}}</pre>
+                     <pre>{{transcription(file)}}</pre>
                   </div>
                </div>
             </div>
@@ -75,20 +72,7 @@ onBeforeMount(() => {
 })
 
 const transcribeClicked = ((imgFile) => {
-   if ( hasPendingTranscription(imgFile) == false) {
-      details.setTranscriptionTarget( imgFile )
-   }
-})
-
-const hasPendingTranscription = ((imgFile) => {
-   if (imgFile.transcriptions.length == 0 ) return false
-   let pending = true
-   imgFile.transcriptions.forEach( t => {
-      if (t.approved === true) {
-         pending = false
-      }
-   })
-   return pending
+   details.setTranscriptionTarget( imgFile )
 })
 
 const transcription = ((imgFile) => {

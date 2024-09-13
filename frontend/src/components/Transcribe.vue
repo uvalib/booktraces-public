@@ -17,25 +17,31 @@
          <input v-model="email" class="pure-u-1-1" type="email">
          <p class="note">We will keep your email address private and will only use if if we need to contact you about your transcription.</p>
       </div>
-      <p class="error" v-if="details.transcribeError">{{details.transcribeError}}</p>
       <div class="controls">
          <Button @click="cancelClicked" severity="secondary" label="Cancel"/>
-         <Button @click="submitClicked" label="Submit" :disabled=" details.working" />
+         <Button @click="submitClicked" label="Submit" :disabled="!canSubmit" />
       </div>
    </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useDetailsStore } from "@/stores/details"
 import OpenSeadragon from "openseadragon"
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const details = useDetailsStore()
 
 const transcription = ref("")
 const name = ref("")
 const email = ref("")
 const viewer = ref()
+
+const canSubmit = computed(() => {
+   if (details.working) return false
+   return transcription.value != "" && name.value != "" && email.value != ""
+})
 
 onMounted(() => {
    viewer.value = OpenSeadragon({
@@ -64,8 +70,19 @@ const cancelClicked = (() => {
    details.cancelTranscription()
 })
 
-const submitClicked = (() => {
-   details.submitTranscription(transcription.value, name.value, email.value)
+const submitClicked = (async () => {
+   await details.submitTranscription(transcription.value, name.value, email.value)
+   if (details.transcribeError == "" ) {
+      toast.add( {
+         severity: 'success', summary: 'Transcription Submitted',
+         detail: `The transcription has been submitted. It will appear online after it has been reviewd and approved. Check back later.`
+      })
+   } else {
+      toast.add( {
+         severity: 'error', summary: 'Transcription Error',
+         detail: `Transcription submission failed: ${details.transcribeError}`
+      })
+   }
 })
 </script>
 <style scoped lang="scss">

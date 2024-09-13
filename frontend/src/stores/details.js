@@ -27,7 +27,7 @@ export const useDetailsStore = defineStore('details', {
       },
 
       cancelTranscription() {
-         this.transcribeFile = file
+         this.transcribeFile = null
          this.transcribeError = ""
       },
 
@@ -44,68 +44,8 @@ export const useDetailsStore = defineStore('details', {
          })
       },
 
-      approveTranscription() {
-         this.working = true
-         axios.post(`/api/admin/submissions/${subID}/transcription/${this.submission.id}/approve`).then((response) => {
-            this.working = false
-            this.submission = response.data
-         }).catch ( err => {
-            useSystemStore().setError(err.response.data)
-            this.working = false
-         })
-      },
-
-      async updateTranscription( data ) {
-         let subID = data.submissionID
-         let transID = data.transcriptionID
-         let txt = data.transcription
-         this.working = true
-         try {
-            await axios.put(`/api/admin/submissions/${subID}/transcription/${transID}`, {transcription: txt})
-            this.working = false
-            let f = this.submission.files.find( f=> f.id == data.fileID)
-            if ( f ) {
-               let t = f.transcriptions.find( t => t.id == data.transcriptionID )
-               if ( t ) {
-                  t.text = data.transcription
-               }
-            }
-         } catch ( err ) {
-            useSystemStore().setError(err.response.data)
-            this.working = false
-         }
-      },
-
-      deleteTranscription( id ) {
-         this.working = true
-         axios.delete(`/api/admin/submissions/${this.submission.id}/transcription/${id}`).then((response) => {
-            this.working = false
-            this.submission = response.data
-         }).catch ( err => {
-            useSystemStore().setError(err.response.data)
-            this.working = false
-         })
-      },
-
-      submitTranscription(transcription, name, email) {
+      async submitTranscription(transcription, name, email) {
          this.transcribeError = ""
-         if (this.transcribeFile == null) {
-            this.transcribeError =  "File is missing"
-            return
-         }
-
-         if (transcription == "") {
-            this.transcribeError =  "Please enter a transcription"
-            return
-         }
-         if (name == "") {
-            this.transcribeError =  "Name is required"
-            return
-         }
-         if (email == "") {
-            this.transcribeError =  "Email is required"
-            return
-         }
          this.working = true
          let req = {
             transcription: transcription,
@@ -114,7 +54,7 @@ export const useDetailsStore = defineStore('details', {
             submissionID: this.submission.id,
             fileID:  this.transcribeFile.id
          }
-         axios.post("/api/transcription", req).then(() => {
+         await axios.post("/api/transcription", req).then(() => {
             let idx = this.submission.files.findIndex( f =>f.id = this.transcribeFile.id )
             if (idx > -1 ) {
                let pend = {text: "pending", approved: false}
