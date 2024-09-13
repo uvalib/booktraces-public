@@ -1,86 +1,98 @@
 <template>
-   <div class="admin-edit">
-      <div class="row">
-         <label for="title">Title of book</label>
-         <InputText id="title" v-model="edit.title" />
-      </div>
-      <div class="row">
-         <label for="author">Author (Last name, first name)</label>
-         <InputText id="author" v-model="edit.author" />
-      </div>
-      <div class="row">
-         <label for="publication">Publication place/date (e.g., London, 1888)</label>
-         <InputText id="publication" v-model="edit.publication" />
-      </div>
-      <div class="row">
-         <label for="institution">Institution where found</label>
-         <Select v-model="selectedInstitution" :options="system.institutions"
-            optionLabel="name" :editable="true"
-            placeholder="Select or create an institution" />
-      </div>
-      <div class="row">
-         <label for="callnumber">Call Number</label>
-         <InputText id="callnumber" v-model="edit.callNumber" />
-      </div>
-      <div class="row">
-         <label for="description">Description</label>
-         <Textarea id="description" v-model="edit.description" rows="4" />
-      </div>
-      <div class="row">
-         <label for="submitter">Submitted By</label>
-         <InputText id="submitter" v-model="edit.submitter" />
-      </div>
-        <!--
-         <tr>
-            <td class="label">Tags:</td>
-            <td class="value" style="position:relative;">
-               <div v-if="showTagList" class="source-tags">
-                  <p class="head">Available Tags</p>
-                  <div class="list">
-                     <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">
-                        {{tag.name}}
-                     </p>
+   <Button size="small" label="Edit" @click="showDialog=true" severity="info"/>
+   <Dialog v-model:visible="showDialog" header="Edit Submission" :modal="true" position="top" @show="opened"
+      maximizable :style="{ width: '75%' }" :blockScroll="true" :breakpoints="{'768px': '100%'}"
+   >
+      <div class="admin-edit">
+         <div class="row">
+            <label for="title">Title of book</label>
+            <InputText id="title" v-model="edit.title" />
+         </div>
+         <div class="row">
+            <label for="author">Author (Last name, first name)</label>
+            <InputText id="author" v-model="edit.author" />
+         </div>
+         <div class="row">
+            <label for="publication">Publication place/date (e.g., London, 1888)</label>
+            <InputText id="publication" v-model="edit.publication" />
+         </div>
+         <div class="row">
+            <label for="institution">Institution where found</label>
+            <Select v-model="selectedInstitution" :options="system.institutions"
+               optionLabel="name" :editable="true"
+               placeholder="Select or create an institution" />
+         </div>
+         <div class="row">
+            <label for="callnumber">Call Number</label>
+            <InputText id="callnumber" v-model="edit.callNumber" />
+         </div>
+         <div class="row">
+            <label for="description">Description</label>
+            <Textarea id="description" v-model="edit.description" rows="4" />
+         </div>
+         <div class="row">
+            <label for="submitter">Submitted By</label>
+            <InputText id="submitter" v-model="edit.submitter" />
+         </div>
+         <!--
+            <tr>
+               <td class="label">Tags:</td>
+               <td class="value" style="position:relative;">
+                  <div v-if="showTagList" class="source-tags">
+                     <p class="head">Available Tags</p>
+                     <div class="list">
+                        <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">
+                           {{tag.name}}
+                        </p>
+                     </div>
+                     <span @click="closeTagList" class="add-tag pure-button pure-button-primary">
+                        Done
+                     </span>
                   </div>
-                  <span @click="closeTagList" class="add-tag pure-button pure-button-primary">
-                     Done
+                  <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">
+                     Add
                   </span>
-               </div>
-               <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">
-                  Add
-               </span>
-               <span class="tag" v-for="(tag,idx) in editDetails.tags"
-                  :key="idx" @click="removeTag">
-                  {{tag}}
-                  <i class="pi pi-trash"></i>
-               </span>
-            </td>
-         </tr>
-         -->
-      <div class="buttons">
-         <Button size="small" label="Cancel" @click="emit('cancel')" severity="secondary"/>
-         <Button size="small" label="Save" @click="saveClicked" severity="info"/>
+                  <span class="tag" v-for="(tag,idx) in editDetails.tags"
+                     :key="idx" @click="removeTag">
+                     {{tag}}
+                     <i class="pi pi-trash"></i>
+                  </span>
+               </td>
+            </tr>
+            -->
       </div>
-   </div>
+      <template #footer>
+         <Button label="Cancel" @click="showDialog=false" severity="secondary"/>
+         <Button label="Save" @click="saveClicked" severity="info"/>
+      </template>
+   </Dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useDetailsStore } from "@/stores/details"
 import { useSystemStore } from "@/stores/system"
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
+import Dialog from 'primevue/dialog'
 
-const emit = defineEmits( ['cancel', 'save'] )
+const emit = defineEmits( ['save'] )
 
-const details = useDetailsStore()
+const props = defineProps({
+   details: {
+      type: Object,
+      required: true
+   },
+})
+
 const system = useSystemStore()
 
 const selectedInstitution = ref()
 const edit = ref({})
+const showDialog = ref(false)
 
-onMounted(() => {
-   edit.value = Object.assign({}, details.submission)
+const opened = (() => {
+   edit.value = Object.assign({}, props.details)
    selectedInstitution.value = system.institutions.find( i => i.id == edit.value.institution_id)
    console.log(edit.value)
    console.log(selectedInstitution.value)
@@ -146,23 +158,6 @@ const saveClicked = (() => {
       display: flex;
       flex-direction: column;
       gap: 5px;
-   }
-   .buttons {
-      display: flex;
-      flex-flow: row wrap;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 5px;
-   }
-}
-@media only screen and (min-width: 768px) {
-   .admin-edit {
-      width: 70%;
-   }
-}
-@media only screen and (max-width: 768px) {
-   .admin-edit {
-      width: 95%;
    }
 }
 </style>

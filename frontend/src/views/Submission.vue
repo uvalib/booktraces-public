@@ -183,6 +183,7 @@ div.details {
       justify-content: flex-start;
       gap: 15px;
       div.zoom-wrap {
+         flex: 1;
          display: flex;
          flex-direction: column;
          justify-content: stretch;
@@ -195,6 +196,7 @@ div.details {
       }
    }
    div.transcription-wrap {
+      flex: 1;
       margin: 0;
       border:1px solid #ddd;
       border-radius: 4px;
@@ -231,19 +233,18 @@ div.tags {
 
 @media only screen and (min-width: 768px) {
    .zoom-wrap {
-      flex-basis: 55%;
-      max-width: 55%;
+      max-width: 50%;
    }
    div.transcription-wrap {
-      flex-basis: 42%;
+      flex-basis: 50%;
    }
 }
 @media only screen and (max-width: 768px) {
    .zoom-wrap {
-      flex-basis: 100%;
+      max-width: 100%;
    }
    div.transcription-wrap {
-      flex-basis: 100%;
+      max-width: 100%;
    }
 }
 </style>

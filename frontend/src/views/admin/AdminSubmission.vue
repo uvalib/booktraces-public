@@ -13,7 +13,7 @@
                <i class="pi pi-arrow-left"></i>&nbsp;Back to Submissions
             </router-link>
             <div class="buttons">
-               <Button size="small" label="Edit" @click="edit=true" severity="info"/>
+               <AdminEditSubmission @save="saveEdits" :details="details.submission" />
                <Button @click="togglePublish" size="small" :severity="publishSeverity" :label="publishLabel"/>
                <Button size="small" label="Delete" @click="deleteSubmission" severity="danger"/>
             </div>
@@ -123,7 +123,6 @@
                </div>
             </div>
          </div>
-         <AdminEditSubmission v-else  @cancel="edit=false"  @save="saveEdits" />
       </template>
    </div>
 </template>
@@ -399,10 +398,12 @@ div.admin-submission {
          padding-bottom: 20px;
          border-bottom: 1px solid #ccc;
          display: flex;
+         flex-flow: row wrap;
          align-items: stretch;
-         gap: 15px;
          justify-content: flex-start;
+         gap: 15px;
          div.zoom-wrap {
+            flex:1;
             min-height: 400px;
             display: flex;
             flex-direction: column;
@@ -416,6 +417,7 @@ div.admin-submission {
          }
       }
       div.transcription-panel {
+         flex:1;
          margin: 0;
          border: 1px solid #ddd;
          border-radius: 4px;
@@ -469,11 +471,10 @@ table {
 
 @media only screen and (min-width: 768px) {
    .zoom-wrap {
-      flex-basis: 50%;
       max-width: 50%;
    }
    div.transcription-panel {
-      flex-basis: 50%;
+      max-width: 50%;
    }
    .admin-submission {
       padding: 15px 25px;
@@ -481,10 +482,10 @@ table {
 }
 @media only screen and (max-width: 768px) {
    .zoom-wrap {
-      flex-basis: 100%;
+      max-width: 100%;
    }
    div.transcription-panel {
-      flex-basis: 100%;
+      max-width: 100%;
    }
    .admin-submission {
       padding: 10px;
