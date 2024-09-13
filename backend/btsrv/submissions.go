@@ -377,9 +377,9 @@ func (svc *ServiceContext) SubmitForm(c *gin.Context) {
 }
 
 // WriteTags commits submission tags to DB
-func writeTags(db *dbx.DB, submissionID int, tags []string) {
+func writeTags(db *dbx.DB, submissionID int, tagIDs []string) {
 	log.Printf("INFO: attach tags to submission")
-	for _, tagIDStr := range tags {
+	for _, tagIDStr := range tagIDs {
 		tagID, _ := strconv.Atoi(tagIDStr)
 		_, err := db.Insert("submission_tags", dbx.Params{
 			"submission_id": submissionID,

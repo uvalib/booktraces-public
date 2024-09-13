@@ -34,32 +34,21 @@
             <label for="submitter">Submitted By</label>
             <InputText id="submitter" v-model="edit.submitter" />
          </div>
-         <!--
-            <tr>
-               <td class="label">Tags:</td>
-               <td class="value" style="position:relative;">
-                  <div v-if="showTagList" class="source-tags">
-                     <p class="head">Available Tags</p>
-                     <div class="list">
-                        <p class="tag" v-for="(tag,idx) in tags" :key="idx" @click="addTag" :data-id="tag.id">
-                           {{tag.name}}
-                        </p>
-                     </div>
-                     <span @click="closeTagList" class="add-tag pure-button pure-button-primary">
-                        Done
-                     </span>
-                  </div>
-                  <span @click="addTagClicked" class="add-tag pure-button pure-button-primary">
-                     Add
-                  </span>
-                  <span class="tag" v-for="(tag,idx) in editDetails.tags"
-                     :key="idx" @click="removeTag">
-                     {{tag}}
-                     <i class="pi pi-trash"></i>
-                  </span>
-               </td>
-            </tr>
-            -->
+         <div class="row">
+            <label>Tags:</label>
+            <div class="tags">
+               <Button v-for="tag in editTagNames" icon="pi pi-trash" :label="tag" @click="removeTag(tag)"
+                  severity="secondary" outlined rounded/>
+               <Button v-if="!showTags" label="Add Tags" rounded severity="secondary" icon="pi pi-plus" @click="showTags=true"/>
+            </div>
+            <div v-if="showTags" class="source-tags">
+               <div class="title">Available Tags:</div>
+               <div class="tags">
+                  <Button v-for="tag in availableTags" :label="tag.name" @click="addTag(tag)" severity="secondary" outlined rounded/>
+               </div>
+               <Button label="Done" rounded severity="secondary"  @click="showTags=false"/>
+            </div>
+         </div>
       </div>
       <template #footer>
          <Button label="Cancel" @click="showDialog=false" severity="secondary"/>
@@ -69,7 +58,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useSystemStore } from "@/stores/system"
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
@@ -88,63 +77,81 @@ const props = defineProps({
 const system = useSystemStore()
 
 const selectedInstitution = ref()
-const edit = ref({})
+const edit = ref({
+   title: "",
+   author: "",
+   publication: "",
+   institution_id: 0,
+   institution: "",
+	callNumber: "",
+	description: "",
+	submitter: "",
+   tags: []
+})
+const editTagNames = ref([])
 const showDialog = ref(false)
+const showTags = ref(false)
+
+const availableTags = computed(() => {
+   return system.tags.filter( st => !editTagNames.value.includes(st.name))
+})
 
 const opened = (() => {
-   edit.value = Object.assign({}, props.details)
-   selectedInstitution.value = system.institutions.find( i => i.id == edit.value.institution_id)
-   console.log(edit.value)
-   console.log(selectedInstitution.value)
+   edit.value.title = props.details.title
+   edit.value.author = props.details.author
+   edit.value.publication = props.details.publication
+	edit.value.callNumber = props.details.callNumber
+	edit.value.description = props.details.description
+	edit.value.submitter = props.details.submitter
+
+   // NOTE: the back end sends up institution as two distinct fields in th details,
+   // but the select tracks an institution object. Track that in selectedInstitution. When
+   // saved, populate the institution_id and institution fields.
+   selectedInstitution.value = system.institutions.find( i => i.id == props.details.institution_id)
+   edit.value.institution_id = 0
+   edit.value.institution = ""
+
+   // NOTE: tags in the submission details is a list of names, but the backend wants a list
+   // of tag IDs for the update. Leave tags array empty now and track edits in editTagNames.
+   // When save is clicked, convert the edited list of names to IDs.
+   edit.value.tags =  []
+   editTagNames.value = props.details.tags
 })
 
-const saveClicked = (() => {
-   // TODO move selectedInstiturion into edit and create as necessary
+const addTag = ((tagObj) => {
+   editTagNames.value.push(tagObj.name)
+})
+
+const removeTag = ((tagName) => {
+   let idx = editTagNames.value.findIndex(t => t == tagName)
+   if ( idx > -1 ) {
+      editTagNames.value.splice(idx, 1)
+   }
+})
+
+const saveClicked = ( async () => {
+   if ( typeof selectedInstitution.value == 'string' ) {
+      // if a new institution has been added, institution will just be the string name.
+      // Create a new institution, then pull the newly created info into selectedInstitution
+      await system.addInstitution( selectedInstitution.value )
+      selectedInstitution.value = system.institutions.find( i => i.name == selectedInstitution.value )
+   }
+
+   // Popuate institution in the edit object as separate fields as the back end wants it
+   edit.value.institution = selectedInstitution.value.name
+   edit.value.institution_id = selectedInstitution.value.id
+
+   // convert list of tag names to tags IDs as backend wants it
+   edit.value.tags = []
+   editTagNames.value.forEach( tagName => {
+      let tag = system.tags.find( t => t.name == tagName)
+      if ( tag ) {
+         edit.value.tags.push( tag.id)
+      }
+   })
    emit('save', edit.value)
+   showDialog.value = false
 })
-//       addInstitution(newInstitutionName) {
-//          this.$store
-//             .dispatch("addInstitution", newInstitutionName)
-//             .then(() => {
-//                this.institutions.some(i => {
-//                   if (i.name == newInstitutionName) {
-//                      this.selectedInstitution = i
-//                      return true;
-//                   }
-//                   return false;
-//                })
-//             })
-//             .catch(error => {
-//                // TODO something else maybe?
-//                alert(error)
-//             });
-//       },
-
-//       addTag(event) {
-//          let addTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-//          if (this.editDetails.tags.includes(addTag)) {
-//             return;
-//          }
-//          this.editDetails.tags.push(addTag);
-//       },
-//       closeTagList() {
-//          this.showTagList = false;
-//       },
-//       removeTag(event) {
-//          let delTag = event.currentTarget.textContent.replace(/^\s+|\s+$/g, "");
-//          var delIdx = -1;
-//          this.editDetails.tags.some(function(tag, idx) {
-//             if (tag == delTag) {
-//                delIdx = idx;
-//                return true;
-//             }
-//             return false;
-//          });
-//          this.editDetails.tags.splice(delIdx, 1);
-//       },
-//       addTagClicked() {
-//          this.showTagList = true;
-//       },
 </script>
 
 <style scoped lang="scss">
@@ -152,12 +159,27 @@ const saveClicked = (() => {
    display: flex;
    flex-direction: column;
    gap: 20px;
-   margin: 50px auto;
 
    .row {
       display: flex;
       flex-direction: column;
       gap: 5px;
+   }
+   .tags {
+      display: flex;
+      flex-flow: row wrap;
+      gap: 5px 10px;
+      margin-bottom: 10px;
+   }
+   .source-tags {
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 5px;
+      .title {
+         padding-bottom: 10px;
+         border-bottom: 1px solid #ddd;
+         margin-bottom: 20px;
+      }
    }
 }
 </style>

@@ -60,7 +60,6 @@ export const useAdminStore = defineStore('admin', {
             this.submissions.start = response.data.start
             this.submissions.hits = response.data.submissions
             this.working = false
-            console.log("GOT ADMIN SUBMISSIONS")
          }).catch((error) => {
             this.working = false
             useSystemStore().setError("Unable to get recent submissions: " + error.response.data)
@@ -121,7 +120,6 @@ export const useAdminStore = defineStore('admin', {
             origEvt.date = updated.date
             origEvt.description = updated.description
             this.working = false
-            console.log("UPDATED")
          }).catch((error) => {
             this.error = error.response.data
             this.working = false
@@ -189,34 +187,13 @@ export const useAdminStore = defineStore('admin', {
          })
       },
 
-      updateSubmission(modified) {
-         // FIXME
-         // // update wants tags to be a list of IDs, but currently has names...
-         // // clone the original list of tag names
-         // var tagNames = []
-         // if (modified.tags) {
-         //    tagNames = modified.tags.slice(0)
-         //    for (let i = 0; i < modified.tags.length; i++) {
-         //       let tn = modified.tags[i]
-         //       this.rootState.tags.some(function (t) {
-         //          if (t.name == tn) {
-         //             modified.tags[i] = t.id
-         //          }
-         //          return t.name == tn
-         //       })
-         //    }
-         // }
-         // return new Promise((resolve, reject) => {
-         //    axios.post("/api/admin/submissions/" + modified.id, modified).then((/*response*/) => {
-         //       // put the string tags back in place and update the model in root state
-         //       modified.tags = tagNames.slice(0)
-         //       this.commit("setSubmissionDetail", modified, { root: true })
-         //       resolve()
-         //    }).catch((error) => {
-         //       useSystemStore().setError(error.response.data)
-         //       reject(error)
-         //    })
-         // })
+      async updateSubmission(id, modified) {
+         this.working = true
+         await axios.put(`/api/admin/submissions/${id}`, modified).catch((error) => {
+            this.error = error.response.data
+         }).finally( ()=>{
+            this.working = false
+         })
       },
 
       getPedagogyDocuments() {

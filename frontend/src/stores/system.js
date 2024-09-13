@@ -99,7 +99,7 @@ export const useSystemStore = defineStore('system', {
       },
       async addInstitution(name) {
          let url = `/api/institutions`
-         return axios.post(url, { name: name }).then((response) => {
+         await axios.post(url, { name: name }).then((response) => {
             this.institutions.push( response.data )
          })
       },

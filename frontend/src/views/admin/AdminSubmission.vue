@@ -172,23 +172,14 @@ const publishLabel = computed(() => {
  })
 
 onMounted(() => {
-   console.log("ID "+route.params.id )
    details.getSubmission( route.params.id )
    system.getTags()
    system.getInstitutions()
 })
 
-const saveEdits = (( edits ) => {
-   // TODO
-//          this.editDetails.institution_id = this.selectedInstitution.id
-//          this.editDetails.institution = this.selectedInstitution.name
-//          this.$store
-//             .dispatch("admin/updateSubmission", this.editDetails)
-//             .then((/*response*/) => {
-//                this.edit = false;
-//                this.editDetails = null;
-//             });
-   console.log(edits)
+const saveEdits = ( async ( edits ) => {
+   await admin.updateSubmission( details.submission.id, edits )
+   details.getSubmission( details.submission.id )
 })
 
 const togglePublish = ( () => {
@@ -306,19 +297,6 @@ const getTranscribeStatus = ((f) => {
 //             imgURL: imgURL
 //          });
 //       },
-
-//       editClicked() {
-//          this.editDetails = Object.assign({}, this.details);
-//          this.edit = true;
-//          this.institutions.some(i => {
-//             if (i.name == this.editDetails.institution) {
-//                this.selectedInstitution = i
-//                return true
-//             }
-//             return false
-//          })
-//       },
-
 </script>
 
 <style scoped lang="scss">
@@ -366,7 +344,7 @@ div.admin-submission {
       flex-flow: row wrap;
       justify-content: flex-start;
       align-items: center;
-      gap: 5px;
+      gap: 10px;
    }
    div.actions, .transcribe-acts {
       padding: 10px;

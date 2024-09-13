@@ -204,6 +204,12 @@ func (svc *ServiceContext) UnpublishSubmission(c *gin.Context) {
 
 // UpdateSubmission updates the details (aside from publish status) of a submission
 func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
+	subID, _ := strconv.Atoi(c.Param("id"))
+	if subID == 0 {
+		log.Printf("ERROR: invalid submissionID  %s", c.Param("id"))
+		c.String(http.StatusBadRequest, "invalid submission id")
+		return
+	}
 	var submission AdminSubmission
 	err := c.ShouldBindJSON(&submission)
 	if err != nil {
@@ -211,6 +217,7 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
+	submission.ID = subID
 	log.Printf("INFO: received updated submission: %+v", submission)
 	err = svc.DB.Model(&submission).Exclude("Files", "Tags", "UploadID", "SubmittedAt", "Public").Update()
 	if err != nil {
@@ -221,10 +228,10 @@ func (svc *ServiceContext) UpdateSubmission(c *gin.Context) {
 
 	log.Printf("INFO: updating all tags")
 	dq := svc.DB.NewQuery("delete from submission_tags where submission_id={:id}")
-	dq.Bind(dbx.Params{"id": submission.ID})
+	dq.Bind(dbx.Params{"id": subID})
 	dq.Execute()
 
-	writeTags(svc.DB, submission.ID, submission.Tags)
+	writeTags(svc.DB, subID, submission.Tags)
 
 	c.String(http.StatusOK, "ok")
 }
