@@ -28,8 +28,10 @@ import BookTraces from '@/assets/theme/booktraces'
 import 'primeicons/primeicons.css'
 import Button from 'primevue/button'
 import ConfirmationService from 'primevue/confirmationservice'
+import ToastService from 'primevue/toastservice'
 import ConfirmDialog from 'primevue/confirmdialog'
 
+app.use(ToastService)
 app.use(ConfirmationService)
 app.component("Button", Button)
 app.component("ConfirmDialog", ConfirmDialog)

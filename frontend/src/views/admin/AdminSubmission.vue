@@ -67,8 +67,8 @@
             <div class="thumbs">
                <div class="thumb" v-for="file in details.submission.files">
                   <div class="zoom-wrap">
-                     <vue-image-zoomer :regular="file.url" />
-                     <!-- <p @click="rotateClicked(f.url)" class="pure-button rotate">Rotate Right</p> -->
+                     <vue-image-zoomer :regular="file.url" :zoom-amount="4"/>
+                     <Button severity="info" label="Rotate Right" @click="rotateClicked(file.url)" />
                   </div>
                   <div class="transcription-panel">
                      <div class="head">Transcriptions</div>
@@ -135,7 +135,9 @@ import { useDetailsStore } from "@/stores/details"
 import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from "primevue/useconfirm"
 import AdminEditSubmission from "@/components/AdminEditSubmission.vue"
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const confirm = useConfirm()
 const system = useSystemStore()
 const admin = useAdminStore()
@@ -224,20 +226,25 @@ const deleteSubmission = ( () => {
    })
 })
 
+const rotateClicked = ( async (imgURL) => {
+   await admin.rotateImage( details.submission.id, imgURL)
+   toast.add({
+      severity: 'success', summary: 'Rotate Success',
+      detail: 'The image has been rotated, but is cached in your browser. Wait a few seconds, clear the cache and reload the page to see the rotated image.' })
+})
+
 const nextTran = (( image ) => {
    if (transcriptionIdx.value == image.transcriptions.length -1) {
       return
    }
    transcriptionIdx.value++
 })
-
 const priorTran = (() => {
    if (transcriptionIdx.value == 0) {
       return
    }
    transcriptionIdx.value--
 })
-
 const getTranscribeDate = ((f) => {
    if (f.transcriptions.length == 0) return ""
    let t = f.transcriptions[transcriptionIdx.value]
@@ -288,14 +295,6 @@ const getTranscribeStatus = ((f) => {
 //             this.$store.dispatch("transcribe/delete", t.id)
 //             transcriptionIdx.value = 0
 //          }
-//       },
-
-
-//       rotateClicked(imgURL) {
-//          this.$store.dispatch("admin/rotateImage", {
-//             submissionID: details.submission.id,
-//             imgURL: imgURL
-//          });
 //       },
 </script>
 

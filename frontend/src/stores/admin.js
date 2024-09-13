@@ -35,11 +35,12 @@ export const useAdminStore = defineStore('admin', {
          this.user = { firstName: "", lastName: "", title: "", affiliation: "", email: "", phone: "" }
       },
 
-      rotateImage(data) {
+      async rotateImage(submissionID, imageURL) {
          this.working = true
-         let url = `/api/admin/submissions/${data.submissionID}/rotate?url=${data.imgURL}`
-         axios.put(url, { withCredentials: true }).then((_response) => {
+         let url = `/api/admin/submissions/${submissionID}/rotate?url=${imageURL}`
+         await axios.put(url, { withCredentials: true }).then((_response) => {
             this.working = false
+            console.log("ROTATED")
          }).catch((error) => {
             this.working = false
             useSystemStore().setError("Unable to get rotate image: " + error.response.data)

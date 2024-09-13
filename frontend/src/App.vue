@@ -7,6 +7,7 @@
          </div>
       </template>
    </ConfirmDialog>
+   <Toast position="top-center" />
    <BookTracesHeader/>
    <template v-if="system.adminMode">
       <router-view/>
@@ -31,6 +32,7 @@ import BookTracesSidebar from "@/components/BookTracesSidebar.vue"
 import BookTracesHeader from "@/components/BookTracesHeader.vue"
 import BookTracesFooter from "@/components/BookTracesFooter.vue"
 import { useSystemStore } from "@/stores/system"
+import Toast from 'primevue/toast'
 
 const system = useSystemStore()
 
