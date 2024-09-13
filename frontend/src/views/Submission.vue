@@ -33,7 +33,10 @@
                <div class="transcription-wrap">
                   <div class="head">Transcription</div>
                   <div class="transcription">
-                     <pre>{{transcription(file)}}</pre>
+                     <div class="pending" v-if="hasPendingTranscription(file)">
+                        Transcription under review.<br/>Please check back in a few days.
+                     </div>
+                     <pre v-else>{{transcription(file)}}</pre>
                   </div>
                </div>
             </div>
@@ -73,6 +76,17 @@ onBeforeMount(() => {
 
 const transcribeClicked = ((imgFile) => {
    details.setTranscriptionTarget( imgFile )
+})
+
+const hasPendingTranscription = ((imgFile) => {
+   if (imgFile.transcriptions.length == 0 ) return false
+   let pending = true
+   imgFile.transcriptions.forEach( t => {
+      if (t.approved === true) {
+         pending = false
+      }
+   })
+   return pending
 })
 
 const transcription = ((imgFile) => {
