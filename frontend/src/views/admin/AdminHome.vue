@@ -194,18 +194,22 @@ h2 {
    align-items: flex-start;
    margin-bottom: 15px;
    .left {
+      flex:1;
       display: flex;
       flex-flow: row nowrap;
+      justify-content: flex-start;
       gap: 15px;
       .search {
+         flex:1;
          display: flex;
          flex-flow: row nowrap;
          align-items: stretch;
+         justify-content: flex-start;
          gap: 10px;
          input {
+            flex: 1;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 300px;
          }
       }
       .tag-filter {

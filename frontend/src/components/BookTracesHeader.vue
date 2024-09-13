@@ -45,6 +45,16 @@
             <li><span @click="showSearchClick" class="search small">Search</span></li>
          </ul>
       </div>
+      <div v-else class="hmenu">
+         <div @click="toggleHMenu" class="hmenu-button"><i class="pi pi-bars"></i></div>
+         <ul id="hmenu" class="hmenu-items hidden">
+            <li class="public pure-menu-item"><router-link to="/">Public</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/submissions">Submissions</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/events">Events</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/news">News</router-link></li>
+            <li class="pure-menu-item"><router-link to="/admin/pedagogy">Pedagogy</router-link></li>
+         </ul>
+      </div>
    </div>
 </template>
 
@@ -98,10 +108,10 @@ span.search.small {
 }
 .hmenu-items {
    position: absolute;
-   right: 15px;
+   right: 0;
    z-index: 1000;
    background: #222;
-   width: 100px;
+   width: 145px;
    list-style: none;
    padding: 10px 10px;
    margin: 0;

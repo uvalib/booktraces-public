@@ -43,6 +43,14 @@ const system = useSystemStore()
    #app .main div.pure-u-5-6.bkg {
       width: 100%;
    }
+   #app div.content {
+      margin: 25px;
+   }
+}
+@media only screen and (max-width: 768px) {
+   #app div.content {
+      margin: 0 !important;
+   }
 }
 html,
 body {
@@ -93,7 +101,6 @@ div.bkg {
    font-weight: 400;
    color: #444;
    border: 1px solid #222;
-   /* width: 80%; */
    margin: 25px;
 }
 #app .content h2 {
