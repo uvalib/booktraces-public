@@ -7,7 +7,7 @@ FROM public.ecr.aws/docker/library/golang:1.22.3-alpine3.20 as builder
 RUN apk update && apk upgrade && apk add --no-cache make npm
 
 # see: https://stackoverflow.com/questions/69692842/error-message-error0308010cdigital-envelope-routinesunsupported
-ENV NODE_OPTIONS --openssl-legacy-provider
+ENV NODE_OPTIONS=--openssl-legacy-provider
 
 WORKDIR /build
 COPY go.mod go.sum Makefile ./
@@ -22,7 +22,13 @@ RUN make linux-full
 FROM public.ecr.aws/docker/library/alpine:3.20
 
 # update the packages
-RUN apk update && apk upgrade && apk add bash curl tzdata ca-certificates imagemagick msttcorefonts-installer && rm -rf /var/cache/apk/* && update-ms-fonts
+RUN apk update && apk upgrade && apk add bash curl tzdata ca-certificates msttcorefonts-installer && rm -rf /var/cache/apk/* && update-ms-fonts
+
+# image magick support
+RUN apk add fftw-double-libs fontconfig freetype ghostscript ghostscript-fonts lcms2 libbz2 libgcc libgomp libheif libjxl libltdl libraw libx11 libxext libxml2 openjpeg pango tiff zlib libwebpmux libwebpdemux
+COPY distro/bin/magick /usr/local/bin
+RUN ln -s /usr/local/bin/magick /usr/local/bin/convert && ln -s /usr/local/bin/magick /usr/local/bin/identify
+COPY distro/etc/ /usr/local/etc
 
 # Create the run user and group
 RUN addgroup --gid 18570 sse && adduser --uid 1984 docker -G sse -D
@@ -32,7 +38,7 @@ ENV TZ=UTC
 RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Specify home
-ENV APP_HOME /booktraces-public
+ENV APP_HOME=/booktraces-public
 WORKDIR $APP_HOME
 
 # Create necessary directories
@@ -40,7 +46,7 @@ RUN mkdir -p $APP_HOME/scripts $APP_HOME/bin $APP_HOME/db
 RUN chown -R docker $APP_HOME && chgrp -R sse $APP_HOME
 
 # add the migrate tool
-ENV MIGRATE_VERSION v4.17.1
+ENV MIGRATE_VERSION=v4.18.1
 RUN cd $APP_HOME/bin && curl -L https://github.com/golang-migrate/migrate/releases/download/${MIGRATE_VERSION}/migrate.linux-amd64.tar.gz | tar xvz && rm LICENSE README.md
 
 # Specify the user
