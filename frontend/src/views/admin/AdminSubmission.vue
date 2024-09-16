@@ -20,48 +20,50 @@
          </div>
          <div v-if="!edit" class="details">
             <table class="submit-info">
-               <tr>
-                  <td class="label">Visible to public:</td>
-                  <td class="value">{{ published }}</td>
-               </tr>
-               <tr>
-                  <td class="label">Title:</td>
-                  <td class="value">{{details.submission.title}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Author:</td>
-                  <td class="value">{{details.submission.author}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Publication details:</td>
-                  <td class="value">{{details.submission.publication}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Institution:</td>
-                  <td class="value">{{details.submission.institution}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Call number:</td>
-                  <td class="value">{{details.submission.callNumber}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Submitted by:</td>
-                  <td class="value">{{details.submission.submitter}} ( {{details.submission.email}} )</td>
-               </tr>
-               <tr>
-                  <td class="label">Submitted on:</td>
-                  <td class="value">{{ details.submission.submittedAt.split("T")[0] }}</td>
-               </tr>
-               <tr>
-                  <td class="label">Tags:</td>
-                  <td class="value">{{submissionTagCSV}}</td>
-               </tr>
-               <tr>
-                  <td class="label">Description:</td>
-                  <td class="value">
-                     <span v-html="description"></span>
-                  </td>
-               </tr>
+               <tbody>
+                  <tr>
+                     <td class="label">Visible to public:</td>
+                     <td class="value">{{ published }}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Title:</td>
+                     <td class="value">{{details.submission.title}}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Author:</td>
+                     <td class="value">{{details.submission.author}}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Publication details:</td>
+                     <td class="value">{{details.submission.publication}}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Institution:</td>
+                     <td class="value">{{details.submission.institution}}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Call number:</td>
+                     <td class="value">{{details.submission.callNumber}}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Submitted by:</td>
+                     <td class="value">{{details.submission.submitter}} ( {{details.submission.email}} )</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Submitted on:</td>
+                     <td class="value">{{ details.submission.submittedAt.split("T")[0] }}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Tags:</td>
+                     <td class="value">{{submissionTagCSV}}</td>
+                  </tr>
+                  <tr>
+                     <td class="label">Description:</td>
+                     <td class="value">
+                        <span v-html="description"></span>
+                     </td>
+                  </tr>
+               </tbody>
             </table>
             <div class="thumbs">
                <div class="thumb" v-for="file in details.submission.files">
@@ -90,18 +92,20 @@
                         </div>
                         <div class="transcription-info" v-if="file.transcriptions.length > 0">
                            <table>
-                              <tr>
-                                 <td class="label">Date:</td>
-                                 <td>{{ getTranscribeDate(file) }}</td>
-                              </tr>
-                              <tr>
-                                 <td class="label">Submitter:</td>
-                                 <td>{{ getTranscriber(file) }}</td>
-                              </tr>
-                              <tr>
-                                 <td class="label">Status:</td>
-                                 <td>{{ getTranscribeStatus(file) }}</td>
-                              </tr>
+                              <tbody>
+                                 <tr>
+                                    <td class="label">Date:</td>
+                                    <td>{{ getTranscribeDate(file) }}</td>
+                                 </tr>
+                                 <tr>
+                                    <td class="label">Submitter:</td>
+                                    <td>{{ getTranscriber(file) }}</td>
+                                 </tr>
+                                 <tr>
+                                    <td class="label">Status:</td>
+                                    <td>{{ getTranscribeStatus(file) }}</td>
+                                 </tr>
+                              </tbody>
                            </table>
                            <div class="edit-trans" v-if="editTrans">
                               <Textarea id="description" v-model="workingTrans" rows="4" />

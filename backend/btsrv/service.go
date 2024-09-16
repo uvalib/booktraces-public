@@ -155,6 +155,7 @@ func generateThumbnails(srcDir string) error {
 		log.Printf("INFO: convert args: %+v", args)
 		cmd := exec.Command("convert", args...)
 		thumbOut, err := cmd.CombinedOutput()
+		log.Printf("INFO: thub output [%s]", thumbOut)
 		if err != nil {
 			return fmt.Errorf("thumb generate failed [%s]: %s", thumbOut, err.Error())
 		}

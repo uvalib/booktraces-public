@@ -2,10 +2,12 @@
    <div class="content events">
       <h2>Events</h2>
       <table>
-         <tr v-for="event in system.events">
-            <td class="date">{{event.date}}</td>
-            <td><span v-html="event.description"></span></td>
-         </tr>
+         <tbody>
+            <tr v-for="event in system.events">
+               <td class="date">{{event.date}}</td>
+               <td><span v-html="event.description"></span></td>
+            </tr>
+         </tbody>
       </table>
    </div>
 </template>

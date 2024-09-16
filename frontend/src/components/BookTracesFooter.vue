@@ -34,8 +34,8 @@ const system = useSystemStore()
 
 <style scoped>
 footer {
-   background-color: black;
-   color: #ccc;
+   background-color: #222;
+   color: #dadada;
    padding:20px;
    font-size: 0.9em;
    font-weight: 500;
