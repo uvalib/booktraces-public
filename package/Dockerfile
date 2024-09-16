@@ -22,7 +22,13 @@ RUN make linux-full
 FROM public.ecr.aws/docker/library/alpine:3.20
 
 # update the packages
-RUN apk update && apk upgrade && apk add bash curl tzdata ca-certificates imagemagick msttcorefonts-installer && rm -rf /var/cache/apk/* && update-ms-fonts
+RUN apk update && apk upgrade && apk add bash curl tzdata ca-certificates msttcorefonts-installer && rm -rf /var/cache/apk/* && update-ms-fonts
+
+# image magick support
+RUN apk add fftw-double-libs fontconfig freetype ghostscript ghostscript-fonts lcms2 libbz2 libgcc libgomp libheif libjxl libltdl libraw libx11 libxext libxml2 openjpeg pango tiff zlib libwebpmux libwebpdemux
+COPY distro/bin/magick /usr/local/bin
+RUN ln -s /usr/local/bin/magick /usr/local/bin/convert && ln -s /usr/local/bin/magick /usr/local/bin/identify
+COPY distro/etc/ /usr/local/etc
 
 # Create the run user and group
 RUN addgroup --gid 18570 sse && adduser --uid 1984 docker -G sse -D
@@ -40,7 +46,7 @@ RUN mkdir -p $APP_HOME/scripts $APP_HOME/bin $APP_HOME/db
 RUN chown -R docker $APP_HOME && chgrp -R sse $APP_HOME
 
 # add the migrate tool
-ENV MIGRATE_VERSION v4.17.1
+ENV MIGRATE_VERSION v4.18.1
 RUN cd $APP_HOME/bin && curl -L https://github.com/golang-migrate/migrate/releases/download/${MIGRATE_VERSION}/migrate.linux-amd64.tar.gz | tar xvz && rm LICENSE README.md
 
 # Specify the user
