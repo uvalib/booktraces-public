@@ -23,8 +23,7 @@
             <div><label>Submitted by: </label><span class="value">{{submission.submitter}}</span></div>
             <div><label>Description: </label><p class="value" v-html="formatDescription(submission.description)"></p></div>
          </div>
-         <Transcribe v-if="details.isTranscribing" />
-         <div v-else class="images-wrapper">
+         <div class="images-wrapper">
             <div class="image-controls">
                <div class="section">
                   <Button id="rotate-left" icon="pi pi-undo" rounded severity="secondary"/>
@@ -32,7 +31,7 @@
                   <Button id="zoom-in" icon="pi pi-search-plus" rounded severity="secondary"/>
                   <Button id="zoom-out" icon="pi pi-search-minus" rounded severity="secondary"/>
                </div>
-               <div class="section wide" v-if="submission.files.length > 1">
+               <div class="section wide" v-if="submission.files.length > 1 && details.isTranscribing == false">
                   <Button icon="pi pi-chevron-left" rounded severity="secondary"
                      :disabled="currImageIdx==0" @click="prevImage"/>
                   <span>Image {{ currImageIdx+1 }} of {{ submission.files.length }}</span>
@@ -43,11 +42,27 @@
             <div class="image-content">
                <div class="zoom-wrap">
                   <div id="dragon" class="viewer"></div>
-                  <Button severity="info" @click="transcribeClicked(file)" label="Transcribe"/>
+                  <Button severity="info" @click="transcribeClicked(file)" label="Transcribe" :disabled="details.isTranscribing"/>
                </div>
                <div class="transcription-wrap">
                   <div class="head">Transcription</div>
-                  <div class="transcription">
+                  <div class="trans-form" v-if="details.isTranscribing">
+                     <Textarea rows="6" v-model="newTranscription.text" />
+                     <div class="row">
+                        <label for="submitter">Transcribed By<span class="required">(required)</span></label>
+                        <InputText id="submitted" v-model="newTranscription.name" />
+                     </div>
+                     <div class="row">
+                        <label for="email">Email Address<span class="required">(required)</span></label>
+                        <InputText id="email" v-model="newTranscription.email"/>
+                        <p class="note">We will keep your email address private and will only use if if we need to contact you about your transcription.</p>
+                     </div>
+                     <div class="controls">
+                        <Button @click="cancelTranscribeClicked" severity="secondary" label="Cancel"/>
+                        <Button @click="submitTranscribeClicked" label="Submit" :disabled="!canSubmit" />
+                     </div>
+                  </div>
+                  <div v-else class="transcription">
                      <div class="pending" v-if="hasPendingTranscription">
                         Transcription under review.<br/>Please check back in a few days.
                      </div>
@@ -56,8 +71,8 @@
                </div>
             </div>
          </div>
-         <div class="tags" v-if="!details.isTranscribing">
-            <Button v-for="tag in submission.tags" severity="info" rounded small :label="tag"  @click="tagClicked(tag)"/>
+         <div class="tags">
+            <Button v-for="tag in submission.tags" severity="info" rounded small :label="tag"  @click="tagClicked(tag)" :disabled="details.isTranscribing"/>
          </div>
       </template>
    </div>
@@ -68,10 +83,13 @@ import { onMounted, computed, ref, onUnmounted } from 'vue'
 import { useDetailsStore } from "@/stores/details"
 import { useSystemStore } from "@/stores/system"
 import { useSubmissionsStore } from "@/stores/submissions"
-import Transcribe from "@/components/Transcribe.vue"
 import { useRoute, useRouter } from 'vue-router'
 import OpenSeadragon from "openseadragon"
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const system = useSystemStore()
 const submissions = useSubmissionsStore()
 const details = useDetailsStore()
@@ -79,6 +97,7 @@ const route = useRoute()
 const router = useRouter()
 const viewer = ref()
 const currImageIdx = ref(0)
+const newTranscription = ref({text: "", name: "", email: ""})
 
 const submitDate = computed( () => {
    return details.submission.submittedAt.split("T")[0]
@@ -86,6 +105,11 @@ const submitDate = computed( () => {
 
 const submission = computed( () => {
    return details.submission
+})
+
+const canSubmit = computed(() => {
+   if (details.working) return false
+   return newTranscription.value.text != "" && newTranscription.value.name != "" && newTranscription.value.email != ""
 })
 
 onMounted( async () => {
@@ -192,6 +216,25 @@ const nextClicked = (async () => {
       viewer.value.destroy()
       initViewer()
       router.push("/submissions/" + details.submission.previousId)
+   }
+})
+
+const cancelTranscribeClicked = (() => {
+   details.cancelTranscription()
+})
+
+const submitTranscribeClicked = (async () => {
+   await details.submitTranscription(newTranscription.value.text, newTranscription.value.name, newTranscription.value.email)
+   if (details.transcribeError == "" ) {
+      toast.add( {
+         severity: 'success', summary: 'Transcription Submitted',
+         detail: `The transcription has been submitted. It will appear online after it has been reviewd and approved. Check back later.`
+      })
+   } else {
+      toast.add( {
+         severity: 'error', summary: 'Transcription Error',
+         detail: `Transcription submission failed: ${details.transcribeError}`
+      })
    }
 })
 
@@ -313,6 +356,28 @@ div.details {
             white-space: -pre-wrap;      /* Opera 4-6 */
             white-space: -o-pre-wrap;    /* Opera 7 */
             word-wrap: break-word;       /* Internet Explorer 5.5+ */
+         }
+      }
+      .trans-form {
+         padding: 20px;
+         display: flex;
+         flex-direction: column;
+         gap: 20px;
+         .row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            .required {
+               display: inline-block;
+               margin-left: 5px;
+               color: #aaa;
+            }
+         }
+         .controls {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: flex-end;
+            gap: 10px;
          }
       }
    }
