@@ -18,10 +18,6 @@ app.use(router)
 import BTSpinner from "@/components/BTSpinner.vue"
 app.component('BTSpinner', BTSpinner)
 
-import VueImageZoomer from 'vue-image-zoomer'
-import 'vue-image-zoomer/dist/style.css'
-app.use(VueImageZoomer)
-
 // Primevue setup
 import PrimeVue from 'primevue/config'
 import BookTraces from '@/assets/theme/booktraces'

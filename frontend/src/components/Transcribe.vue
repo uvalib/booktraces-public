@@ -63,7 +63,7 @@ onMounted(() => {
          type: 'image',
          url:  details.transcribeFile.url
       },
-   });
+   })
 })
 
 const cancelClicked = (() => {

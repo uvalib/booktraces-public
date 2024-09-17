@@ -14,9 +14,11 @@ export const useDetailsStore = defineStore('details', {
          return state.transcribeFile != null
       },
       hasNext: state => {
+         if ( !state.submission ) return false
          return state.submission.previousId > 0
       },
       hasPrev: state => {
+         if ( !state.submission ) return false
          return state.submission.nextId > 0
       },
    },
@@ -31,11 +33,11 @@ export const useDetailsStore = defineStore('details', {
          this.transcribeError = ""
       },
 
-      getSubmission(id) {
+      async getSubmission(id) {
          const system = useSystemStore()
          system.loading = true
          this.submission = null
-         axios.get("/api/submissions/" + id).then((response) => {
+         await axios.get("/api/submissions/" + id).then((response) => {
             this.submission = response.data
             system.loading  = false
          }).catch((error) => {

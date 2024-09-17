@@ -6,7 +6,7 @@
             <b>Logged in as:</b>{{admin.loginName}}
          </span>
       </h2>
-      <BTSpinner v-if="system.loading==true" message="Loading details..." />
+      <BTSpinner v-if="system.loading==true || details.submission == null" message="Loading details..." />
       <template v-else>
          <div class="actions" v-if="!edit">
             <router-link to="/admin">
@@ -65,63 +65,76 @@
                   </tr>
                </tbody>
             </table>
-            <div class="thumbs">
-               <div class="thumb" v-for="file in details.submission.files">
-                  <div class="zoom-wrap">
-                     <vue-image-zoomer :regular="file.url" :zoom-amount="4"/>
-                     <Button severity="info" label="Rotate Right" @click="rotateClicked(file.url)" />
-                  </div>
-                  <div class="transcription-panel">
-                     <div class="head">Transcriptions</div>
-                     <div v-if="file.transcriptions.length == 0" class="none">None</div>
-                     <template v-else>
-                        <div class="transcribe-acts">
-                           <div class="buttons">
-                              <Button v-if="file.transcriptions[transcriptionIdx].approved==false" aria-label="approve transcription"
-                                 icon="pi pi-check-circle"  size="small" @click="approveTranscription(file)"/>
-                              <Button icon="pi pi-file-edit"  severity="secondary" size="small" @click="editTranscription(file)"/>
-                              <Button icon="pi pi-trash"  severity="danger" size="small" @click="deleteTranscription(file)"/>
-                           </div>
-                           <span class="paging">
-                              <Button icon="pi pi-chevron-left" rounded severity="secondary" size="small"
-                                 :disabled="transcriptionIdx == 0" @click="priorTran()"/>
-                              <span>{{transcriptionIdx+1}} of {{file.transcriptions.length}}</span>
-                              <Button icon="pi pi-chevron-right" rounded severity="secondary" size="small"
-                                 :disabled="transcriptionIdx == file.transcriptions.length-1" @click="nextTran(file)"/>
-                           </span>
+         </div>
+         <div class="images-wrapper">
+            <div class="image-controls">
+               <div class="section">
+                  <Button id="zoom-in" icon="pi pi-search-plus" rounded severity="secondary"/>
+                  <Button id="zoom-out" icon="pi pi-search-minus" rounded severity="secondary"/>
+               </div>
+               <div class="section wide" v-if="details.submission.files.length > 1">
+                  <Button icon="pi pi-chevron-left" rounded severity="secondary"
+                     :disabled="currImageIdx==0" @click="prevImage"/>
+                  <span>Image {{ currImageIdx+1 }} of {{ details.submission.files.length }}</span>
+                  <Button icon="pi pi-chevron-right" rounded severity="secondary"
+                     :disabled="currImageIdx==details.submission.files.length-1" @click="nextImage"/>
+               </div>
+            </div>
+            <div class="image-content">
+               <div class="zoom-wrap">
+                  <div id="dragon" class="viewer"></div>
+                  <Button severity="info" label="Rotate Right" @click="rotateClicked" />
+               </div>
+               <div class="transcription-panel">
+                  <div class="head">Transcriptions</div>
+                  <div v-if="hasTranscription == false" class="none">None</div>
+                  <template v-else>
+                     <div class="transcribe-acts">
+                        <div class="buttons">
+                           <Button v-if="isTranscriptionApproved" aria-label="approve transcription"
+                              icon="pi pi-check-circle"  size="small" @click="approveTranscription(currImage)"/>
+                           <Button icon="pi pi-file-edit"  severity="secondary" size="small" @click="editTranscription(currImage)"/>
+                           <Button icon="pi pi-trash"  severity="danger" size="small" @click="deleteTranscription(currImage)"/>
                         </div>
-                        <div class="transcription-info" v-if="file.transcriptions.length > 0">
-                           <table>
-                              <tbody>
-                                 <tr>
-                                    <td class="label">Date:</td>
-                                    <td>{{ getTranscribeDate(file) }}</td>
-                                 </tr>
-                                 <tr>
-                                    <td class="label">Submitter:</td>
-                                    <td>{{ getTranscriber(file) }}</td>
-                                 </tr>
-                                 <tr>
-                                    <td class="label">Status:</td>
-                                    <td>{{ getTranscribeStatus(file) }}</td>
-                                 </tr>
-                              </tbody>
-                           </table>
-                           <div class="edit-trans" v-if="editTrans">
-                              <Textarea id="description" v-model="workingTrans" rows="4" />
-                              <div class="actions">
-                                 <span class="buttons">
-                                    <Button severity="secondary" label="Cancel" @click="cancelEditTranscription" />
-                                    <Button severity="info" label="Submit" @click="submitEditTranscription(file)" />
-                                 </span>
-                              </div>
+                        <span class="paging">
+                           <Button icon="pi pi-chevron-left" rounded severity="secondary" size="small"
+                              :disabled="transcriptionIdx == 0" @click="priorTran()"/>
+                           <span>{{transcriptionIdx+1}} of {{currImage.transcriptions.length}}</span>
+                           <Button icon="pi pi-chevron-right" rounded severity="secondary" size="small"
+                              :disabled="transcriptionIdx == currImage.transcriptions.length-1" @click="nextTran()"/>
+                        </span>
+                     </div>
+                     <div class="transcription-info" v-if="currImage.transcriptions.length > 0">
+                        <table>
+                           <tbody>
+                              <tr>
+                                 <td class="label">Date:</td>
+                                 <td>{{ transcribeDate }}</td>
+                              </tr>
+                              <tr>
+                                 <td class="label">Submitter:</td>
+                                 <td>{{ transcriber }}</td>
+                              </tr>
+                              <tr>
+                                 <td class="label">Status:</td>
+                                 <td>{{ transcribeStatus }}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <div class="edit-trans" v-if="editTrans">
+                           <Textarea id="description" v-model="workingTrans" rows="4" />
+                           <div class="actions">
+                              <span class="buttons">
+                                 <Button severity="secondary" label="Cancel" @click="cancelEditTranscription" />
+                                 <Button severity="info" label="Submit" @click="submitEditTranscription" />
+                              </span>
                            </div>
-                           <template v-else>
-                              <pre class="transcription">{{file.transcriptions[transcriptionIdx].text}}</pre>
-                           </template>
                         </div>
-                     </template>
-                  </div>
+                        <template v-else>
+                           <pre class="transcription">{{currImage.transcriptions[transcriptionIdx].text}}</pre>
+                        </template>
+                     </div>
+                  </template>
                </div>
             </div>
          </div>
@@ -138,6 +151,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from "primevue/useconfirm"
 import AdminEditSubmission from "@/components/AdminEditSubmission.vue"
 import Textarea from 'primevue/textarea'
+import OpenSeadragon from "openseadragon"
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
@@ -147,6 +161,8 @@ const admin = useAdminStore()
 const details = useDetailsStore()
 const route = useRoute()
 const router = useRouter()
+const viewer = ref()
+const currImageIdx = ref(0)
 
 const edit = ref(false)
 const editTrans = ref(false)
@@ -165,6 +181,10 @@ const submissionTagCSV = computed(() => {
    return ""
 })
 
+const currImage = computed(() => {
+   return details.submission.files[currImageIdx.value]
+})
+
 const description = computed(() => {
    return details.submission.description.replace(/\r|\r\n/gm, "\n").replace(/\n+/gm, "<br/><br/>")
 })
@@ -177,10 +197,38 @@ const publishLabel = computed(() => {
    return  "primary"
  })
 
-onMounted(() => {
-   details.getSubmission( route.params.id )
+onMounted(async () => {
+
    system.getTags()
    system.getInstitutions()
+
+   await details.getSubmission( route.params.id )
+   let sources = []
+   details.submission.files.forEach( f => {
+      sources.push( {type: 'image',url:  f.url} )
+   })
+   viewer.value = OpenSeadragon({
+      id: `dragon`,
+      animationTime: 0.1,
+      autoResize: true,
+      constrainDuringPan: true,
+      imageSmoothingEnabled: true,
+      smoothTileEdgesMinZoom: Infinity,
+      maxZoomPixelRatio: 10.0,
+      showSequenceControl: false,
+      zoomInButton:   "zoom-in",
+      zoomOutButton:  "zoom-out",
+      showNavigator: true,
+      showRotationControl: false,
+      tileSources: sources,
+      sequenceMode: true,
+      preserveViewport: true,
+      showReferenceStrip: true,
+      referenceStripScroll: 'vertical',
+   })
+   viewer.value.addHandler("page", (data) => {
+      currImageIdx.value = data.page
+   })
 })
 
 const saveEdits = ( async ( edits ) => {
@@ -230,30 +278,63 @@ const deleteSubmission = ( () => {
    })
 })
 
-const rotateClicked = ( async (imgURL) => {
-   await admin.rotateImage( details.submission.id, imgURL)
+const nextImage = ( async () => {
+   currImageIdx.value++
+   transcriptionIdx.value = 0
+   await viewer.value.goToPage( currImageIdx.value )
+   console.log( details.submission )
+   console.log( details.submission.files.length )
+})
+
+const prevImage = ( async () => {
+   currImageIdx.value--
+   transcriptionIdx.value = 0
+   await viewer.value.goToPage( currImageIdx.value )
+})
+
+const rotateClicked = ( async () => {
+   let imgFile = details.submission.files[currImageIdx.value]
+   await admin.rotateImage( details.submission.id, imgFile.url)
    toast.add({
       severity: 'success', summary: 'Rotate Success',
       detail: 'The image has been rotated, but is cached in your browser. Wait a few seconds, clear the cache and reload the page to see the rotated image.' })
 })
 
-const nextTran = (( image ) => {
+const hasTranscription = computed(() => {
+   let imgFile = details.submission.files[currImageIdx.value]
+   if (imgFile.transcriptions.length == 0 ) return false
+   console.log("HAS T")
+   console.log(imgFile)
+   return true
+})
+
+const isTranscriptionApproved  = computed(() => {
+   let imgFile = details.submission.files[currImageIdx.value]
+   if (imgFile ==  null ) return false
+   if ( imgFile.transcriptions.length == 0 ) return false
+   return imgFile.transcriptions[transcriptionIdx.value].approved==false
+})
+
+const nextTran = (( ) => {
    transcriptionIdx.value++
 })
 const priorTran = (() => {
    transcriptionIdx.value--
 })
-const getTranscribeDate = ((f) => {
+const transcribeDate = computed( () => {
+   let f = details.submission.files[currImageIdx.value]
    if (f.transcriptions.length == 0) return ""
    let t = f.transcriptions[transcriptionIdx.value]
    return t.transcribed_at.split("T")[0]
 })
-const getTranscriber = ((f) => {
+const transcriber = computed( () => {
+   let f = details.submission.files[currImageIdx.value]
    if (f.transcriptions.length == 0) return ""
    let t = f.transcriptions[transcriptionIdx.value]
    return `${t.transcriber_email} (${t.transcriber})`
 })
-const getTranscribeStatus = ((f) => {
+const transcribeStatus = computed( () => {
+   let f = details.submission.files[currImageIdx.value]
    if (f.transcriptions.length == 0) return ""
    let t = f.transcriptions[transcriptionIdx.value]
    if (t.approved) {
@@ -269,7 +350,8 @@ const cancelEditTranscription = (() => {
    editTrans.value = false
    workingTrans.value = ""
 })
-const submitEditTranscription = ( async (image) => {
+const submitEditTranscription = ( async () => {
+   let image = details.submission.files[currImageIdx.value]
    let trans = image.transcriptions[transcriptionIdx.value]
    await admin.updateTranscription(details.submission.id, trans.id, workingTrans.value)
    if (admin.error != "" ) {
@@ -400,14 +482,36 @@ div.admin-submission {
    div.details {
       margin: 0 25px 0 25px;
    }
-   .thumbs {
-      border-top: 1px solid #ddd;
-      margin-top: 20px;
-      padding-top: 20px;
+
+   .images-wrapper {
+      border-top: 1px solid #ccc;
+      padding: 10px 0;
+      margin-top: 10px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      div.thumb {
+      gap: 10px;
+      .image-controls {
+         display: flex;
+         flex-flow: row wrap;
+         .section {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 5px;
+         }
+         .section.wide  {
+            gap: 10px;
+         }
+         button {
+            display: inherit !important;
+         }
+         .rotated {
+            transform: scaleX(-1);
+         }
+      }
+      div.image-content {
+         flex: 1;
          padding-bottom: 20px;
          border-bottom: 1px solid #ccc;
          display: flex;
@@ -416,8 +520,6 @@ div.admin-submission {
          justify-content: flex-start;
          gap: 15px;
          div.zoom-wrap {
-            flex:1;
-            min-height: 400px;
             display: flex;
             flex-direction: column;
             justify-content: stretch;
@@ -427,29 +529,34 @@ div.admin-submission {
             border: 1px solid #ddd;
             padding: 10px;
             border-radius: 4px;
+            .viewer {
+               height: 600px;
+               width: 100%;
+            }
          }
       }
-      div.transcription-panel {
-         flex:1;
-         margin: 0;
-         border: 1px solid #ddd;
-         border-radius: 4px;
-         .none {
-            font-size: 1.3em;
-            text-align: center;
-            margin: 15% auto;
-         }
-         .head {
-            background: #fafafa;
-            padding: 5px 10px;
-            display: flex;
-            flex-flow: row wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            border-bottom: 1px solid #ccc;
-            border-radius: 4px 4px 0 0;
-         }
+   }
+
+   div.transcription-panel {
+      flex:1;
+      margin: 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      .none {
+         font-size: 1.3em;
+         text-align: center;
+         margin: 15% auto;
+      }
+      .head {
+         background: #fafafa;
+         padding: 5px 10px;
+         display: flex;
+         flex-flow: row wrap;
+         justify-content: space-between;
+         align-items: center;
+         gap: 20px;
+         border-bottom: 1px solid #ccc;
+         border-radius: 4px 4px 0 0;
       }
    }
 }
@@ -483,22 +590,31 @@ table {
 }
 
 @media only screen and (min-width: 768px) {
+   .image-controls {
+      justify-content: space-between;
+      align-items: flex-start;
+   }
    .zoom-wrap {
-      max-width: 50%;
+      width: 50%;
    }
    div.transcription-panel {
-      max-width: 50%;
+      width: 50%;
    }
    .admin-submission {
       padding: 15px 25px;
    }
 }
 @media only screen and (max-width: 768px) {
+   .image-controls {
+      justify-content: center;
+      align-items: flex-start;
+      gap: 10px 0;
+   }
    .zoom-wrap {
-      max-width: 100%;
+      width: 100%;
    }
    div.transcription-panel {
-      max-width: 100%;
+      width: 100%;
    }
    .admin-submission {
       padding: 10px;

@@ -1,6 +1,6 @@
 <template>
    <div class="submission content">
-      <template v-if="system.loading">
+      <template v-if="system.loading || details.submission == null">
          <h1>Loading Details...</h1>
       </template>
       <template v-else>
@@ -24,19 +24,34 @@
             <div><label>Description: </label><p class="value" v-html="formatDescription(submission.description)"></p></div>
          </div>
          <Transcribe v-if="details.isTranscribing" />
-         <div v-else class="thumbs">
-            <div class="thumb" v-for="file in submission.files">
+         <div v-else class="images-wrapper">
+            <div class="image-controls">
+               <div class="section">
+                  <Button id="rotate-left" icon="pi pi-undo" rounded severity="secondary"/>
+                  <Button id="rotate-right" icon="pi pi-undo" class="rotated" rounded severity="secondary"/>
+                  <Button id="zoom-in" icon="pi pi-search-plus" rounded severity="secondary"/>
+                  <Button id="zoom-out" icon="pi pi-search-minus" rounded severity="secondary"/>
+               </div>
+               <div class="section wide" v-if="submission.files.length > 1">
+                  <Button icon="pi pi-chevron-left" rounded severity="secondary"
+                     :disabled="currImageIdx==0" @click="prevImage"/>
+                  <span>Image {{ currImageIdx+1 }} of {{ submission.files.length }}</span>
+                  <Button icon="pi pi-chevron-right" rounded severity="secondary"
+                     :disabled="currImageIdx==submission.files.length-1" @click="nextImage"/>
+               </div>
+            </div>
+            <div class="image-content">
                <div class="zoom-wrap">
-                  <vue-image-zoomer :regular="file.url" />
+                  <div id="dragon" class="viewer"></div>
                   <Button severity="info" @click="transcribeClicked(file)" label="Transcribe"/>
                </div>
                <div class="transcription-wrap">
                   <div class="head">Transcription</div>
                   <div class="transcription">
-                     <div class="pending" v-if="hasPendingTranscription(file)">
+                     <div class="pending" v-if="hasPendingTranscription">
                         Transcription under review.<br/>Please check back in a few days.
                      </div>
-                     <pre v-else>{{transcription(file)}}</pre>
+                     <pre v-else>{{transcription}}</pre>
                   </div>
                </div>
             </div>
@@ -49,18 +64,21 @@
 </template>
 
 <script setup>
-import { onBeforeMount, computed } from 'vue'
+import { onMounted, computed, ref, onUnmounted } from 'vue'
 import { useDetailsStore } from "@/stores/details"
 import { useSystemStore } from "@/stores/system"
 import { useSubmissionsStore } from "@/stores/submissions"
 import Transcribe from "@/components/Transcribe.vue"
 import { useRoute, useRouter } from 'vue-router'
+import OpenSeadragon from "openseadragon"
 
 const system = useSystemStore()
 const submissions = useSubmissionsStore()
 const details = useDetailsStore()
 const route = useRoute()
 const router = useRouter()
+const viewer = ref()
+const currImageIdx = ref(0)
 
 const submitDate = computed( () => {
    return details.submission.submittedAt.split("T")[0]
@@ -70,15 +88,65 @@ const submission = computed( () => {
    return details.submission
 })
 
-onBeforeMount(() => {
-   details.getSubmission( route.params.id )
+onMounted( async () => {
+   await details.getSubmission( route.params.id )
+   initViewer()
 })
 
-const transcribeClicked = ((imgFile) => {
+const initViewer = (() => {
+   let sources = []
+   details.submission.files.forEach( f => {
+      sources.push( {type: 'image',url:  f.url} )
+   })
+   viewer.value = OpenSeadragon({
+      id: `dragon`,
+      animationTime: 0.1,
+      autoResize: true,
+      constrainDuringPan: true,
+      imageSmoothingEnabled: true,
+      smoothTileEdgesMinZoom: Infinity,
+      maxZoomPixelRatio: 10.0,
+      showSequenceControl: false,
+      zoomInButton:   "zoom-in",
+      zoomOutButton:  "zoom-out",
+      showNavigator: true,
+      showRotationControl: true,
+      rotateLeftButton: "rotate-left",
+      rotateRightButton: "rotate-right",
+      tileSources: sources,
+      sequenceMode: true,
+      preserveViewport: true,
+      showReferenceStrip: true,
+      referenceStripScroll: 'vertical',
+   })
+   viewer.value.addHandler("page", (data) => {
+      currImageIdx.value = data.page
+   })
+})
+
+onUnmounted( async () => {
+   if ( viewer.value ) {
+      viewer.value.destroy()
+   }
+})
+
+const nextImage = ( async () => {
+   currImageIdx.value++
+   viewer.value.goToPage( currImageIdx.value )
+})
+
+const prevImage = ( async () => {
+   currImageIdx.value--
+   viewer.value.goToPage( currImageIdx.value )
+})
+
+const transcribeClicked = (() => {
+   let imgFile = details.submission.files[currImageIdx.value]
    details.setTranscriptionTarget( imgFile )
 })
 
-const hasPendingTranscription = ((imgFile) => {
+const hasPendingTranscription = computed(() => {
+   let imgFile = details.submission.files[currImageIdx.value]
    if (imgFile.transcriptions.length == 0 ) return false
    let pending = true
    imgFile.transcriptions.forEach( t => {
@@ -89,7 +157,8 @@ const hasPendingTranscription = ((imgFile) => {
    return pending
 })
 
-const transcription = ((imgFile) => {
+const transcription  = computed(() => {
+   let imgFile = details.submission.files[currImageIdx.value]
    let t = imgFile.transcriptions.find( t=> t.approved == true)
    if ( t!=null) {
       return t.text
@@ -107,17 +176,22 @@ const formatDescription = (( desc ) => {
    return out
 })
 
-const prevClicked = (() => {
+const prevClicked = (async () => {
    if (details.submission.nextId > 0) {
+      await details.getSubmission( details.submission.nextId )
+      viewer.value.destroy()
+      initViewer()
       router.push("/submissions/" + details.submission.nextId )
-      details.getSubmission( details.submission.nextId )
+
    }
 })
 
-const nextClicked = (() => {
+const nextClicked = (async () => {
    if ( details.submission.previousId > 0) {
+      await details.getSubmission( details.submission.previousId )
+      viewer.value.destroy()
+      initViewer()
       router.push("/submissions/" + details.submission.previousId)
-      details.getSubmission( details.submission.previousId )
    }
 })
 
@@ -166,13 +240,33 @@ div.details {
    }
 }
 
-.thumbs {
-   margin-top: 20px;
-   padding-top: 20px;
+.images-wrapper {
+   padding-top: 10px;
    display: flex;
    flex-direction: column;
-   gap: 20px;
-   div.thumb {
+   gap: 10px;
+   .image-controls {
+      display: flex;
+      flex-flow: row wrap;
+      .section {
+         display: flex;
+         flex-flow: row wrap;
+         justify-content: flex-start;
+         align-items: center;
+         gap: 5px;
+      }
+      .section.wide  {
+         gap: 10px;
+      }
+      button {
+         display: inherit !important;
+      }
+      .rotated {
+         transform: scaleX(-1);
+      }
+   }
+   div.image-content {
+      flex: 1;
       padding-bottom: 20px;
       border-bottom: 1px solid #ccc;
       display: flex;
@@ -181,7 +275,6 @@ div.details {
       justify-content: flex-start;
       gap: 15px;
       div.zoom-wrap {
-         flex: 1;
          display: flex;
          flex-direction: column;
          justify-content: stretch;
@@ -191,6 +284,10 @@ div.details {
          border: 1px solid #ddd;
          padding: 10px;
          border-radius: 4px;
+         .viewer {
+            height: 600px;
+            width: 100%;
+         }
       }
    }
    div.transcription-wrap {
@@ -231,18 +328,27 @@ div.tags {
 
 @media only screen and (min-width: 768px) {
    .zoom-wrap {
-      max-width: 50%;
+      width: 50%;
    }
    div.transcription-wrap {
-      flex-basis: 50%;
+      width: 50%;
+   }
+   .image-controls {
+      justify-content: space-between;
+      align-items: flex-start;
    }
 }
 @media only screen and (max-width: 768px) {
+   .image-controls {
+      justify-content: center;
+      align-items: flex-start;
+      gap: 10px 0;
+   }
    .zoom-wrap {
-      max-width: 100%;
+      width: 100%;
    }
    div.transcription-wrap {
-      max-width: 100%;
+      width: 100%;
    }
 }
 </style>
