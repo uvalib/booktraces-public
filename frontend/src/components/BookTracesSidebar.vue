@@ -59,6 +59,7 @@ div.sidebar {
    padding: 10px;
    background-color: #222;
    color: #dadada;
+   width: 18%;
    a, .recent-link, .archive-date {
       color: #dadada;
       text-decoration: none;

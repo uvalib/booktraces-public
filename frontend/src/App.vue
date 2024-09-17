@@ -14,10 +14,8 @@
    </template>
    <template v-else>
       <div class="main">
-         <div class="pure-u-1-6">
-            <BookTracesSidebar/>
-         </div>
-         <div class="pure-u-5-6 bkg">
+         <BookTracesSidebar/>
+         <div class="content-wrap">
             <BookTracesSearch/>
             <router-view/>
          </div>
@@ -38,9 +36,9 @@ const system = useSystemStore()
 
 </script>
 
-<style>
+<style lang="scss">
 @media only screen and (max-width: 1050px) {
-   #app .main div.pure-u-5-6.bkg {
+   #app .main {
       width: 100%;
    }
    #app div.content {
@@ -56,11 +54,30 @@ html,
 body {
    margin: 0;
    padding: 0;
-   /* background-image: url(./assets/main-bkg.jpg); */
    background-color: #222;
 }
 #app .main {
    padding-top:0;
+   display: flex;
+   flex-flow: row nowrap;
+   .content-wrap {
+      flex:1;
+      display: flex;
+      flex-direction: column;
+      background-image: url(./assets/books-bkg.jpg);
+      position: relative;
+      .content {
+         flex:1;
+         position: relative;
+         padding: 3vw 3vw 2vw 3vw;
+         min-height: 600px;
+         background: white;
+         font-weight: 400;
+         color: #444;
+         border: 1px solid #222;
+         margin: 25px;
+      }
+   }
 }
 #app {
    font-family: "Avenir", Helvetica, Arial, sans-serif;
@@ -86,22 +103,8 @@ body {
    top: 15px;
    left: 15px;
 }
-div.bkg {
-   background-image: url(./assets/books-bkg.jpg);
-   position: relative;
-}
 #app h1 {
    margin: 0 0 5px 0;
-}
-#app div.content {
-   position: relative;
-   padding: 3vw 3vw 2vw 3vw;
-   min-height: 600px;
-   background: white;
-   font-weight: 400;
-   color: #444;
-   border: 1px solid #222;
-   margin: 25px;
 }
 #app .content h2 {
    font-size: 1.5em;
