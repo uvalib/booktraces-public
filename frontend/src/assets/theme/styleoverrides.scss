@@ -9,6 +9,27 @@
    }
 }
 
+div.p-menubar {
+   justify-content: flex-end;
+   .p-menubar-button {
+      color: white;
+   }
+   .p-menubar-end {
+      margin-left: initial;
+   }
+   .p-menubar-start {
+      margin: 0 auto 0 0;
+   }
+   .p-menubar-item-label {
+      font-family: Special Elite, cursive;
+   }
+}
+div.p-menubar.p-menubar-mobile-active {
+   .p-menubar-button {
+      color: #222;
+   }
+}
+
 .p-dialog-mask {
    .p-dialog {
       .p-dialog-header {

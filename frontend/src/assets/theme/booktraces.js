@@ -130,6 +130,28 @@ const BookTraces = definePreset(Aura, {
             }
          }
       },
+      menubar: {
+         root: {
+            borderRadius: "0px",
+            background: '#222',
+            borderColor: '#222',
+         },
+         item: {
+            focusBackground: '#222',
+            color: '#ffffff',
+            focusColor: '#05a707',
+            icon: {
+               color: '#ffffff',
+           }
+         },
+         submenu: {
+            background: '#444',
+            borderColor: '#444',
+            borderRadius: '4px',
+            mobileIndent: '0.1rem',
+            focusBackground: '#444',
+        },
+      },
       panel: {
          header: {
             background: '#f8f9fa',

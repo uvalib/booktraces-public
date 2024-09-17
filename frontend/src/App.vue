@@ -90,12 +90,12 @@ body {
    margin: 0;
    position: relative;
 }
-#app a {
+a {
    color: #24890d;
    font-weight: 500;
    text-decoration: none;
 }
-#app a:hover {
+a:hover {
    text-decoration: underline;
 }
 #app a.back {
