@@ -124,6 +124,7 @@ const initViewer = (() => {
    })
    viewer.value = OpenSeadragon({
       id: `dragon`,
+      immediateRender: true,
       animationTime: 0.1,
       autoResize: true,
       constrainDuringPan: true,
@@ -133,7 +134,7 @@ const initViewer = (() => {
       showSequenceControl: false,
       zoomInButton:   "zoom-in",
       zoomOutButton:  "zoom-out",
-      showNavigator: true,
+      showNavigator: false,
       showRotationControl: true,
       rotateLeftButton: "rotate-left",
       rotateRightButton: "rotate-right",
@@ -330,6 +331,9 @@ div.details {
          .viewer {
             height: 600px;
             width: 100%;
+            background-image: url('@/assets/spinner.gif');
+            background-repeat:no-repeat;
+            background-position: center center;
          }
       }
    }

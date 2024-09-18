@@ -209,6 +209,7 @@ onMounted(async () => {
    })
    viewer.value = OpenSeadragon({
       id: `dragon`,
+      immediateRender: true,
       animationTime: 0.1,
       autoResize: true,
       constrainDuringPan: true,
@@ -218,7 +219,7 @@ onMounted(async () => {
       showSequenceControl: false,
       zoomInButton:   "zoom-in",
       zoomOutButton:  "zoom-out",
-      showNavigator: true,
+      showNavigator: false,
       showRotationControl: false,
       tileSources: sources,
       sequenceMode: true,
@@ -532,6 +533,9 @@ div.admin-submission {
             .viewer {
                height: 600px;
                width: 100%;
+               background-image: url('@/assets/spinner.gif');
+               background-repeat:no-repeat;
+               background-position: center center;
             }
          }
       }
