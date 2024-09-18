@@ -1,14 +1,12 @@
 <template>
    <div class="content events">
       <h2>Events</h2>
-      <table>
-         <tbody>
-            <tr v-for="event in system.events">
-               <td class="date">{{event.date}}</td>
-               <td><span v-html="event.description"></span></td>
-            </tr>
-         </tbody>
-      </table>
+      <div class="events">
+         <div class="event" v-for="event in system.events">
+            <span class="date nowrap">{{event.date}}</span>
+            <span v-html="event.description"></span>
+         </div>
+      </div>
    </div>
 </template>
 
@@ -23,12 +21,23 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-td.date {
-   padding: 5px 20px;
-   text-align: right;
-}
-td {
-border-bottom: 1px solid #ddd;
+<style scoped lang="scss">
+.events {
+   width: 100%;
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+   div.event {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: flex-start;
+      gap: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      .date {
+         white-space: nowrap;
+         font-weight: bold;
+      }
+   }
 }
 </style>

@@ -67,7 +67,6 @@ body {
       background-image: url(./assets/books-bkg.jpg);
       position: relative;
       .content {
-         flex:1;
          position: relative;
          padding: 3vw 3vw 2vw 3vw;
          min-height: 600px;
@@ -94,6 +93,17 @@ a {
    color: #24890d;
    font-weight: 500;
    text-decoration: none;
+   overflow-wrap: break-word;
+   word-wrap: break-word;
+
+   -ms-word-break: break-all;
+   word-break: break-word;
+
+   /* Adds a hyphen where the word breaks, if supported (No Blink) */
+   -ms-hyphens: auto;
+   -moz-hyphens: auto;
+   -webkit-hyphens: auto;
+   hyphens: auto;
 }
 a:hover {
    text-decoration: underline;

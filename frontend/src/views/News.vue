@@ -2,7 +2,10 @@
    <div class="content events">
       <h2>News</h2>
       <div class="news-item" v-for="item in system.publishedNews" >
-         <h3>{{item.title}}<span class="date">{{formatDate(item.createdAt)}}</span></h3>
+         <h3>
+            <span>{{item.title}}</span>
+            <span class="date">{{formatDate(item.createdAt)}}</span>
+         </h3>
          <div class="text" v-html="item.content"></div>
       </div>
    </div>
@@ -34,18 +37,21 @@ h3 {
    padding: 5px 10px;
    background: #666;
    color: white;
+   display: flex;
+   flex-flow: row wrap;
+   justify-content: space-between;
+   align-items: flex-start;
+   gap: 10px;
+
+   span.date {
+      font-weight: 100;
+      font-size: 0.8em;
+   }
 }
 div.text {
    padding: 10px;
    :deep(p) {
       margin: 0 0;
    }
-}
-span.date {
-   position: absolute;
-   right: 10px;
-   top: 6px;
-   font-weight: 100;
-   font-size: 0.8em;
 }
 </style>

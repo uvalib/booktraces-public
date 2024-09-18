@@ -15,14 +15,14 @@
          <div v-else class="hits">
             <div class="controls">
                <span>Total Matches Found: {{ submissionsStore.searchHitCount }}</span>
-               <InstitutionSearch style="margin-left: auto"/>
+               <InstitutionSearch />
             </div>
             <div class="hits">
                <div v-for="hit in submissionsStore.searchResults" :key="hit.id">
                   <router-link class="hit" :to="`/submissions/${hit.id}`">
-                     <div class="hit pure-g">
-                        <img class="pure-u-1-3 thumb" :src="hit.url"/>
-                        <div class="pure-u-2-3 data">
+                     <div class="hit">
+                        <img class="thumb" :src="hit.url"/>
+                        <div class="data">
                            <p><b>Title:</b> {{ hit.title }}</p>
                            <p><b>Submitted:</b> {{ hit.submittedOn }}</p>
                            <p><b>Institution:</b> {{ hit.institution }}</p>
@@ -30,9 +30,6 @@
                            <div class="desc">
                               <label>Description:</label>
                               <p class="indent">{{ formatDescription(hit.description) }}</p>
-                           </div>
-                           <div class="small-img">
-                               <img class="thumb" :src="hit.url"/>
                            </div>
                         </div>
                      </div>
@@ -84,66 +81,73 @@ const formatTags = ((text) => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@media only screen and (min-width: 768px) {
+   div.hit {
+      display: flex;
+      flex-flow: row wrap;
+      gap: 20px;
+   }
+}
 @media only screen and (max-width: 768px) {
-   img.pure-u-1-3.thumb {
-      display: none;
+   div.hit {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
    }
-   div.pure-u-2-3.data {
-      width:100%;
+}
+.bt-banner {
+   h3, h1 {
+      font-family: 'Special Elite', cursive;
+      margin-bottom: 5px;
    }
-   div.desc {
-      display:none;
-   }
-   div.small-img {
-      display: block !important;
+   h3 {
+      margin: 10px 0 10px 0;
+      font-weight: 500;
+      padding-bottom:10px;
+      border-bottom: 1px dashed #666;
    }
 }
 div.small-img {
    text-align: center;
    display:none;
 }
-h3, h1 {
-   font-family: 'Special Elite', cursive;
-   margin-bottom: 5px;
-}
-h3 {
-   margin: 10px 0 10px 0;
-   font-weight: 500;
-   padding-bottom:10px;
-   border-bottom: 1px dashed #666;
-}
-div.hits a.hit {
-   color: #444 !important;
-   text-decoration: none !important;
-}
-div.hit {
-   border:1px solid #ccc;
-   padding: 10px 0;
-   margin: 5px 0;
-   /* min-height:150px; */
-   /* max-height:150px; */
-   font-size: 0.9em;
-}
-img.thumb {
-   max-width: 150px;
-   max-height: 150px;
-}
-div.data {
-   padding-left: 15px;
-}
-div.data p {
-   margin: 5px 0;
-}
-div.data label {
-   font-weight:bold;
-}
-div.data p.indent {
-   margin-left: 25px;
-}
-.controls {
-   display:flex;
-   flex-flow: row wrap;
-   align-items: center;
+div.hits {
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+   a.hit {
+      color: #444 !important;
+      text-decoration: none !important;
+   }
+   div.hit {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 4px;
+      img.thumb {
+         width: 150px;
+         height: 150px;
+      }
+      div.data {
+         flex:1;
+         p {
+            margin: 5px 0;
+         }
+         label {
+            font-weight:bold;
+         }
+         p.indent {
+            margin-left: 25px;
+         }
+      }
+   }
+   .controls {
+      display:flex;
+      flex-flow: row wrap;
+      align-items: center;
+      justify-content: space-between;
+   }
 }
 </style>
