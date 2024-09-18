@@ -11,7 +11,7 @@ export const useSystemStore = defineStore('system', {
       error: null,
       loading: true,
       adminMode: false,
-      appVersion: "2.0.0"
+      version: "2.0.0"
    }),
    getters: {
       hasError: state => {
