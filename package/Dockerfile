@@ -54,7 +54,7 @@ USER docker
 
 # port and run command
 EXPOSE 8080
-ENTRYPOINT ["scripts/entry.sh"]
+CMD ["scripts/entry.sh"]
 
 # Move in necessary assets
 COPY package/scripts/entry.sh $APP_HOME/scripts/entry.sh
