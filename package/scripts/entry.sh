@@ -1,4 +1,7 @@
+#!/usr/bin/env bash
+#
 # run application
+#
 
 # run the migrations
 echo "Migrate DB"
